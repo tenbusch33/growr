@@ -12,6 +12,9 @@ const percent = new Intl.NumberFormat("en-US", {
 const returns = {
   k401: 0.1,
   roth: 0.1,
+  traditionalIra: 0.1,
+  hsa: 0.09,
+  college529: 0.08,
   brokerage: 0.08,
 };
 
@@ -35,6 +38,12 @@ const budgetDefaults = {
   k401Contribution: 500,
   rothBalance: 12000,
   rothContribution: 250,
+  traditionalIraBalance: 6000,
+  traditionalIraContribution: 150,
+  hsaBalance: 3500,
+  hsaContribution: 120,
+  college529Balance: 4000,
+  college529Contribution: 100,
   brokerageBalance: 8000,
   brokerageContribution: 300,
   forecastYears: 10,
@@ -48,6 +57,9 @@ const chartPalette = {
   leftover: "linear-gradient(180deg, #ffd33d, #ffe27e)",
   k401: "linear-gradient(90deg, #3867ff, #6c8cff)",
   roth: "linear-gradient(90deg, #00b894, #60e0c6)",
+  traditionalIra: "linear-gradient(90deg, #14b8ff, #74d7ff)",
+  hsa: "linear-gradient(90deg, #7c4dff, #a281ff)",
+  college529: "linear-gradient(90deg, #ff9f1c, #ffd166)",
   brokerage: "linear-gradient(90deg, #ff4fa1, #ff8cc4)",
   fun: "linear-gradient(180deg, #7c4dff, #a281ff)",
   other: "linear-gradient(180deg, #64748b, #94a3b8)",
@@ -282,6 +294,12 @@ function getPlannerPayload() {
     k401Contribution: getValue("k401Contribution"),
     rothBalance: getValue("rothBalance"),
     rothContribution: getValue("rothContribution"),
+    traditionalIraBalance: getValue("traditionalIraBalance"),
+    traditionalIraContribution: getValue("traditionalIraContribution"),
+    hsaBalance: getValue("hsaBalance"),
+    hsaContribution: getValue("hsaContribution"),
+    college529Balance: getValue("college529Balance"),
+    college529Contribution: getValue("college529Contribution"),
     brokerageBalance: getValue("brokerageBalance"),
     brokerageContribution: getValue("brokerageContribution"),
     forecastYears: getValue("forecastYears"),
@@ -628,6 +646,12 @@ function getInvestmentInputs() {
     k401Contribution: getValue("k401Contribution"),
     rothBalance: getValue("rothBalance"),
     rothContribution: getValue("rothContribution"),
+    traditionalIraBalance: getValue("traditionalIraBalance"),
+    traditionalIraContribution: getValue("traditionalIraContribution"),
+    hsaBalance: getValue("hsaBalance"),
+    hsaContribution: getValue("hsaContribution"),
+    college529Balance: getValue("college529Balance"),
+    college529Contribution: getValue("college529Contribution"),
     brokerageBalance: getValue("brokerageBalance"),
     brokerageContribution: getValue("brokerageContribution"),
     forecastYears: getValue("forecastYears"),
@@ -748,10 +772,21 @@ function renderCharts(data) {
     )
     .join("");
 
-  const investMax = Math.max(data.k401Future, data.rothFuture, data.brokerageFuture, 1);
+  const investMax = Math.max(
+    data.k401Future,
+    data.rothFuture,
+    data.traditionalIraFuture,
+    data.hsaFuture,
+    data.college529Future,
+    data.brokerageFuture,
+    1
+  );
   const investmentRows = [
     { key: "k401", label: "401(k)", amount: data.k401Future },
     { key: "roth", label: "Roth IRA", amount: data.rothFuture },
+    { key: "traditionalIra", label: "Traditional IRA", amount: data.traditionalIraFuture },
+    { key: "hsa", label: "HSA", amount: data.hsaFuture },
+    { key: "college529", label: "529", amount: data.college529Future },
     { key: "brokerage", label: "Brokerage", amount: data.brokerageFuture },
   ];
 
@@ -866,13 +901,33 @@ function updateDashboard() {
     returns.roth,
     years
   );
+  const traditionalIraFuture = futureValue(
+    investmentInputs.traditionalIraBalance,
+    investmentInputs.traditionalIraContribution,
+    returns.traditionalIra,
+    years
+  );
+  const hsaFuture = futureValue(
+    investmentInputs.hsaBalance,
+    investmentInputs.hsaContribution,
+    returns.hsa,
+    years
+  );
+  const college529Future = futureValue(
+    investmentInputs.college529Balance,
+    investmentInputs.college529Contribution,
+    returns.college529,
+    years
+  );
   const brokerageFuture = futureValue(
     investmentInputs.brokerageBalance,
     investmentInputs.brokerageContribution,
     returns.brokerage,
     years
   );
-  const totalFuture = hasInvestmentAccess() ? k401Future + rothFuture + brokerageFuture : 0;
+  const totalFuture = hasInvestmentAccess()
+    ? k401Future + rothFuture + traditionalIraFuture + hsaFuture + college529Future + brokerageFuture
+    : 0;
   const homeEquity = homeValue - mortgageBalance;
   const carEquity = carValue - carLoanBalance;
   const totalAssets = homeValue + carValue + cashAssets + investedAssets + otherAssets;
@@ -887,6 +942,13 @@ function updateDashboard() {
 
   document.getElementById("k401Future").textContent = hasInvestmentAccess() ? currency.format(k401Future) : "Locked";
   document.getElementById("rothFuture").textContent = hasInvestmentAccess() ? currency.format(rothFuture) : "Locked";
+  document.getElementById("traditionalIraFuture").textContent = hasInvestmentAccess()
+    ? currency.format(traditionalIraFuture)
+    : "Locked";
+  document.getElementById("hsaFuture").textContent = hasInvestmentAccess() ? currency.format(hsaFuture) : "Locked";
+  document.getElementById("college529Future").textContent = hasInvestmentAccess()
+    ? currency.format(college529Future)
+    : "Locked";
   document.getElementById("brokerageFuture").textContent = hasInvestmentAccess() ? currency.format(brokerageFuture) : "Locked";
   document.getElementById("totalFuture").textContent = hasInvestmentAccess() ? currency.format(totalFuture) : "Locked";
 
@@ -949,6 +1011,9 @@ function updateDashboard() {
     totalExpenses,
     k401Future,
     rothFuture,
+    traditionalIraFuture,
+    hsaFuture,
+    college529Future,
     brokerageFuture,
     totalFuture,
     years,

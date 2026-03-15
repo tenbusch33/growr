@@ -200,6 +200,12 @@ function sanitizePlannerForAccount(payload, account) {
     delete sanitized.k401Contribution;
     delete sanitized.rothBalance;
     delete sanitized.rothContribution;
+    delete sanitized.traditionalIraBalance;
+    delete sanitized.traditionalIraContribution;
+    delete sanitized.hsaBalance;
+    delete sanitized.hsaContribution;
+    delete sanitized.college529Balance;
+    delete sanitized.college529Contribution;
     delete sanitized.brokerageBalance;
     delete sanitized.brokerageContribution;
     delete sanitized.forecastYears;
