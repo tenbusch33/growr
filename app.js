@@ -217,6 +217,26 @@ function updateIntegrationStatus(config) {
     config.stripeApiConfigured || (config.stripeBudgetConfigured && config.stripeBundleConfigured)
       ? "Connected"
       : "Demo mode";
+  const signupNote = document.getElementById("signup-note");
+  const accountsNote = document.getElementById("accounts-note");
+  const billingNote = document.getElementById("billing-note");
+
+  signupNote.classList.remove("hidden");
+  accountsNote.classList.remove("hidden");
+  billingNote.classList.remove("hidden");
+
+  signupNote.textContent =
+    config.stripeApiConfigured || (config.stripeBudgetConfigured && config.stripeBundleConfigured)
+      ? "Billing is connected. New members can start a free trial and move into checkout."
+      : "Billing is still in demo mode. Accounts can be created, but live subscription charging is not on yet.";
+
+  accountsNote.textContent = config.plaidConfigured
+    ? "Plaid is connected in sandbox mode right now, so account linking is ready for testing."
+    : "Account linking will come to life here once Plaid is fully connected.";
+
+  billingNote.textContent = config.stripeApiConfigured
+    ? "Billing portal is ready. Payment method updates and cancellation should happen there."
+    : "Billing portal is not live yet, so payment-method changes and cancellation are still placeholder flows.";
 }
 
 function setAuthMessage(text) {
@@ -447,7 +467,12 @@ function setPlaidMessage(text) {
 function renderList(containerId, rows, emptyText) {
   const container = document.getElementById(containerId);
   if (!rows.length) {
-    container.innerHTML = `<div class="linked-item"><p>${emptyText}</p></div>`;
+    container.innerHTML = `
+      <div class="linked-item empty-state">
+        <strong>Nothing here yet</strong>
+        <p>${emptyText}</p>
+      </div>
+    `;
     return;
   }
 
@@ -502,7 +527,12 @@ function renderTransactions() {
   });
 
   if (!filteredTransactions.length) {
-    container.innerHTML = `<div class="transaction-item"><p>No transactions saved yet.</p></div>`;
+    container.innerHTML = `
+      <div class="transaction-item empty-state">
+        <strong>No transactions yet</strong>
+        <p>Add one manually or import from Plaid to start building your monthly view.</p>
+      </div>
+    `;
     updateTransactionSummary(filteredTransactions);
     return;
   }
