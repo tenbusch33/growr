@@ -25,8 +25,13 @@
             </div>
           </div>
           <div class="topbar-actions">
-            <button class="ghost-btn" data-page-target="overview">Overview</button>
-            <button class="primary-btn" data-page-target="snapshot">Open dashboard</button>
+            <div class="page-tabs topbar-tabs">
+              <button class="tab-btn is-active" data-page-target="overview">Overview</button>
+              <button class="tab-btn" data-page-target="snapshot">Snapshot</button>
+              <button class="tab-btn" data-page-target="budget">Budget</button>
+              <button class="tab-btn" data-page-target="accounts">Accounts</button>
+              <button class="tab-btn" data-page-target="launch">Setup</button>
+            </div>
           </div>
         </nav>
 
@@ -69,19 +74,6 @@
           </div>
         </section>
 
-        <div class="workspace-nav glass">
-          <div class="workspace-nav-copy">
-            <p class="eyebrow">Workspace</p>
-            <h2>Move through Growr one page at a time</h2>
-          </div>
-          <div class="page-tabs">
-            <button class="tab-btn is-active" data-page-target="overview">Overview</button>
-            <button class="tab-btn" data-page-target="snapshot">Snapshot</button>
-            <button class="tab-btn" data-page-target="budget">Budget</button>
-            <button class="tab-btn" data-page-target="accounts">Accounts</button>
-            <button class="tab-btn" data-page-target="launch">Launch</button>
-          </div>
-        </div>
       </header>
 
       <main class="workspace-main">
@@ -525,7 +517,7 @@
         <section class="app-page" data-page="launch">
         <section class="glass launch-panel">
           <div class="section-heading">
-            <p class="eyebrow">Launch setup</p>
+            <p class="eyebrow">Setup</p>
             <h2>Production connection checklist</h2>
           </div>
           <div id="launch-checklist" class="launch-grid"></div>

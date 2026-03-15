@@ -72,29 +72,14 @@ select {
   gap: 20px;
 }
 
-.workspace-nav {
-  margin-top: 18px;
-  padding: 18px 22px;
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-
-.workspace-nav-copy h2,
-.workspace-nav-copy p {
-  margin: 0;
-}
-
-.workspace-nav-copy h2 {
-  font-size: 1.2rem;
-}
-
 .page-tabs {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.topbar-tabs {
+  justify-content: flex-end;
 }
 
 .tab-btn {
@@ -972,9 +957,6 @@ select {
     grid-template-columns: 1fr;
   }
 
-  .workspace-nav {
-    align-items: flex-start;
-  }
 }
 
 @media (max-width: 640px) {
