@@ -772,7 +772,7 @@ select {
 }
 
 .integration-banner,
-.launch-grid,
+.accounts-intro,
 .linked-columns,
 .live-summary-grid {
   display: grid;
@@ -808,18 +808,14 @@ select {
   margin: 10px 0 0;
 }
 
-.launch-panel {
-  margin-top: 20px;
-  padding: 24px;
-}
-
 .accounts-panel {
   margin-top: 20px;
   padding: 24px;
 }
 
-.launch-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.accounts-intro {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 16px;
 }
 
 .live-summary-grid {
@@ -946,7 +942,7 @@ select {
   .budgeting-grid,
   .results-grid,
   .guidance-grid,
-  .launch-grid,
+  .accounts-intro,
   .linked-columns,
   .live-summary-grid,
   .transaction-summary-grid,

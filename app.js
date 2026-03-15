@@ -197,53 +197,6 @@ function renderRecommendations(items) {
     .join("");
 }
 
-function getLaunchItems(config) {
-  return [
-    {
-      label: "Authentication",
-      state: config.supabaseConfigured ? "Connected" : "Needs setup",
-      body: config.supabaseConfigured
-        ? "Supabase environment variables are present, so auth can be wired to real signup and login next."
-        : "Add SUPABASE_URL and SUPABASE_ANON_KEY in .env to mark auth as connected.",
-    },
-    {
-      label: "Billing",
-      state:
-        config.stripeApiConfigured || (config.stripeBudgetConfigured && config.stripeBundleConfigured)
-          ? "Connected"
-          : "Needs setup",
-      body:
-        config.stripeApiConfigured
-          ? "Stripe API keys and price IDs are present, so real subscription checkout and webhook-based access control can run."
-          : config.stripeBudgetConfigured && config.stripeBundleConfigured
-            ? "Hosted checkout links are configured for both pricing tiers."
-            : "Add Stripe API keys and price IDs, or hosted checkout URLs, for the Budget Core and Bundle plans.",
-    },
-    {
-      label: "Plaid data",
-      state: config.plaidConfigured ? "Connected" : "Needs setup",
-      body: config.plaidConfigured
-        ? "Plaid credentials are present, so users can link balances, liabilities, and investment accounts."
-        : "Add PLAID_CLIENT_ID, PLAID_SECRET, and PLAID_ENV in .env to enable live account linking.",
-    },
-  ];
-}
-
-function renderLaunchChecklist(config) {
-  const container = document.getElementById("launch-checklist");
-  container.innerHTML = getLaunchItems(config)
-    .map(
-      (item) => `
-        <article class="checklist-item">
-          <span>${item.label}</span>
-          <strong>${item.state}</strong>
-          <p>${item.body}</p>
-        </article>
-      `
-    )
-    .join("");
-}
-
 function updateIntegrationStatus(config) {
   document.getElementById("auth-status").textContent = config.supabaseConfigured
     ? "Connected"
@@ -252,7 +205,6 @@ function updateIntegrationStatus(config) {
     config.stripeApiConfigured || (config.stripeBudgetConfigured && config.stripeBundleConfigured)
       ? "Connected"
       : "Demo mode";
-  renderLaunchChecklist(config);
 }
 
 function setAuthMessage(text) {
