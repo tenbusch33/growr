@@ -20,7 +20,7 @@ const returns = {
 
 const state = {
   config: null,
-  currentPage: "overview",
+  currentPage: "snapshot",
   plaidHandler: null,
   user: null,
   saveTimer: null,
@@ -226,7 +226,7 @@ function setAuthMessage(text) {
 }
 
 function setActivePage(page) {
-  const nextPage = document.querySelector(`.app-page[data-page="${page}"]`) ? page : "overview";
+  const nextPage = document.querySelector(`.app-page[data-page="${page}"]`) ? page : "snapshot";
   state.currentPage = nextPage;
   document.querySelectorAll(".app-page").forEach((section) => {
     section.classList.toggle("is-active", section.dataset.page === nextPage);
@@ -257,6 +257,10 @@ function setTransactionStatus(text) {
   document.getElementById("transaction-status").textContent = text;
 }
 
+function setAccountStatus(text) {
+  document.getElementById("account-status").textContent = text;
+}
+
 function hasInvestmentAccess() {
   return Boolean(state.user && state.user.plan === "bundle" && state.user.subscriptionActive !== false);
 }
@@ -268,6 +272,39 @@ function formatTrialMessage(user = state.user) {
 
   const daysRemaining = Math.max(Number(user.trialDaysRemaining || 0), 0);
   return daysRemaining <= 1 ? "Trial ends soon" : `${daysRemaining} trial days left`;
+}
+
+function populateAccountForm() {
+  const nameInput = document.getElementById("accountFullName");
+  const emailInput = document.getElementById("accountEmail");
+  const saveButton = document.getElementById("account-save-button");
+  const billingButton = document.getElementById("account-billing-button");
+  const logoutButton = document.getElementById("account-logout-button");
+
+  if (!state.user) {
+    nameInput.value = "";
+    emailInput.value = "";
+    nameInput.disabled = true;
+    emailInput.disabled = true;
+    saveButton.disabled = true;
+    billingButton.disabled = true;
+    logoutButton.disabled = true;
+    setAccountStatus("Sign in to update your account details.");
+    return;
+  }
+
+  nameInput.disabled = false;
+  emailInput.disabled = false;
+  saveButton.disabled = false;
+  billingButton.disabled = !state.config?.stripeApiConfigured;
+  logoutButton.disabled = false;
+  nameInput.value = state.user.fullName || "";
+  emailInput.value = state.user.email || "";
+  setAccountStatus(
+    state.user.trialActive
+      ? `Signed in. Your free trial ends ${new Date(state.user.trialEndsAt).toLocaleDateString()}.`
+      : "Signed in. Update your profile or manage your subscription here."
+  );
 }
 
 function getPlannerPayload() {
@@ -345,6 +382,7 @@ function renderAccountState() {
     saveButton.disabled = true;
     setPlannerStatus("Planner changes save after you sign in.");
     setTransactionStatus("Sign in to save and load transactions.");
+    populateAccountForm();
     applyFeatureGate();
     return;
   }
@@ -372,6 +410,7 @@ function renderAccountState() {
     }</p>
   `;
   setPlannerStatus("Signed in. Your planner can be saved to this account.");
+  populateAccountForm();
   applyFeatureGate();
 }
 
@@ -1121,7 +1160,7 @@ function handleLogout() {
       setAuthMessage("Logged out.");
       setPlaidMessage("Sign in before linking or loading account data.");
       applyFeatureGate();
-      setActivePage("overview");
+      setActivePage("snapshot");
     });
 }
 
@@ -1169,6 +1208,43 @@ function handleManageBilling() {
     })
     .catch((error) => {
       setAuthMessage(error.message);
+    });
+}
+
+function handleAccountSave() {
+  if (!state.user) {
+    setAccountStatus("Sign in before updating your account.");
+    return;
+  }
+
+  const fullName = document.getElementById("accountFullName").value.trim();
+  const email = document.getElementById("accountEmail").value.trim();
+  const button = document.getElementById("account-save-button");
+
+  button.disabled = true;
+  setAccountStatus("Saving account details...");
+
+  fetch("/api/account/profile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fullName, email }),
+  })
+    .then(async (response) => {
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to update account.");
+      }
+
+      state.user = payload.account;
+      renderAccountState();
+      setAuthMessage(payload.message);
+      setAccountStatus(payload.message);
+    })
+    .catch((error) => {
+      setAccountStatus(error.message);
+    })
+    .finally(() => {
+      button.disabled = false;
     });
 }
 
@@ -1376,6 +1452,9 @@ document.getElementById("signup-form").addEventListener("submit", handleSignup);
 document.getElementById("login-form").addEventListener("submit", handleLogin);
 document.getElementById("logout-button").addEventListener("click", handleLogout);
 document.getElementById("manage-billing-button").addEventListener("click", handleManageBilling);
+document.getElementById("account-save-button").addEventListener("click", handleAccountSave);
+document.getElementById("account-billing-button").addEventListener("click", handleManageBilling);
+document.getElementById("account-logout-button").addEventListener("click", handleLogout);
 document.getElementById("connect-accounts").addEventListener("click", connectPlaidAccounts);
 document.getElementById("import-transactions").addEventListener("click", importPlaidTransactions);
 document.getElementById("save-plan").addEventListener("click", () => savePlanner(true));
@@ -1396,7 +1475,7 @@ updateDashboard();
 renderTransactions();
 renderCategoryProgress();
 applyFeatureGate();
-setActivePage(window.location.hash.replace("#", "") || "overview");
+setActivePage(window.location.hash.replace("#", "") || "snapshot");
 loadConfig();
 handleCheckoutReturn();
 document.getElementById("txDate").value = new Date().toISOString().slice(0, 10);

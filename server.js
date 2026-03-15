@@ -833,6 +833,60 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  if (request.method === "POST" && request.url === "/api/account/profile") {
+    const session = getSessionAccount(request);
+    if (!session) {
+      sendJson(response, 401, { error: "Sign in before updating your account." });
+      return;
+    }
+
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+
+    request.on("end", () => {
+      try {
+        const payload = JSON.parse(body || "{}");
+        const fullName = String(payload.fullName || "").trim();
+        const email = String(payload.email || "").trim().toLowerCase();
+
+        if (!fullName || !email) {
+          sendJson(response, 400, { error: "Name and email are required." });
+          return;
+        }
+
+        const accounts = readJson(accountsFile);
+        const emailTaken = accounts.find(
+          (entry) => entry.email === email && entry.id !== session.account.id
+        );
+        if (emailTaken) {
+          sendJson(response, 409, { error: "That email is already in use by another account." });
+          return;
+        }
+
+        const account = accounts.find((entry) => entry.id === session.account.id);
+        if (!account) {
+          sendJson(response, 404, { error: "Account not found." });
+          return;
+        }
+
+        account.fullName = fullName;
+        account.email = email;
+        writeJson(accountsFile, accounts);
+
+        sendJson(response, 200, {
+          account: publicAccount(account),
+          message: "Account details updated.",
+        });
+      } catch {
+        sendJson(response, 400, { error: "Invalid account payload." });
+      }
+    });
+
+    return;
+  }
+
   if (request.method === "POST" && request.url === "/api/billing/portal") {
     const session = getSessionAccount(request);
     if (!session) {

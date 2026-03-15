@@ -26,11 +26,11 @@
           </div>
           <div class="topbar-actions">
             <div class="page-tabs topbar-tabs">
-              <button class="tab-btn is-active" data-page-target="overview">Overview</button>
-              <button class="tab-btn" data-page-target="snapshot">Snapshot</button>
+              <button class="tab-btn is-active" data-page-target="snapshot">Snapshot</button>
               <button class="tab-btn" data-page-target="budget">Budget</button>
               <button class="tab-btn" data-page-target="networth">Net Worth</button>
               <button class="tab-btn" data-page-target="accounts">Connect Accounts</button>
+              <button class="tab-btn" data-page-target="account">Account</button>
             </div>
           </div>
         </nav>
@@ -45,7 +45,7 @@
               or rebalance retirement accounts by age.
             </p>
             <div class="hero-cta-row">
-              <button class="primary-btn" data-page-target="overview">Open planner</button>
+              <button class="primary-btn" data-page-target="snapshot">Open planner</button>
               <button class="secondary-btn" data-page-target="budget">Budget tools</button>
             </div>
             <div class="hero-badges">
@@ -77,7 +77,7 @@
       </header>
 
       <main class="workspace-main">
-        <section class="app-page is-active" data-page="overview">
+        <section class="app-page is-active" data-page="snapshot">
         <section id="how-it-works" class="info-grid">
           <article class="glass info-card">
             <h2>Budget Engine</h2>
@@ -243,9 +243,6 @@
           </div>
         </section>
 
-        </section>
-
-        <section class="app-page" data-page="snapshot">
         <section class="dashboard-strip">
           <article class="glass score-panel">
             <div class="section-heading compact">
@@ -614,6 +611,48 @@
           </div>
         </section>
 
+        </section>
+
+        <section class="app-page" data-page="account">
+        <section class="planner-grid">
+          <article class="glass planner-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Account</p>
+              <h2>Profile and billing</h2>
+            </div>
+            <p class="status-message" id="account-status">Sign in to update your account details.</p>
+            <form id="account-form" class="planner-form">
+              <label>Full name<input type="text" id="accountFullName" placeholder="Jordan Miles" /></label>
+              <label>Email<input type="email" id="accountEmail" placeholder="jordan@email.com" /></label>
+            </form>
+            <div class="auth-inline-actions">
+              <button type="button" class="primary-btn" id="account-save-button">Save account details</button>
+              <button type="button" class="ghost-btn" id="account-billing-button">Manage billing</button>
+              <button type="button" class="ghost-btn" id="account-logout-button">Log out</button>
+            </div>
+          </article>
+
+          <article class="glass results-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Billing help</p>
+              <h2>Payment method and cancellation</h2>
+            </div>
+            <div class="recommendation-list">
+              <article class="recommendation-item good">
+                <h3>Update payment method</h3>
+                <p>Use Manage billing to change cards or payment details in the secure Stripe portal.</p>
+              </article>
+              <article class="recommendation-item warn">
+                <h3>Cancel subscription</h3>
+                <p>If Stripe is connected, cancellation should happen in the billing portal so subscription access stays in sync.</p>
+              </article>
+              <article class="recommendation-item">
+                <h3>Email changes</h3>
+                <p>Use the profile form on this page to update your account email and name without touching budgeting data.</p>
+              </article>
+            </div>
+          </article>
+        </section>
         </section>
       </main>
     </div>
