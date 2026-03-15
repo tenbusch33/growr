@@ -286,7 +286,6 @@ function getPlannerPayload() {
     carValue: getValue("carValue"),
     carLoanBalance: getValue("carLoanBalance"),
     cashAssets: getValue("cashAssets"),
-    investedAssets: getValue("investedAssets"),
     otherAssets: getValue("otherAssets"),
     otherLiabilities: getValue("otherLiabilities"),
     age: getValue("age"),
@@ -875,7 +874,6 @@ function updateDashboard() {
   const carValue = getValue("carValue");
   const carLoanBalance = getValue("carLoanBalance");
   const cashAssets = getValue("cashAssets");
-  const investedAssets = getValue("investedAssets");
   const otherAssets = getValue("otherAssets");
   const otherLiabilities = getValue("otherLiabilities");
   const investmentInputs = getInvestmentInputs();
@@ -928,9 +926,17 @@ function updateDashboard() {
   const totalFuture = hasInvestmentAccess()
     ? k401Future + rothFuture + traditionalIraFuture + hsaFuture + college529Future + brokerageFuture
     : 0;
+  const currentInvestmentAssets = hasInvestmentAccess()
+    ? investmentInputs.k401Balance +
+      investmentInputs.rothBalance +
+      investmentInputs.traditionalIraBalance +
+      investmentInputs.hsaBalance +
+      investmentInputs.college529Balance +
+      investmentInputs.brokerageBalance
+    : 0;
   const homeEquity = homeValue - mortgageBalance;
   const carEquity = carValue - carLoanBalance;
-  const totalAssets = homeValue + carValue + cashAssets + investedAssets + otherAssets;
+  const totalAssets = homeValue + carValue + cashAssets + currentInvestmentAssets + otherAssets;
   const totalLiabilities =
     mortgageBalance + carLoanBalance + creditCardBalance + otherDebt + otherLiabilities;
   const netWorth = totalAssets - totalLiabilities;
@@ -964,7 +970,7 @@ function updateDashboard() {
   document.getElementById("homeNetLabel").textContent = currency.format(homeEquity);
   document.getElementById("carNetLabel").textContent = currency.format(carEquity);
   document.getElementById("liquidNetLabel").textContent = currency.format(
-    cashAssets + investedAssets + otherAssets - otherLiabilities
+    cashAssets + currentInvestmentAssets + otherAssets - otherLiabilities
   );
 
   const allocation = getAllocation(investmentInputs.age);
