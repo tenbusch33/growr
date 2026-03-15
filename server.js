@@ -5,7 +5,7 @@ const crypto = require("crypto");
 
 const root = __dirname;
 const envPath = path.join(root, ".env");
-const dataDir = path.join(root, "data");
+const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, "data");
 const accountsFile = path.join(dataDir, "accounts.json");
 const plaidItemsFile = path.join(dataDir, "plaid-items.json");
 const plannerFile = path.join(dataDir, "planners.json");
@@ -212,6 +212,7 @@ function getConfig() {
     plaidConfigured: Boolean(
       process.env.PLAID_CLIENT_ID && process.env.PLAID_SECRET && process.env.PLAID_ENV
     ),
+    dataDir,
   };
 }
 
@@ -630,6 +631,11 @@ const server = http.createServer((request, response) => {
 
   if (request.method === "GET" && request.url === "/api/config") {
     sendJson(response, 200, getConfig());
+    return;
+  }
+
+  if (request.method === "GET" && request.url === "/api/health") {
+    sendJson(response, 200, { ok: true });
     return;
   }
 

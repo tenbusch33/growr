@@ -23,9 +23,44 @@ npm start
 
 Open `http://localhost:3000`.
 
+## Deploy on Render
+
+Render is a strong fit for this project because it supports a custom Node web service directly from GitHub with standard build and start commands. This app already matches that model with `npm start`, and the repo now includes the pieces needed for a smoother deployment.
+
+Included deployment prep:
+
+- `render.yaml`
+- `GET /api/health` health check endpoint
+- `DATA_DIR` support so JSON app data can live on a persistent disk
+- Node engine metadata in `package.json`
+
+### Recommended Render setup
+
+1. Create a new `Web Service` from this GitHub repo.
+2. Confirm these settings:
+   - Build Command: `npm install`
+   - Start Command: `npm start`
+   - Health Check Path: `/api/health`
+3. Add a persistent disk mounted at:
+
+```text
+/var/data/growr
+```
+
+4. Add this environment variable:
+
+```env
+DATA_DIR=/var/data/growr
+```
+
+5. Add any live secrets you want to enable, such as Stripe and Plaid credentials.
+
+Without a persistent disk, local JSON data like accounts, sessions, planners, and imported transactions will reset on rebuilds and restarts.
+
 ## Environment variables
 
 - `PORT`: local server port
+- `DATA_DIR`: optional override for where Growr stores JSON app data
 - `SUPABASE_URL`: used to indicate auth is connected
 - `SUPABASE_ANON_KEY`: used to indicate auth is connected
 - `STRIPE_CHECKOUT_BUDGET_URL`: hosted checkout or payment link for the `$7.99` plan

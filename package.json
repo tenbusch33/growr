@@ -1,8 +1,11 @@
 {
-  "name": "moneymap-budget-app",
+  "name": "growr",
   "version": "1.0.0",
   "private": true,
-  "description": "Prototype budgeting and investment forecasting app",
+  "description": "Growr budgeting and investment forecasting app",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server.js"
   }
