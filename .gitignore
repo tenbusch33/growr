@@ -1,0 +1,11 @@
+node_modules/
+.env
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+data/accounts.json
+data/plaid-items.json
+data/planners.json
+data/sessions.json
+data/transactions.json

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Growr | Budget + Investing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <nav class="topbar">
+          <div class="brand">
+            <span class="brand-mark">M</span>
+            <div>
+              <p>Growr</p>
+              <span>Grow money with clarity.</span>
+            </div>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-btn" data-scroll="#pricing">Pricing</button>
+            <button class="primary-btn" data-scroll="#auth">Start now</button>
+          </div>
+        </nav>
+
+        <section class="hero-content">
+          <div class="hero-copy">
+            <p class="eyebrow">Budgeting + investment forecasting</p>
+            <h1>Growr shows where your money goes and what to do next.</h1>
+            <p class="hero-text">
+              Track income, debt, bills, and investments in one place. Get practical
+              suggestions like when to pause investing, attack high-interest debt,
+              or rebalance retirement accounts by age.
+            </p>
+            <div class="hero-cta-row">
+              <button class="primary-btn" data-scroll="#planner">Open planner</button>
+              <button class="secondary-btn" data-scroll="#how-it-works">How it works</button>
+            </div>
+            <div class="hero-badges">
+              <span>Budget plan: $7.99/mo</span>
+              <span>Investing add-on: +$5/mo</span>
+              <span>Account-ready experience</span>
+            </div>
+          </div>
+          <div class="hero-card glass">
+            <div class="mini-stat">
+              <span>Monthly leftover</span>
+              <strong id="hero-leftover">$0</strong>
+            </div>
+            <div class="mini-stat">
+              <span>Debt pressure</span>
+              <strong id="hero-debt-pressure">Balanced</strong>
+            </div>
+            <div class="mini-stat">
+              <span>10-year potential</span>
+              <strong id="hero-growth">$0</strong>
+            </div>
+            <p>
+              Educational estimates only. This app can surface patterns and options,
+              but it does not replace a licensed financial professional.
+            </p>
+          </div>
+        </section>
+      </header>
+
+      <main>
+        <section id="how-it-works" class="info-grid">
+          <article class="glass info-card">
+            <h2>Budget Engine</h2>
+            <p>
+              Add paychecks, recurring bills, debt payments, and car costs. The app
+              calculates cash flow, emergency buffer pressure, and a simple debt load snapshot.
+            </p>
+          </article>
+          <article class="glass info-card">
+            <h2>Investment Forecasts</h2>
+            <p>
+              Forecast 401(k), Roth IRA, and brokerage growth with long-term average
+              return assumptions so users can compare consistency versus speed.
+            </p>
+          </article>
+          <article class="glass info-card">
+            <h2>Actionable Opinions</h2>
+            <p>
+              The recommendation engine highlights tradeoffs like reducing contributions,
+              avoiding overextended car payments, and prioritizing toxic debt.
+            </p>
+          </article>
+        </section>
+
+        <section id="pricing" class="pricing-section">
+          <div class="section-heading">
+            <p class="eyebrow">Pricing</p>
+            <h2>Simple subscription structure</h2>
+          </div>
+          <div class="pricing-grid">
+            <article class="glass price-card">
+              <p class="plan-name">Budget Core</p>
+              <h3>$7.99<span>/month</span></h3>
+              <ul>
+                <li>Income and bill tracking</li>
+                <li>Debt and car payment analysis</li>
+                <li>Monthly cash flow recommendations</li>
+              </ul>
+            </article>
+            <article class="glass price-card featured">
+              <p class="plan-name">Investing Add-on</p>
+              <h3>$12.99<span>/month total</span></h3>
+              <ul>
+                <li>401(k), Roth IRA, brokerage forecasts</li>
+                <li>Age-based allocation suggestions</li>
+                <li>Goal and contribution comparisons</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="auth" class="auth-section glass">
+          <div class="section-heading">
+            <p class="eyebrow">Account setup</p>
+            <h2>Create an account and choose access</h2>
+          </div>
+          <div class="integration-banner">
+            <div class="integration-chip">
+              <span>Auth</span>
+              <strong id="auth-status">Checking...</strong>
+            </div>
+            <div class="integration-chip">
+              <span>Billing</span>
+              <strong id="billing-status">Checking...</strong>
+            </div>
+          </div>
+          <form id="signup-form" class="auth-form">
+            <label>
+              Full name
+              <input type="text" id="fullName" placeholder="Jordan Miles" required />
+            </label>
+            <label>
+              Email
+              <input type="email" id="email" placeholder="jordan@email.com" required />
+            </label>
+            <label>
+              Password
+              <input type="password" id="password" placeholder="Create a password" required />
+            </label>
+            <label>
+              Plan
+              <select id="plan">
+                <option value="budget">Budget Core - $7.99</option>
+                <option value="bundle">Budget + Investing - $12.99</option>
+              </select>
+            </label>
+            <button type="submit" class="primary-btn" id="signup-button">Create account</button>
+          </form>
+          <form id="login-form" class="auth-form login-form">
+            <label>
+              Login email
+              <input type="email" id="loginEmail" placeholder="jordan@email.com" required />
+            </label>
+            <label>
+              Login password
+              <input type="password" id="loginPassword" placeholder="Enter your password" required />
+            </label>
+            <div class="auth-inline-actions">
+              <button type="submit" class="secondary-btn" id="login-button">Log in</button>
+              <button type="button" class="ghost-btn hidden" id="logout-button">Log out</button>
+              <button type="button" class="ghost-btn hidden" id="manage-billing-button">Manage billing</button>
+            </div>
+          </form>
+          <p id="auth-message" class="status-message hidden"></p>
+          <div id="account-summary" class="account-summary hidden"></div>
+          <div class="upgrade-banner hidden" id="upgrade-banner">
+            <p id="upgrade-copy">Upgrade to unlock investing forecasts, age-based allocation guidance, and investment-linked Plaid data.</p>
+            <button type="button" class="primary-btn" id="upgrade-button">Upgrade to Bundle</button>
+          </div>
+        </section>
+
+        <section id="planner" class="planner-grid">
+          <div class="glass planner-panel">
+          <div class="section-heading compact">
+            <p class="eyebrow">Budget planner</p>
+            <h2>Enter monthly numbers</h2>
+          </div>
+          <div class="planner-toolbar">
+            <p id="planner-status" class="status-message">Planner changes save after you sign in.</p>
+            <button type="button" id="save-plan" class="ghost-btn">Save plan</button>
+          </div>
+          <form id="budget-form" class="planner-form">
+              <label>Monthly take-home income<input type="number" id="income" value="6200" min="0" /></label>
+              <label>Housing + utilities<input type="number" id="housing" value="2100" min="0" /></label>
+              <label>Groceries + essentials<input type="number" id="essentials" value="850" min="0" /></label>
+              <label>Credit card payment<input type="number" id="creditCard" value="450" min="0" /></label>
+              <label>Student/personal debt<input type="number" id="otherDebt" value="300" min="0" /></label>
+              <label>Car payment<input type="number" id="carPayment" value="725" min="0" /></label>
+              <label>Insurance + gas<input type="number" id="carCosts" value="340" min="0" /></label>
+              <label>Current emergency savings<input type="number" id="emergencyFund" value="1800" min="0" /></label>
+              <label>Current credit card balance<input type="number" id="creditCardBalance" value="9200" min="0" /></label>
+            </form>
+          </div>
+
+          <div class="glass planner-panel gated-feature" data-feature="investing">
+            <div class="section-heading compact">
+              <p class="eyebrow">Investment planner</p>
+              <h2>Forecast long-term growth</h2>
+            </div>
+            <form id="investment-form" class="planner-form">
+              <label>Age<input type="number" id="age" value="32" min="18" max="80" /></label>
+              <label>401(k) balance<input type="number" id="k401Balance" value="28000" min="0" /></label>
+              <label>401(k) monthly contribution<input type="number" id="k401Contribution" value="500" min="0" /></label>
+              <label>Roth IRA balance<input type="number" id="rothBalance" value="12000" min="0" /></label>
+              <label>Roth IRA monthly contribution<input type="number" id="rothContribution" value="250" min="0" /></label>
+              <label>Brokerage balance<input type="number" id="brokerageBalance" value="8000" min="0" /></label>
+              <label>Brokerage monthly contribution<input type="number" id="brokerageContribution" value="300" min="0" /></label>
+              <label>Forecast years<input type="number" id="forecastYears" value="10" min="1" max="40" /></label>
+            </form>
+          </div>
+        </section>
+
+        <section class="dashboard-strip">
+          <article class="glass score-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Health score</p>
+              <h2>Financial pulse</h2>
+            </div>
+            <div class="score-wrap">
+              <div class="score-orb" id="score-orb">
+                <strong id="health-score">0</strong>
+                <span>/100</span>
+              </div>
+              <div class="score-copy">
+                <h3 id="health-label">Getting started</h3>
+                <p id="health-summary">Enter your numbers to see a clearer picture of stability, debt pressure, and saving momentum.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="glass score-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Fast read</p>
+              <h2>Decision signals</h2>
+            </div>
+            <div class="signal-grid">
+              <div class="signal-card">
+                <span>Savings pace</span>
+                <strong id="signal-savings">Needs work</strong>
+              </div>
+              <div class="signal-card">
+                <span>Debt stress</span>
+                <strong id="signal-debt">Balanced</strong>
+              </div>
+              <div class="signal-card">
+                <span>Investment room</span>
+                <strong id="signal-investing">Cautious</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="results-grid">
+          <article class="glass results-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Your snapshot</p>
+              <h2>Budget summary</h2>
+            </div>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <span>Monthly leftover</span>
+                <strong id="leftover">$0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Debt ratio</span>
+                <strong id="debtRatio">0%</strong>
+              </div>
+              <div class="metric-card">
+                <span>Car cost ratio</span>
+                <strong id="carRatio">0%</strong>
+              </div>
+              <div class="metric-card">
+                <span>Emergency months</span>
+                <strong id="emergencyMonths">0</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="glass results-panel gated-feature" data-feature="investing">
+            <div class="section-heading compact">
+              <p class="eyebrow">Forecasts</p>
+              <h2>Projected account values</h2>
+            </div>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <span>401(k)</span>
+                <strong id="k401Future">$0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Roth IRA</span>
+                <strong id="rothFuture">$0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Brokerage</span>
+                <strong id="brokerageFuture">$0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Total projected</span>
+                <strong id="totalFuture">$0</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="glass charts-panel">
+          <div class="section-heading">
+            <p class="eyebrow">Visuals</p>
+            <h2>Colorful budget views</h2>
+          </div>
+          <div class="charts-grid">
+            <article class="chart-card">
+              <div class="chart-card-top">
+                <h3>Monthly cash flow</h3>
+                <strong id="cashflow-percent">0%</strong>
+              </div>
+              <div class="stack-chart" id="cashflow-chart"></div>
+              <p class="chart-note" id="cashflow-note">Shows how your paycheck gets divided each month.</p>
+            </article>
+            <article class="chart-card">
+              <div class="chart-card-top">
+                <h3>Expense mix</h3>
+                <strong id="expense-total">$0</strong>
+              </div>
+              <div class="legend-list" id="expense-legend"></div>
+              <p class="chart-note" id="expense-note">Largest categories should feel intentional, not accidental.</p>
+            </article>
+            <article class="chart-card gated-feature" data-feature="investing">
+              <div class="chart-card-top">
+                <h3>Investment forecast</h3>
+                <strong id="invest-growth-label">$0</strong>
+              </div>
+              <div class="bar-chart" id="investment-bars"></div>
+              <p class="chart-note" id="invest-note">Uses long-run average return assumptions for a directional estimate.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="budgeting-grid">
+          <article class="glass budget-workbench">
+            <div class="section-heading">
+              <p class="eyebrow">Budget categories</p>
+              <h2>Monthly targets and progress</h2>
+            </div>
+            <div id="category-progress" class="category-progress"></div>
+          </article>
+
+          <article class="glass budget-workbench">
+            <div class="section-heading">
+              <p class="eyebrow">Transactions</p>
+              <h2>Track spending this month</h2>
+            </div>
+            <form id="transaction-form" class="transaction-form">
+              <label>Merchant<input type="text" id="txMerchant" placeholder="Trader Joe's" required /></label>
+              <label>Amount<input type="number" id="txAmount" min="0" step="0.01" placeholder="84.52" required /></label>
+              <label>Category
+                <select id="txCategory">
+                  <option value="housing">Housing</option>
+                  <option value="essentials">Essentials</option>
+                  <option value="debt">Debt</option>
+                  <option value="car">Car</option>
+                  <option value="fun">Fun</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+              <label>Date<input type="date" id="txDate" required /></label>
+              <button type="submit" class="primary-btn">Add transaction</button>
+            </form>
+            <p id="transaction-status" class="status-message">Sign in to save and load transactions.</p>
+            <div class="transaction-dashboard">
+              <div class="transaction-summary-grid">
+                <article class="mini-stat">
+                  <span>Visible spend</span>
+                  <strong id="tx-visible-total">$0</strong>
+                </article>
+                <article class="mini-stat">
+                  <span>Transactions shown</span>
+                  <strong id="tx-count">0</strong>
+                </article>
+                <article class="mini-stat">
+                  <span>Largest category</span>
+                  <strong id="tx-top-category">None</strong>
+                </article>
+              </div>
+              <div class="transaction-filters">
+                <label>
+                  Category
+                  <select id="transaction-filter-category">
+                    <option value="all">All categories</option>
+                    <option value="housing">Housing</option>
+                    <option value="essentials">Essentials</option>
+                    <option value="debt">Debt</option>
+                    <option value="car">Car</option>
+                    <option value="fun">Fun</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+                <label>
+                  Source
+                  <select id="transaction-filter-source">
+                    <option value="all">All sources</option>
+                    <option value="manual">Manual</option>
+                    <option value="plaid">Plaid</option>
+                  </select>
+                </label>
+                <label>
+                  Search
+                  <input type="text" id="transaction-search" placeholder="Search merchant" />
+                </label>
+              </div>
+            </div>
+            <div id="transaction-list" class="transaction-list"></div>
+          </article>
+        </section>
+
+        <section class="guidance-grid">
+          <article class="glass recommendations-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Recommendations</p>
+              <h2>Suggested next moves</h2>
+            </div>
+            <div id="recommendations" class="recommendation-list"></div>
+          </article>
+
+          <article class="glass recommendations-panel gated-feature" data-feature="investing">
+            <div class="section-heading compact">
+              <p class="eyebrow">401(k) guidance</p>
+              <h2>Age-based allocation idea</h2>
+            </div>
+            <div id="allocation" class="allocation-card"></div>
+          </article>
+        </section>
+
+        <section class="glass accounts-panel">
+          <div class="section-heading">
+            <p class="eyebrow">Connected accounts</p>
+            <h2>Bring in live balances and debts</h2>
+          </div>
+          <div class="accounts-toolbar">
+            <button id="connect-accounts" class="primary-btn">Connect accounts with Plaid</button>
+            <button id="import-transactions" class="secondary-btn">Import Plaid transactions</button>
+            <p id="plaid-message" class="status-message">
+              Connect checking, credit cards, loans, and investment accounts to pull live data.
+            </p>
+          </div>
+          <div class="live-summary-grid">
+            <article class="mini-stat">
+              <span>Cash and depository</span>
+              <strong id="live-cash">$0</strong>
+            </article>
+            <article class="mini-stat">
+              <span>Credit card debt</span>
+              <strong id="live-credit-debt">$0</strong>
+            </article>
+            <article class="mini-stat">
+              <span>Loan balances</span>
+              <strong id="live-loan-debt">$0</strong>
+            </article>
+            <article class="mini-stat gated-feature" data-feature="investing">
+              <span>Investments linked</span>
+              <strong id="live-investments">$0</strong>
+            </article>
+          </div>
+          <div class="linked-columns">
+            <div class="linked-card">
+              <h3>Accounts</h3>
+              <div id="linked-accounts" class="linked-list"></div>
+            </div>
+            <div class="linked-card">
+              <h3>Liabilities</h3>
+              <div id="linked-liabilities" class="linked-list"></div>
+            </div>
+            <div class="linked-card gated-feature" data-feature="investing">
+              <h3>Investments</h3>
+              <div id="linked-investments" class="linked-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="glass launch-panel">
+          <div class="section-heading">
+            <p class="eyebrow">Launch setup</p>
+            <h2>Production connection checklist</h2>
+          </div>
+          <div id="launch-checklist" class="launch-grid"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

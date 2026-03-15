@@ -1,0 +1,9 @@
+{
+  "name": "moneymap-budget-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Prototype budgeting and investment forecasting app",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
