@@ -291,6 +291,9 @@ function populateAccountForm() {
   const saveButton = document.getElementById("account-save-button");
   const billingButton = document.getElementById("account-billing-button");
   const logoutButton = document.getElementById("account-logout-button");
+  const planLabel = document.getElementById("accountPlanLabel");
+  const trialLabel = document.getElementById("accountTrialLabel");
+  const subscriptionLabel = document.getElementById("accountSubscriptionLabel");
 
   if (!state.user) {
     nameInput.value = "";
@@ -300,6 +303,9 @@ function populateAccountForm() {
     saveButton.disabled = true;
     billingButton.disabled = true;
     logoutButton.disabled = true;
+    planLabel.textContent = "Signed out";
+    trialLabel.textContent = "Unavailable";
+    subscriptionLabel.textContent = "Unavailable";
     setAccountStatus("Sign in to update your account details.");
     return;
   }
@@ -311,6 +317,11 @@ function populateAccountForm() {
   logoutButton.disabled = false;
   nameInput.value = state.user.fullName || "";
   emailInput.value = state.user.email || "";
+  planLabel.textContent = state.user.plan === "bundle" ? "Budget + Investing" : "Budget Core";
+  trialLabel.textContent = state.user.trialActive
+    ? `${Math.max(Number(state.user.trialDaysRemaining || 0), 0)} days left`
+    : "No active trial";
+  subscriptionLabel.textContent = state.user.subscriptionActive === false ? "Pending" : "Active";
   setAccountStatus(
     state.user.trialActive
       ? `Signed in. Your free trial ends ${new Date(state.user.trialEndsAt).toLocaleDateString()}.`

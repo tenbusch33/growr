@@ -78,6 +78,18 @@
 
       <main class="workspace-main">
         <section class="app-page is-active" data-page="snapshot">
+        <section class="glass page-intro">
+          <div>
+            <p class="eyebrow">Snapshot</p>
+            <h2>Your money, simplified</h2>
+            <p class="page-intro-text">Start here to understand this month, spot pressure points, and decide what to do next.</p>
+          </div>
+          <div class="page-intro-callouts">
+            <span>Best for first-time setup</span>
+            <span>Live recommendations</span>
+            <span>Built for quick decisions</span>
+          </div>
+        </section>
         <section class="glass quickstart-panel">
           <div class="section-heading compact">
             <p class="eyebrow">Quick start</p>
@@ -418,6 +430,35 @@
         </section>
 
         <section class="app-page" data-page="budget">
+        <section class="glass page-intro">
+          <div>
+            <p class="eyebrow">Budget</p>
+            <h2>Stay on top of spending</h2>
+            <p class="page-intro-text">Track category targets, log transactions, and understand where the month is getting tight.</p>
+          </div>
+          <div class="page-intro-callouts">
+            <span>Monthly targets</span>
+            <span>Transaction filters</span>
+            <span>Progress by category</span>
+          </div>
+        </section>
+        <section class="budget-coach-grid">
+          <article class="glass coach-card">
+            <p class="eyebrow">Budget coach</p>
+            <h3>Keep the month simple</h3>
+            <p>Focus on fixed bills first, protect essentials second, then decide how much room you really have left.</p>
+          </article>
+          <article class="glass coach-card">
+            <p class="eyebrow">Good rhythm</p>
+            <h3>Check spending weekly</h3>
+            <p>Small weekly adjustments are easier than trying to fix the whole month at the end.</p>
+          </article>
+          <article class="glass coach-card">
+            <p class="eyebrow">Best use</p>
+            <h3>Use this page like a pulse check</h3>
+            <p>If one category runs hot, adjust there first before cutting everywhere else.</p>
+          </article>
+        </section>
         <section class="budgeting-grid">
           <article class="glass budget-workbench">
             <div class="section-heading">
@@ -498,6 +539,18 @@
         </section>
 
         <section class="app-page" data-page="networth">
+        <section class="glass page-intro">
+          <div>
+            <p class="eyebrow">Net Worth</p>
+            <h2>See what you own minus what you owe</h2>
+            <p class="page-intro-text">Home equity, car equity, cash, and investments all roll into one cleaner net worth view.</p>
+          </div>
+          <div class="page-intro-callouts">
+            <span>Home equity included</span>
+            <span>Vehicle equity included</span>
+            <span>Investments added automatically</span>
+          </div>
+        </section>
         <section class="planner-grid">
           <div class="glass planner-panel">
             <div class="section-heading compact">
@@ -572,6 +625,18 @@
         </section>
 
         <section class="app-page" data-page="accounts">
+        <section class="glass page-intro">
+          <div>
+            <p class="eyebrow">Connect Accounts</p>
+            <h2>Link banks, cards, loans, and investments</h2>
+            <p class="page-intro-text">Bring in balances automatically so Growr can become more accurate and less manual.</p>
+          </div>
+          <div class="page-intro-callouts">
+            <span>Plaid-powered</span>
+            <span>Balances and liabilities</span>
+            <span>Transaction import support</span>
+          </div>
+        </section>
         <section class="glass accounts-panel">
           <div class="section-heading">
             <p class="eyebrow">Connect accounts</p>
@@ -631,6 +696,18 @@
         </section>
 
         <section class="app-page" data-page="account">
+        <section class="glass page-intro">
+          <div>
+            <p class="eyebrow">Account</p>
+            <h2>Manage your profile and billing</h2>
+            <p class="page-intro-text">Update your details, open billing, and keep your subscription information clean and current.</p>
+          </div>
+          <div class="page-intro-callouts">
+            <span>Profile updates</span>
+            <span>Billing portal</span>
+            <span>Subscription controls</span>
+          </div>
+        </section>
         <section class="planner-grid">
           <article class="glass planner-panel">
             <div class="section-heading compact">
@@ -642,6 +719,20 @@
               <label>Full name<input type="text" id="accountFullName" placeholder="Jordan Miles" /></label>
               <label>Email<input type="email" id="accountEmail" placeholder="jordan@email.com" /></label>
             </form>
+            <div class="account-meta-grid">
+              <article class="mini-stat">
+                <span>Plan</span>
+                <strong id="accountPlanLabel">Signed out</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Trial / status</span>
+                <strong id="accountTrialLabel">Unavailable</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Billing state</span>
+                <strong id="accountSubscriptionLabel">Unavailable</strong>
+              </article>
+            </div>
             <div class="auth-inline-actions">
               <button type="button" class="primary-btn" id="account-save-button">Save account details</button>
               <button type="button" class="ghost-btn" id="account-billing-button">Manage billing</button>
@@ -672,6 +763,10 @@
         </section>
         </section>
       </main>
+      <footer class="site-footer">
+        <p>Growr is built to help everyday people budget, plan, and invest with more clarity.</p>
+        <span>Educational guidance only. Not personalized financial advice.</span>
+      </footer>
     </div>
 
     <script src="app.js"></script>

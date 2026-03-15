@@ -69,6 +69,21 @@ select {
   gap: 20px;
 }
 
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 24px 4px 0;
+  color: var(--subtle);
+  font-size: 0.92rem;
+}
+
+.site-footer p,
+.site-footer span {
+  margin: 0;
+}
+
 .topbar,
 .hero-content,
 .info-grid,
@@ -218,6 +233,48 @@ select {
   display: grid;
   gap: 16px;
   align-content: start;
+}
+
+.page-intro {
+  padding: 22px 24px;
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.page-intro h2,
+.page-intro p {
+  margin: 0;
+}
+
+.page-intro-text {
+  margin-top: 10px;
+  max-width: 700px;
+  color: var(--subtle);
+  line-height: 1.65;
+}
+
+.page-intro-callouts {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.page-intro-callouts span {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-size: 0.9rem;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.quickstart-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .mini-stat,
@@ -547,6 +604,40 @@ select {
   grid-template-columns: 1.1fr 0.9fr;
   gap: 20px;
   margin: 20px 0;
+}
+
+.budget-coach-grid,
+.account-meta-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.budget-coach-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.account-meta-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 16px 0 6px;
+}
+
+.coach-card {
+  padding: 18px;
+}
+
+.coach-card h3,
+.coach-card p {
+  margin: 0;
+}
+
+.coach-card h3 {
+  font-size: 1.05rem;
+  margin: 6px 0 10px;
+}
+
+.coach-card p {
+  color: var(--subtle);
+  line-height: 1.6;
 }
 
 .networth-breakdown {
@@ -951,10 +1042,13 @@ select {
   .pricing-grid,
   .planner-grid,
   .dashboard-strip,
+  .quickstart-grid,
   .budgeting-grid,
+  .budget-coach-grid,
   .results-grid,
   .guidance-grid,
   .accounts-intro,
+  .account-meta-grid,
   .linked-columns,
   .live-summary-grid,
   .transaction-summary-grid,
@@ -973,6 +1067,10 @@ select {
 
   .integration-banner {
     grid-template-columns: 1fr;
+  }
+
+  .page-intro {
+    align-items: flex-start;
   }
 
 }
