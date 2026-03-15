@@ -456,6 +456,10 @@ select {
   gap: 14px;
 }
 
+.metric-card-wide {
+  grid-column: 1 / -1;
+}
+
 .recommendation-list {
   display: grid;
   gap: 12px;
@@ -531,6 +535,12 @@ select {
   grid-template-columns: 1.1fr 0.9fr;
   gap: 20px;
   margin: 20px 0;
+}
+
+.networth-breakdown {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .budget-workbench {
@@ -979,5 +989,9 @@ select {
 
   .metric-grid {
     grid-template-columns: 1fr;
+  }
+
+  .metric-card-wide {
+    grid-column: auto;
   }
 }

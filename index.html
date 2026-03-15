@@ -29,8 +29,8 @@
               <button class="tab-btn is-active" data-page-target="overview">Overview</button>
               <button class="tab-btn" data-page-target="snapshot">Snapshot</button>
               <button class="tab-btn" data-page-target="budget">Budget</button>
-              <button class="tab-btn" data-page-target="accounts">Accounts</button>
-              <button class="tab-btn" data-page-target="launch">Setup</button>
+              <button class="tab-btn" data-page-target="networth">Net Worth</button>
+              <button class="tab-btn" data-page-target="accounts">Connect Accounts</button>
             </div>
           </div>
         </nav>
@@ -465,10 +465,84 @@
 
         </section>
 
+        <section class="app-page" data-page="networth">
+        <section class="planner-grid">
+          <div class="glass planner-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Net worth inputs</p>
+              <h2>Add property and vehicle equity</h2>
+            </div>
+            <form id="networth-form" class="planner-form">
+              <label>Home value<input type="number" id="homeValue" value="380000" min="0" /></label>
+              <label>Mortgage balance<input type="number" id="mortgageBalance" value="275000" min="0" /></label>
+              <label>Car value<input type="number" id="carValue" value="22000" min="0" /></label>
+              <label>Car loan balance<input type="number" id="carLoanBalance" value="16500" min="0" /></label>
+              <label>Cash savings<input type="number" id="cashAssets" value="6200" min="0" /></label>
+              <label>Investments outside home<input type="number" id="investedAssets" value="48000" min="0" /></label>
+              <label>Other assets<input type="number" id="otherAssets" value="0" min="0" /></label>
+              <label>Other liabilities<input type="number" id="otherLiabilities" value="9200" min="0" /></label>
+            </form>
+          </div>
+
+          <div class="glass results-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Net worth snapshot</p>
+              <h2>Assets, debt, and equity</h2>
+            </div>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <span>Home equity</span>
+                <strong id="homeEquity">$0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Car equity</span>
+                <strong id="carEquity">$0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Total assets</span>
+                <strong id="totalAssets">$0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Total liabilities</span>
+                <strong id="totalLiabilities">$0</strong>
+              </div>
+              <div class="metric-card metric-card-wide">
+                <span>Net worth</span>
+                <strong id="netWorth">$0</strong>
+              </div>
+            </div>
+            <div class="networth-breakdown">
+              <article class="category-card">
+                <div class="category-top">
+                  <h3>Home</h3>
+                  <strong id="homeNetLabel">$0</strong>
+                </div>
+                <p class="category-meta">Property value minus mortgage balance.</p>
+              </article>
+              <article class="category-card">
+                <div class="category-top">
+                  <h3>Vehicle</h3>
+                  <strong id="carNetLabel">$0</strong>
+                </div>
+                <p class="category-meta">Vehicle market value minus remaining loan balance.</p>
+              </article>
+              <article class="category-card">
+                <div class="category-top">
+                  <h3>Liquid + invested assets</h3>
+                  <strong id="liquidNetLabel">$0</strong>
+                </div>
+                <p class="category-meta">Cash, investments, and other assets less other liabilities.</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        </section>
+
         <section class="app-page" data-page="accounts">
         <section class="glass accounts-panel">
           <div class="section-heading">
-            <p class="eyebrow">Connected accounts</p>
+            <p class="eyebrow">Connect accounts</p>
             <h2>Bring in live balances and debts</h2>
           </div>
           <div class="accounts-toolbar">

@@ -317,6 +317,14 @@ function getPlannerPayload() {
     carCosts: getValue("carCosts"),
     emergencyFund: getValue("emergencyFund"),
     creditCardBalance: getValue("creditCardBalance"),
+    homeValue: getValue("homeValue"),
+    mortgageBalance: getValue("mortgageBalance"),
+    carValue: getValue("carValue"),
+    carLoanBalance: getValue("carLoanBalance"),
+    cashAssets: getValue("cashAssets"),
+    investedAssets: getValue("investedAssets"),
+    otherAssets: getValue("otherAssets"),
+    otherLiabilities: getValue("otherLiabilities"),
     age: getValue("age"),
     k401Balance: getValue("k401Balance"),
     k401Contribution: getValue("k401Contribution"),
@@ -875,6 +883,14 @@ function updateDashboard() {
   const carCosts = getValue("carCosts");
   const emergencyFund = getValue("emergencyFund");
   const creditCardBalance = getValue("creditCardBalance");
+  const homeValue = getValue("homeValue");
+  const mortgageBalance = getValue("mortgageBalance");
+  const carValue = getValue("carValue");
+  const carLoanBalance = getValue("carLoanBalance");
+  const cashAssets = getValue("cashAssets");
+  const investedAssets = getValue("investedAssets");
+  const otherAssets = getValue("otherAssets");
+  const otherLiabilities = getValue("otherLiabilities");
   const investmentInputs = getInvestmentInputs();
   const years = investmentInputs.forecastYears;
 
@@ -905,6 +921,12 @@ function updateDashboard() {
     years
   );
   const totalFuture = hasInvestmentAccess() ? k401Future + rothFuture + brokerageFuture : 0;
+  const homeEquity = homeValue - mortgageBalance;
+  const carEquity = carValue - carLoanBalance;
+  const totalAssets = homeValue + carValue + cashAssets + investedAssets + otherAssets;
+  const totalLiabilities =
+    mortgageBalance + carLoanBalance + creditCardBalance + otherDebt + otherLiabilities;
+  const netWorth = totalAssets - totalLiabilities;
 
   document.getElementById("leftover").textContent = currency.format(leftover);
   document.getElementById("debtRatio").textContent = percent.format(debtRatio);
@@ -920,6 +942,16 @@ function updateDashboard() {
   document.getElementById("hero-growth").textContent = hasInvestmentAccess() ? currency.format(totalFuture) : "Upgrade";
   document.getElementById("hero-debt-pressure").textContent =
     debtRatio > 0.35 ? "High" : debtRatio > 0.2 ? "Moderate" : "Balanced";
+  document.getElementById("homeEquity").textContent = currency.format(homeEquity);
+  document.getElementById("carEquity").textContent = currency.format(carEquity);
+  document.getElementById("totalAssets").textContent = currency.format(totalAssets);
+  document.getElementById("totalLiabilities").textContent = currency.format(totalLiabilities);
+  document.getElementById("netWorth").textContent = currency.format(netWorth);
+  document.getElementById("homeNetLabel").textContent = currency.format(homeEquity);
+  document.getElementById("carNetLabel").textContent = currency.format(carEquity);
+  document.getElementById("liquidNetLabel").textContent = currency.format(
+    cashAssets + investedAssets + otherAssets - otherLiabilities
+  );
 
   const allocation = getAllocation(investmentInputs.age);
   document.getElementById("allocation").innerHTML = hasInvestmentAccess()
@@ -1329,7 +1361,7 @@ document.getElementById("transaction-form").addEventListener("submit", createTra
 bindTransactionFilters();
 
 document
-  .querySelectorAll("#budget-form input, #investment-form input")
+  .querySelectorAll("#budget-form input, #investment-form input, #networth-form input")
   .forEach((input) =>
     input.addEventListener("input", () => {
       updateDashboard();
