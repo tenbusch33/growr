@@ -45,8 +45,8 @@
               or rebalance retirement accounts by age.
             </p>
             <div class="hero-cta-row">
-              <button class="primary-btn" data-page-target="snapshot">Open planner</button>
-              <button class="secondary-btn" data-page-target="budget">Budget tools</button>
+              <button class="primary-btn" data-page-target="snapshot">Start with Snapshot</button>
+              <button class="secondary-btn" data-page-target="budget">Open Budget</button>
             </div>
             <div class="hero-badges">
               <span>Budget plan: $7.99/mo</span>
@@ -78,26 +78,43 @@
 
       <main class="workspace-main">
         <section class="app-page is-active" data-page="snapshot">
+        <section class="glass quickstart-panel">
+          <div class="section-heading compact">
+            <p class="eyebrow">Quick start</p>
+            <h2>Start here</h2>
+          </div>
+          <div class="info-grid quickstart-grid">
+            <article class="mini-stat">
+              <span>Step 1</span>
+              <strong>Add your monthly numbers</strong>
+            </article>
+            <article class="mini-stat">
+              <span>Step 2</span>
+              <strong>Review your signals and suggestions</strong>
+            </article>
+            <article class="mini-stat">
+              <span>Step 3</span>
+              <strong>Connect accounts when you are ready</strong>
+            </article>
+          </div>
+        </section>
         <section id="how-it-works" class="info-grid">
           <article class="glass info-card">
-            <h2>Budget Engine</h2>
+            <h2>Plan your month</h2>
             <p>
-              Add paychecks, recurring bills, debt payments, and car costs. The app
-              calculates cash flow, emergency buffer pressure, and a simple debt load snapshot.
+              Add income, bills, debt payments, and car costs. Growr turns that into a simple monthly plan.
             </p>
           </article>
             <article class="glass info-card">
-              <h2>Investment Forecasts</h2>
+              <h2>Project long-term growth</h2>
               <p>
-                Forecast 401(k), Roth IRA, Traditional IRA, HSA, 529, and brokerage growth with long-term average
-                return assumptions so users can compare consistency versus speed.
+                Forecast retirement and investing accounts with long-run assumptions so you can compare paths side by side.
               </p>
             </article>
           <article class="glass info-card">
-            <h2>Actionable Opinions</h2>
+            <h2>Know what to do next</h2>
             <p>
-              The recommendation engine highlights tradeoffs like reducing contributions,
-              avoiding overextended car payments, and prioritizing toxic debt.
+              Get plain-language suggestions around debt payoff, savings pressure, and whether investing should wait.
             </p>
           </article>
         </section>
@@ -105,7 +122,7 @@
         <section id="pricing" class="pricing-section">
           <div class="section-heading">
             <p class="eyebrow">Pricing</p>
-            <h2>Simple subscription structure</h2>
+            <h2>Choose your plan</h2>
           </div>
           <div class="pricing-grid">
             <article class="glass price-card">
@@ -134,7 +151,7 @@
         <section id="auth" class="auth-section glass">
           <div class="section-heading">
             <p class="eyebrow">Account setup</p>
-            <h2>Start your free trial and choose access</h2>
+            <h2>Create your account</h2>
           </div>
           <div class="integration-banner">
             <div class="integration-chip">
@@ -147,7 +164,7 @@
             </div>
           </div>
           <div id="auth-forms">
-            <p class="trial-copy">Every new account starts with a 7-day free trial before paid billing should kick in.</p>
+            <p class="trial-copy">Every new account starts with a 7-day free trial, so you can try the app before paid billing begins.</p>
             <form id="signup-form" class="auth-form">
               <label>
                 Full name
@@ -199,8 +216,8 @@
         <section id="planner" class="planner-grid">
           <div class="glass planner-panel">
           <div class="section-heading compact">
-            <p class="eyebrow">Budget planner</p>
-            <h2>Enter monthly numbers</h2>
+            <p class="eyebrow">Monthly plan</p>
+            <h2>Add your income, bills, and debt</h2>
           </div>
           <div class="planner-toolbar">
             <p id="planner-status" class="status-message">Planner changes save after you sign in.</p>
@@ -221,8 +238,8 @@
 
           <div class="glass planner-panel gated-feature" data-feature="investing">
             <div class="section-heading compact">
-              <p class="eyebrow">Investment planner</p>
-              <h2>Forecast long-term growth</h2>
+              <p class="eyebrow">Investing add-on</p>
+              <h2>Project your future balances</h2>
             </div>
             <form id="investment-form" class="planner-form">
               <label>Age<input type="number" id="age" value="32" min="18" max="80" /></label>
@@ -246,8 +263,8 @@
         <section class="dashboard-strip">
           <article class="glass score-panel">
             <div class="section-heading compact">
-              <p class="eyebrow">Health score</p>
-              <h2>Financial pulse</h2>
+              <p class="eyebrow">Money health</p>
+              <h2>Your overall pulse</h2>
             </div>
             <div class="score-wrap">
               <div class="score-orb" id="score-orb">
@@ -263,8 +280,8 @@
 
           <article class="glass score-panel">
             <div class="section-heading compact">
-              <p class="eyebrow">Fast read</p>
-              <h2>Decision signals</h2>
+              <p class="eyebrow">Quick read</p>
+              <h2>What stands out</h2>
             </div>
             <div class="signal-grid">
               <div class="signal-card">
@@ -286,8 +303,8 @@
         <section class="results-grid">
           <article class="glass results-panel">
             <div class="section-heading compact">
-              <p class="eyebrow">Your snapshot</p>
-              <h2>Budget summary</h2>
+              <p class="eyebrow">This month</p>
+              <h2>Your budget summary</h2>
             </div>
             <div class="metric-grid">
               <div class="metric-card">
@@ -311,8 +328,8 @@
 
           <article class="glass results-panel gated-feature" data-feature="investing">
             <div class="section-heading compact">
-              <p class="eyebrow">Forecasts</p>
-              <h2>Projected account values</h2>
+              <p class="eyebrow">Future values</p>
+              <h2>Projected account balances</h2>
             </div>
             <div class="metric-grid">
               <div class="metric-card">
@@ -350,7 +367,7 @@
         <section class="glass charts-panel">
           <div class="section-heading">
             <p class="eyebrow">Visuals</p>
-            <h2>Colorful budget views</h2>
+            <h2>See the shape of your money</h2>
           </div>
           <div class="charts-grid">
             <article class="chart-card">
@@ -384,7 +401,7 @@
           <article class="glass recommendations-panel">
             <div class="section-heading compact">
               <p class="eyebrow">Recommendations</p>
-              <h2>Suggested next moves</h2>
+              <h2>Suggested next steps</h2>
             </div>
             <div id="recommendations" class="recommendation-list"></div>
           </article>
@@ -392,7 +409,7 @@
           <article class="glass recommendations-panel gated-feature" data-feature="investing">
             <div class="section-heading compact">
               <p class="eyebrow">401(k) guidance</p>
-              <h2>Age-based allocation idea</h2>
+              <h2>Allocation idea by age</h2>
             </div>
             <div id="allocation" class="allocation-card"></div>
           </article>
@@ -405,7 +422,7 @@
           <article class="glass budget-workbench">
             <div class="section-heading">
               <p class="eyebrow">Budget categories</p>
-              <h2>Monthly targets and progress</h2>
+              <h2>Your monthly targets</h2>
             </div>
             <div id="category-progress" class="category-progress"></div>
           </article>
@@ -413,7 +430,7 @@
           <article class="glass budget-workbench">
             <div class="section-heading">
               <p class="eyebrow">Transactions</p>
-              <h2>Track spending this month</h2>
+              <h2>Track your spending</h2>
             </div>
             <form id="transaction-form" class="transaction-form">
               <label>Merchant<input type="text" id="txMerchant" placeholder="Trader Joe's" required /></label>
@@ -485,7 +502,7 @@
           <div class="glass planner-panel">
             <div class="section-heading compact">
               <p class="eyebrow">Net worth inputs</p>
-              <h2>Add property and vehicle equity</h2>
+              <h2>Add home, car, and other assets</h2>
             </div>
             <form id="networth-form" class="planner-form">
               <label>Home value<input type="number" id="homeValue" value="380000" min="0" /></label>
@@ -502,7 +519,7 @@
           <div class="glass results-panel">
             <div class="section-heading compact">
               <p class="eyebrow">Net worth snapshot</p>
-              <h2>Assets, debt, and equity</h2>
+              <h2>Your full balance sheet</h2>
             </div>
             <div class="metric-grid">
               <div class="metric-card">
@@ -558,16 +575,16 @@
         <section class="glass accounts-panel">
           <div class="section-heading">
             <p class="eyebrow">Connect accounts</p>
-            <h2>Bring in balances, debt, and investment data</h2>
+            <h2>Bring in live balances and debt</h2>
           </div>
           <div class="accounts-intro">
             <article class="integration-chip">
               <span>Why connect?</span>
-              <strong>See cash, debt, and investments in one place.</strong>
+              <strong>See cash, debt, and investments without entering everything by hand.</strong>
             </article>
             <article class="integration-chip">
               <span>What imports?</span>
-              <strong>Checking, credit cards, loans, 401(k), IRA, and brokerage accounts.</strong>
+              <strong>Checking, credit cards, loans, 401(k), IRA, HSA, and brokerage accounts.</strong>
             </article>
           </div>
           <div class="accounts-toolbar">
@@ -635,7 +652,7 @@
           <article class="glass results-panel">
             <div class="section-heading compact">
               <p class="eyebrow">Billing help</p>
-              <h2>Payment method and cancellation</h2>
+              <h2>Manage payments and cancellations</h2>
             </div>
             <div class="recommendation-list">
               <article class="recommendation-item good">

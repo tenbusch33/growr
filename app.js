@@ -225,6 +225,16 @@ function setAuthMessage(text) {
   message.textContent = text;
 }
 
+function renderHeroState() {
+  const hero = document.querySelector(".hero");
+  if (!hero) {
+    return;
+  }
+
+  const shouldCompact = state.currentPage !== "snapshot" || Boolean(state.user);
+  hero.classList.toggle("hero-compact", shouldCompact);
+}
+
 function setActivePage(page) {
   const nextPage = document.querySelector(`.app-page[data-page="${page}"]`) ? page : "snapshot";
   state.currentPage = nextPage;
@@ -237,6 +247,7 @@ function setActivePage(page) {
   if (window.location.hash !== `#${nextPage}`) {
     window.history.replaceState({}, "", `#${nextPage}`);
   }
+  renderHeroState();
 }
 
 function handleCheckoutReturn() {
@@ -384,6 +395,7 @@ function renderAccountState() {
     setTransactionStatus("Sign in to save and load transactions.");
     populateAccountForm();
     applyFeatureGate();
+    renderHeroState();
     return;
   }
 
@@ -412,6 +424,7 @@ function renderAccountState() {
   setPlannerStatus("Signed in. Your planner can be saved to this account.");
   populateAccountForm();
   applyFeatureGate();
+  renderHeroState();
 }
 
 function setPlaidMessage(text) {
