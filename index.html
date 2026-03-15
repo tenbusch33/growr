@@ -25,28 +25,28 @@
             </div>
           </div>
           <div class="topbar-actions">
-            <button class="ghost-btn" data-scroll="#pricing">Pricing</button>
-            <button class="primary-btn" data-scroll="#auth">Start now</button>
+            <button class="ghost-btn" data-page-target="overview">Overview</button>
+            <button class="primary-btn" data-page-target="snapshot">Open dashboard</button>
           </div>
         </nav>
 
         <section class="hero-content">
           <div class="hero-copy">
             <p class="eyebrow">Budgeting + investment forecasting</p>
-            <h1>Growr shows where your money goes and what to do next.</h1>
+            <h1>Growr shows you where your money goes and what do next.</h1>
             <p class="hero-text">
               Track income, debt, bills, and investments in one place. Get practical
               suggestions like when to pause investing, attack high-interest debt,
               or rebalance retirement accounts by age.
             </p>
             <div class="hero-cta-row">
-              <button class="primary-btn" data-scroll="#planner">Open planner</button>
-              <button class="secondary-btn" data-scroll="#how-it-works">How it works</button>
+              <button class="primary-btn" data-page-target="overview">Open planner</button>
+              <button class="secondary-btn" data-page-target="budget">Budget tools</button>
             </div>
             <div class="hero-badges">
               <span>Budget plan: $7.99/mo</span>
               <span>Investing add-on: +$5/mo</span>
-              <span>Account-ready experience</span>
+              <span>7-day free trial</span>
             </div>
           </div>
           <div class="hero-card glass">
@@ -68,9 +68,24 @@
             </p>
           </div>
         </section>
+
+        <div class="workspace-nav glass">
+          <div class="workspace-nav-copy">
+            <p class="eyebrow">Workspace</p>
+            <h2>Move through Growr one page at a time</h2>
+          </div>
+          <div class="page-tabs">
+            <button class="tab-btn is-active" data-page-target="overview">Overview</button>
+            <button class="tab-btn" data-page-target="snapshot">Snapshot</button>
+            <button class="tab-btn" data-page-target="budget">Budget</button>
+            <button class="tab-btn" data-page-target="accounts">Accounts</button>
+            <button class="tab-btn" data-page-target="launch">Launch</button>
+          </div>
+        </div>
       </header>
 
-      <main>
+      <main class="workspace-main">
+        <section class="app-page is-active" data-page="overview">
         <section id="how-it-works" class="info-grid">
           <article class="glass info-card">
             <h2>Budget Engine</h2>
@@ -104,6 +119,7 @@
             <article class="glass price-card">
               <p class="plan-name">Budget Core</p>
               <h3>$7.99<span>/month</span></h3>
+              <p class="trial-pill">7-day free trial</p>
               <ul>
                 <li>Income and bill tracking</li>
                 <li>Debt and car payment analysis</li>
@@ -113,6 +129,7 @@
             <article class="glass price-card featured">
               <p class="plan-name">Investing Add-on</p>
               <h3>$12.99<span>/month total</span></h3>
+              <p class="trial-pill">7-day free trial</p>
               <ul>
                 <li>401(k), Roth IRA, brokerage forecasts</li>
                 <li>Age-based allocation suggestions</li>
@@ -125,7 +142,7 @@
         <section id="auth" class="auth-section glass">
           <div class="section-heading">
             <p class="eyebrow">Account setup</p>
-            <h2>Create an account and choose access</h2>
+            <h2>Start your free trial and choose access</h2>
           </div>
           <div class="integration-banner">
             <div class="integration-chip">
@@ -137,45 +154,50 @@
               <strong id="billing-status">Checking...</strong>
             </div>
           </div>
-          <form id="signup-form" class="auth-form">
-            <label>
-              Full name
-              <input type="text" id="fullName" placeholder="Jordan Miles" required />
-            </label>
-            <label>
-              Email
-              <input type="email" id="email" placeholder="jordan@email.com" required />
-            </label>
-            <label>
-              Password
-              <input type="password" id="password" placeholder="Create a password" required />
-            </label>
-            <label>
-              Plan
-              <select id="plan">
-                <option value="budget">Budget Core - $7.99</option>
-                <option value="bundle">Budget + Investing - $12.99</option>
-              </select>
-            </label>
-            <button type="submit" class="primary-btn" id="signup-button">Create account</button>
-          </form>
-          <form id="login-form" class="auth-form login-form">
-            <label>
-              Login email
-              <input type="email" id="loginEmail" placeholder="jordan@email.com" required />
-            </label>
-            <label>
-              Login password
-              <input type="password" id="loginPassword" placeholder="Enter your password" required />
-            </label>
-            <div class="auth-inline-actions">
-              <button type="submit" class="secondary-btn" id="login-button">Log in</button>
-              <button type="button" class="ghost-btn hidden" id="logout-button">Log out</button>
-              <button type="button" class="ghost-btn hidden" id="manage-billing-button">Manage billing</button>
-            </div>
-          </form>
+          <div id="auth-forms">
+            <p class="trial-copy">Every new account starts with a 7-day free trial before paid billing should kick in.</p>
+            <form id="signup-form" class="auth-form">
+              <label>
+                Full name
+                <input type="text" id="fullName" placeholder="Jordan Miles" required />
+              </label>
+              <label>
+                Email
+                <input type="email" id="email" placeholder="jordan@email.com" required />
+              </label>
+              <label>
+                Password
+                <input type="password" id="password" placeholder="Create a password" required />
+              </label>
+              <label>
+                Plan
+                <select id="plan">
+                  <option value="budget">Budget Core - $7.99 after trial</option>
+                  <option value="bundle">Budget + Investing - $12.99 after trial</option>
+                </select>
+              </label>
+              <button type="submit" class="primary-btn" id="signup-button">Start free trial</button>
+            </form>
+            <form id="login-form" class="auth-form login-form">
+              <label>
+                Login email
+                <input type="email" id="loginEmail" placeholder="jordan@email.com" required />
+              </label>
+              <label>
+                Login password
+                <input type="password" id="loginPassword" placeholder="Enter your password" required />
+              </label>
+              <div class="auth-inline-actions">
+                <button type="submit" class="secondary-btn" id="login-button">Log in</button>
+              </div>
+            </form>
+          </div>
           <p id="auth-message" class="status-message hidden"></p>
           <div id="account-summary" class="account-summary hidden"></div>
+          <div id="account-actions" class="auth-inline-actions hidden">
+            <button type="button" class="ghost-btn" id="logout-button">Log out</button>
+            <button type="button" class="ghost-btn hidden" id="manage-billing-button">Manage billing</button>
+          </div>
           <div class="upgrade-banner hidden" id="upgrade-banner">
             <p id="upgrade-copy">Upgrade to unlock investing forecasts, age-based allocation guidance, and investment-linked Plaid data.</p>
             <button type="button" class="primary-btn" id="upgrade-button">Upgrade to Bundle</button>
@@ -223,6 +245,9 @@
           </div>
         </section>
 
+        </section>
+
+        <section class="app-page" data-page="snapshot">
         <section class="dashboard-strip">
           <article class="glass score-panel">
             <div class="section-heading compact">
@@ -348,6 +373,27 @@
           </div>
         </section>
 
+        <section class="guidance-grid">
+          <article class="glass recommendations-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Recommendations</p>
+              <h2>Suggested next moves</h2>
+            </div>
+            <div id="recommendations" class="recommendation-list"></div>
+          </article>
+
+          <article class="glass recommendations-panel gated-feature" data-feature="investing">
+            <div class="section-heading compact">
+              <p class="eyebrow">401(k) guidance</p>
+              <h2>Age-based allocation idea</h2>
+            </div>
+            <div id="allocation" class="allocation-card"></div>
+          </article>
+        </section>
+
+        </section>
+
+        <section class="app-page" data-page="budget">
         <section class="budgeting-grid">
           <article class="glass budget-workbench">
             <div class="section-heading">
@@ -425,24 +471,9 @@
           </article>
         </section>
 
-        <section class="guidance-grid">
-          <article class="glass recommendations-panel">
-            <div class="section-heading compact">
-              <p class="eyebrow">Recommendations</p>
-              <h2>Suggested next moves</h2>
-            </div>
-            <div id="recommendations" class="recommendation-list"></div>
-          </article>
-
-          <article class="glass recommendations-panel gated-feature" data-feature="investing">
-            <div class="section-heading compact">
-              <p class="eyebrow">401(k) guidance</p>
-              <h2>Age-based allocation idea</h2>
-            </div>
-            <div id="allocation" class="allocation-card"></div>
-          </article>
         </section>
 
+        <section class="app-page" data-page="accounts">
         <section class="glass accounts-panel">
           <div class="section-heading">
             <p class="eyebrow">Connected accounts</p>
@@ -489,12 +520,16 @@
           </div>
         </section>
 
+        </section>
+
+        <section class="app-page" data-page="launch">
         <section class="glass launch-panel">
           <div class="section-heading">
             <p class="eyebrow">Launch setup</p>
             <h2>Production connection checklist</h2>
           </div>
           <div id="launch-checklist" class="launch-grid"></div>
+        </section>
         </section>
       </main>
     </div>

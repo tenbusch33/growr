@@ -17,6 +17,7 @@ const returns = {
 
 const state = {
   config: null,
+  currentPage: "overview",
   plaidHandler: null,
   user: null,
   saveTimer: null,
@@ -260,11 +261,25 @@ function setAuthMessage(text) {
   message.textContent = text;
 }
 
+function setActivePage(page) {
+  const nextPage = document.querySelector(`.app-page[data-page="${page}"]`) ? page : "overview";
+  state.currentPage = nextPage;
+  document.querySelectorAll(".app-page").forEach((section) => {
+    section.classList.toggle("is-active", section.dataset.page === nextPage);
+  });
+  document.querySelectorAll("[data-page-target]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.pageTarget === nextPage);
+  });
+  if (window.location.hash !== `#${nextPage}`) {
+    window.history.replaceState({}, "", `#${nextPage}`);
+  }
+}
+
 function handleCheckoutReturn() {
   const params = new URLSearchParams(window.location.search);
   const checkout = params.get("checkout");
   if (checkout === "success") {
-    setAuthMessage("Checkout completed. Subscription status will update as Stripe confirms payment.");
+    setAuthMessage("Checkout completed. Your free trial and subscription status will update as Stripe confirms payment.");
   } else if (checkout === "cancel") {
     setAuthMessage("Checkout was canceled. You can try again whenever you are ready.");
   }
@@ -280,6 +295,15 @@ function setTransactionStatus(text) {
 
 function hasInvestmentAccess() {
   return Boolean(state.user && state.user.plan === "bundle" && state.user.subscriptionActive !== false);
+}
+
+function formatTrialMessage(user = state.user) {
+  if (!user?.trialActive) {
+    return user?.subscriptionActive === false ? "Billing pending" : "Paid plan";
+  }
+
+  const daysRemaining = Math.max(Number(user.trialDaysRemaining || 0), 0);
+  return daysRemaining <= 1 ? "Trial ends soon" : `${daysRemaining} trial days left`;
 }
 
 function getPlannerPayload() {
@@ -328,13 +352,17 @@ function applyFeatureGate() {
 }
 
 function renderAccountState() {
+  const authForms = document.getElementById("auth-forms");
   const summary = document.getElementById("account-summary");
+  const accountActions = document.getElementById("account-actions");
   const logoutButton = document.getElementById("logout-button");
   const manageBillingButton = document.getElementById("manage-billing-button");
   const saveButton = document.getElementById("save-plan");
 
   if (!state.user) {
+    authForms.classList.remove("hidden");
     summary.classList.add("hidden");
+    accountActions.classList.add("hidden");
     logoutButton.classList.add("hidden");
     manageBillingButton.classList.add("hidden");
     saveButton.disabled = true;
@@ -344,15 +372,27 @@ function renderAccountState() {
     return;
   }
 
+  authForms.classList.add("hidden");
   logoutButton.classList.remove("hidden");
+  accountActions.classList.remove("hidden");
   manageBillingButton.classList.toggle("hidden", !state.config?.stripeApiConfigured);
   saveButton.disabled = false;
   summary.classList.remove("hidden");
   summary.innerHTML = `
-    <h3>${state.user.fullName}</h3>
-    <p>${state.user.email}</p>
-    <p>Current access: ${state.user.plan === "bundle" ? "Budget + Investing" : "Budget Core"}</p>
-    <p>Billing status: ${state.user.subscriptionActive === false ? "Pending payment" : "Active"}</p>
+    <div class="account-summary-top">
+      <h3>Welcome back, ${state.user.fullName.split(" ")[0]}</h3>
+      <span class="trial-pill">${formatTrialMessage()}</span>
+    </div>
+    <p>You are signed in on the ${
+      state.user.plan === "bundle" ? "Budget + Investing" : "Budget Core"
+    } plan.</p>
+    <p>${
+      state.user.trialActive
+        ? `Free trial ends ${new Date(state.user.trialEndsAt).toLocaleDateString()}.`
+        : state.user.subscriptionActive === false
+          ? "Billing is pending."
+          : "Billing is active."
+    }</p>
   `;
   setPlannerStatus("Signed in. Your planner can be saved to this account.");
   applyFeatureGate();
@@ -723,9 +763,13 @@ function renderCharts(data) {
   cashflowChart.innerHTML = cashSegments
     .map((segment) => {
       const height = Math.max((segment.amount / incomeBase) * 180, 14);
+      const share = percent.format(segment.amount / incomeBase);
       return `
-        <div class="stack-segment" style="height:${height}px;background:${chartPalette[segment.key]}">
-          <span>${segment.label}</span>
+        <div class="stack-column">
+          <div class="stack-segment" style="height:${height}px;background:${chartPalette[segment.key]}">
+            <strong>${share}</strong>
+          </div>
+          <span class="stack-label">${segment.label}</span>
         </div>
       `;
     })
@@ -933,12 +977,10 @@ function handleSignup(event) {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   const plan = document.getElementById("plan").value;
-  const monthlyPrice = plan === "bundle" ? "$12.99" : "$7.99";
   const button = document.getElementById("signup-button");
-  const summary = document.getElementById("account-summary");
 
   button.disabled = true;
-  setAuthMessage("Creating account...");
+  setAuthMessage("Starting your free trial...");
 
   fetch("/api/signup", {
     method: "POST",
@@ -954,16 +996,9 @@ function handleSignup(event) {
       state.user = payload.account;
       renderAccountState();
       setAuthMessage(payload.checkoutUrl
-        ? "Account saved. Opening checkout..."
-        : "Account created and signed in.");
-      summary.classList.remove("hidden");
-      summary.innerHTML = `
-        <h3>${payload.account.fullName || "New member"} is ready to go</h3>
-        <p>${payload.account.email} selected the ${
-          plan === "bundle" ? "Budget + Investing" : "Budget Core"
-        } plan at ${monthlyPrice}/month.</p>
-        <p>${payload.message}</p>
-      `;
+        ? "Free trial started. Opening checkout to secure billing after the trial..."
+        : payload.message);
+      setActivePage("snapshot");
 
       if (payload.checkoutUrl) {
         window.open(payload.checkoutUrl, "_blank", "noopener");
@@ -1000,6 +1035,7 @@ function handleLogin(event) {
       state.user = payload.account;
       renderAccountState();
       setAuthMessage(payload.message);
+      setActivePage("snapshot");
       return Promise.all([loadPlanner(), loadLinkedSummary(), loadTransactions()]);
     })
     .catch((error) => {
@@ -1030,6 +1066,7 @@ function handleLogout() {
       setAuthMessage("Logged out.");
       setPlaidMessage("Sign in before linking or loading account data.");
       applyFeatureGate();
+      setActivePage("overview");
     });
 }
 
@@ -1273,6 +1310,13 @@ document.querySelectorAll("[data-scroll]").forEach((button) => {
   });
 });
 
+document.querySelectorAll("[data-page-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    setActivePage(button.dataset.pageTarget);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+});
+
 document.getElementById("signup-form").addEventListener("submit", handleSignup);
 document.getElementById("login-form").addEventListener("submit", handleLogin);
 document.getElementById("logout-button").addEventListener("click", handleLogout);
@@ -1297,6 +1341,7 @@ updateDashboard();
 renderTransactions();
 renderCategoryProgress();
 applyFeatureGate();
+setActivePage(window.location.hash.replace("#", "") || "overview");
 loadConfig();
 handleCheckoutReturn();
 document.getElementById("txDate").value = new Date().toISOString().slice(0, 10);

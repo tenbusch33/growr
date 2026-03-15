@@ -169,12 +169,21 @@ function getSessionAccount(request) {
 }
 
 function publicAccount(account) {
+  const trialEndsAt = account.trialEndsAt || null;
+  const trialActive = Boolean(trialEndsAt && new Date(trialEndsAt).getTime() > Date.now());
+  const trialDaysRemaining = trialActive
+    ? Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : 0;
+
   return {
     id: account.id,
     fullName: account.fullName,
     email: account.email,
     plan: account.plan,
     subscriptionActive: account.subscriptionActive !== false,
+    trialEndsAt,
+    trialActive,
+    trialDaysRemaining,
     createdAt: account.createdAt,
   };
 }
@@ -343,6 +352,7 @@ async function createSubscriptionCheckout(account, plan, request) {
     ["metadata[plan]", plan],
     ["subscription_data[metadata][userId]", account.id],
     ["subscription_data[metadata][plan]", plan],
+    ["subscription_data[trial_period_days]", 7],
   ]);
 
   updateAccount(account.id, (entry) => {
@@ -681,12 +691,15 @@ const server = http.createServer((request, response) => {
         }
 
         const credentials = hashPassword(password);
+        const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
         const account = {
           id: `acct_${Date.now()}`,
           fullName,
           email,
           plan,
           subscriptionActive: true,
+          subscriptionStatus: "trialing",
+          trialEndsAt,
           salt: credentials.salt,
           passwordHash: credentials.passwordHash,
           createdAt: new Date().toISOString(),
@@ -702,7 +715,7 @@ const server = http.createServer((request, response) => {
               sendJsonWithCookie(response, 200, {
                 account: publicAccount(readJson(accountsFile).find((entry) => entry.id === account.id)),
                 checkoutUrl: checkoutSession.url,
-                message: "Stripe checkout created. Complete payment to activate your subscription.",
+                message: "Your 7-day free trial started. Complete checkout to secure billing after the trial.",
               }, `growr_session=${session.token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=2592000`);
             })
             .catch((error) => sendJson(response, 400, { error: error.message }));
@@ -714,8 +727,8 @@ const server = http.createServer((request, response) => {
           account: publicAccount(account),
           checkoutUrl,
           message: checkoutUrl
-            ? "Billing is configured, so checkout was prepared in a new tab."
-            : "Stripe checkout is not configured yet, so the account was saved locally in demo mode.",
+            ? "Your 7-day free trial started, and billing checkout was prepared in a new tab."
+            : "Your 7-day free trial started. Stripe checkout is not configured yet, so the account was saved locally in demo mode.",
         }, `growr_session=${session.token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=2592000`);
       } catch {
         sendJson(response, 400, { error: "Invalid signup payload." });
