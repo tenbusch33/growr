@@ -1124,7 +1124,7 @@ function resetAiCoach() {
   document.getElementById("ai-question").value = "";
   setAiStatus(
     state.config?.openaiConfigured
-      ? "Ask educational questions anytime. If you are signed in, Growr can also answer using your saved plan."
+      ? "Ask money questions anytime. If you are signed in, Growr can also answer using your saved plan."
       : "Ask Growr needs an OpenAI API key before it can reply."
   );
   renderAiMessages();
@@ -4266,6 +4266,7 @@ document.getElementById("account-upgrade-button").addEventListener("click", hand
 document.getElementById("transaction-form").addEventListener("submit", createTransaction);
 document.getElementById("ai-form").addEventListener("submit", handleAiSubmit);
 document.getElementById("ai-reset-button").addEventListener("click", resetAiCoach);
+document.getElementById("ai-dismiss-button").addEventListener("click", () => setAiWidgetOpen(false));
 document.getElementById("ai-widget-launcher").addEventListener("click", () => setAiWidgetOpen(true));
 document.getElementById("ai-widget-close").addEventListener("click", () => setAiWidgetOpen(false));
 bindTransactionFilters();

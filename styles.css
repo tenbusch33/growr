@@ -2098,18 +2098,19 @@ select {
 
 .ai-thread {
   display: grid;
-  gap: 12px;
-  margin-bottom: 16px;
-  min-height: 120px;
+  gap: 10px;
+  margin-bottom: 14px;
+  min-height: 100px;
 }
 
 .ai-message {
-  max-width: min(760px, 100%);
-  padding: 16px 18px;
-  border-radius: 24px;
-  line-height: 1.65;
-  border: 1px solid var(--line);
+  max-width: min(620px, 100%);
+  padding: 12px 14px;
+  border-radius: 22px;
+  line-height: 1.55;
+  border: 1px solid rgba(16, 16, 16, 0.08);
   background: #fff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
 }
 
 .ai-message p {
@@ -2119,12 +2120,14 @@ select {
 
 .ai-message.user {
   margin-left: auto;
-  background: linear-gradient(135deg, rgba(56, 103, 255, 0.08), rgba(20, 184, 255, 0.08));
+  background: linear-gradient(180deg, #1184ff, #0b72eb);
+  color: #fff;
+  border-color: rgba(17, 132, 255, 0.35);
 }
 
 .ai-message.assistant {
   margin-right: auto;
-  background: linear-gradient(180deg, #ffffff, #fcfdff);
+  background: linear-gradient(180deg, #f3f4f8, #ffffff);
 }
 
 .ai-message.typing {
@@ -2147,6 +2150,12 @@ select {
 .ai-message-header span {
   color: var(--subtle);
   font-size: 0.85rem;
+}
+
+.ai-message.user .ai-message-header span,
+.ai-message.user .ai-message-header strong,
+.ai-message.user p {
+  color: #fff;
 }
 
 .ai-typing-dots {
@@ -2243,6 +2252,7 @@ select {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .login-form {
