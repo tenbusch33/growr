@@ -505,7 +505,6 @@ function setActivePage(page) {
     setAiWidgetOpen(false);
   }
   renderHeroState();
-  updateMobileAppChrome();
 }
 
 function setAuthView(mode = "signup") {
