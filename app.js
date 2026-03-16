@@ -448,6 +448,35 @@ function setPlannerStatus(text) {
   document.getElementById("planner-status").textContent = text;
 }
 
+function updatePlannerActionState() {
+  const autofillButton = document.getElementById("autofill-plan");
+  const saveButton = document.getElementById("save-plan");
+  if (!autofillButton || !saveButton) {
+    return;
+  }
+
+  const hasConnectedSignals =
+    Boolean(state.linkedSummary?.accounts?.length) ||
+    Boolean(state.transactions.length) ||
+    state.linkedSummary.cashTotal > 0 ||
+    state.linkedSummary.creditCardDebt > 0 ||
+    state.linkedSummary.loanDebt > 0;
+
+  saveButton.disabled = !state.user;
+  autofillButton.disabled = !state.user || !hasConnectedSignals;
+
+  if (!state.user) {
+    autofillButton.title = "Sign in first";
+    saveButton.title = "Sign in first";
+    return;
+  }
+
+  saveButton.title = "Save this planner to your account";
+  autofillButton.title = hasConnectedSignals
+    ? "Use connected balances and transactions to draft the planner"
+    : "Connect accounts or load transactions first";
+}
+
 function setTransactionStatus(text) {
   document.getElementById("transaction-status").textContent = text;
 }
@@ -561,6 +590,7 @@ function populateAccountForm() {
     upgradePanel.classList.add("hidden");
     setAccountStatus("Sign in to update your account details.");
     setVerificationStatus("Sign in to manage email verification.");
+    updatePlannerActionState();
     return;
   }
 
@@ -607,6 +637,7 @@ function populateAccountForm() {
       ? "Your email is verified."
       : "Your email is not verified yet. Send a code, then enter it here."
   );
+  updatePlannerActionState();
 }
 
 function getDefaultAiEmptyState() {
@@ -1925,6 +1956,19 @@ function autofillPlannerFromConnectedData() {
     return;
   }
 
+  const hasConnectedSignals =
+    Boolean(state.linkedSummary?.accounts?.length) ||
+    Boolean(state.transactions.length) ||
+    state.linkedSummary.cashTotal > 0 ||
+    state.linkedSummary.creditCardDebt > 0 ||
+    state.linkedSummary.loanDebt > 0;
+
+  if (!hasConnectedSignals) {
+    setPlannerStatus("Connect accounts or refresh connected data before using auto-fill.");
+    updatePlannerActionState();
+    return;
+  }
+
   setPlannerStatus("Auto-filling from connected data...");
   fetch("/api/planner/autofill", {
     method: "POST",
@@ -1938,9 +1982,11 @@ function autofillPlannerFromConnectedData() {
       applyPlannerPayload(payload.planner || {});
       updateDashboard();
       setPlannerStatus(payload.message || "Planner auto-filled. Review before saving.");
+      updatePlannerActionState();
     })
     .catch((error) => {
       setPlannerStatus(error.message);
+      updatePlannerActionState();
     });
 }
 
@@ -2135,9 +2181,11 @@ function savePlanner(showMessage = false) {
       }
 
       setPlannerStatus("Plan saved to your account.");
+      updatePlannerActionState();
     })
     .catch((error) => {
       setPlannerStatus(error.message);
+      updatePlannerActionState();
     });
 }
 
@@ -3487,6 +3535,7 @@ function loadConfig() {
           ? "Sign in before linking or loading account data."
           : "Add Plaid credentials in .env to enable live account linking."
       );
+      updatePlannerActionState();
     })
     .catch(() => {
       document.getElementById("auth-status").textContent = "Unavailable";
@@ -3586,6 +3635,7 @@ renderAiMessages();
 syncAiAvailability();
 setAuthView(state.authMode);
 setActivePage(window.location.hash.replace("#", "") || "home");
+updatePlannerActionState();
 loadConfig();
 handleCheckoutReturn();
 document.getElementById("txDate").value = new Date().toISOString().slice(0, 10);
