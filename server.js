@@ -773,6 +773,113 @@ function mapPlaidCategory(personalFinanceCategory, accountSubtype) {
   return "other";
 }
 
+function normalizeMerchantName(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\b(inc|llc|co|corp|company|payment|debit|card|online|purchase|pos)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function average(values) {
+  if (!values.length) {
+    return 0;
+  }
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function detectSubscriptionsFromTransactions(transactions) {
+  const recurringKeywords = [
+    "netflix",
+    "spotify",
+    "hulu",
+    "disney",
+    "apple",
+    "google",
+    "youtube",
+    "adobe",
+    "amazon prime",
+    "planet fitness",
+    "xbox",
+    "playstation",
+    "chatgpt",
+    "dropbox",
+    "canva",
+    "max",
+  ];
+
+  const candidateGroups = new Map();
+
+  transactions
+    .filter((entry) => Number(entry.amount) > 0)
+    .forEach((entry) => {
+      const merchantKey = normalizeMerchantName(entry.merchant);
+      if (!merchantKey || ["housing", "debt", "car"].includes(entry.category)) {
+        return;
+      }
+
+      if (!candidateGroups.has(merchantKey)) {
+        candidateGroups.set(merchantKey, []);
+      }
+      candidateGroups.get(merchantKey).push(entry);
+    });
+
+  return Array.from(candidateGroups.entries())
+    .map(([merchantKey, entries]) => {
+      const sorted = entries
+        .slice()
+        .sort((left, right) => new Date(left.date) - new Date(right.date));
+      const intervals = [];
+      for (let index = 1; index < sorted.length; index += 1) {
+        const diff = Math.round(
+          (new Date(sorted[index].date) - new Date(sorted[index - 1].date)) / (1000 * 60 * 60 * 24)
+        );
+        if (diff > 0) {
+          intervals.push(diff);
+        }
+      }
+
+      const amounts = sorted.map((entry) => Number(entry.amount) || 0);
+      const avgAmount = average(amounts);
+      const maxAmount = Math.max(...amounts, 0);
+      const minAmount = Math.min(...amounts, maxAmount);
+      const amountVariation = avgAmount ? (maxAmount - minAmount) / avgAmount : 0;
+      const avgInterval = average(intervals);
+      const manualTrue = sorted.some((entry) => entry.subscriptionStatus === "subscribed");
+      const manualFalse = sorted.some((entry) => entry.subscriptionStatus === "ignored");
+      const keywordMatch = recurringKeywords.some((keyword) => merchantKey.includes(keyword));
+      const cadenceMatch = sorted.length >= 2 && avgInterval >= 20 && avgInterval <= 40 && amountVariation <= 0.45;
+
+      if (manualFalse || (!manualTrue && !keywordMatch && !cadenceMatch)) {
+        return null;
+      }
+
+      const latest = sorted[sorted.length - 1];
+      return {
+        merchantKey,
+        merchant: latest.merchant,
+        amount: Number(latest.amount) || avgAmount,
+        averageAmount: avgAmount,
+        averageIntervalDays: avgInterval || 30,
+        transactionsCount: sorted.length,
+        category: latest.category || "other",
+        source: latest.source || "manual",
+        nextReviewHint: avgInterval
+          ? `About every ${Math.round(avgInterval)} days`
+          : manualTrue
+            ? "Marked as subscription"
+            : "Recurring pattern detected",
+        lastDate: latest.date,
+        monthlyEstimate: avgInterval ? avgAmount * (30 / avgInterval) : avgAmount,
+        transactionIds: sorted.map((entry) => entry.id),
+        status: manualTrue ? "confirmed" : "detected",
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => right.monthlyEstimate - left.monthlyEstimate);
+}
+
 function currencyAmount(value) {
   return typeof value === "number" ? value : 0;
 }

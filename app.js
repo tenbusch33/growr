@@ -21,6 +21,7 @@ const returns = {
 const state = {
   config: null,
   currentPage: "snapshot",
+  authMode: "signup",
   plaidHandler: null,
   user: null,
   saveTimer: null,
@@ -298,16 +299,40 @@ function setActivePage(page) {
   renderHeroState();
 }
 
-function openAuthPanel(mode = "signup") {
-  setActivePage("snapshot");
-  const authSection = document.getElementById("auth");
-  if (!authSection) {
+function setAuthView(mode = "signup") {
+  state.authMode = mode === "login" ? "login" : "signup";
+
+  const signupPanel = document.getElementById("signup-panel");
+  const loginPanel = document.getElementById("login-panel");
+  const kicker = document.getElementById("auth-mode-kicker");
+  const title = document.getElementById("auth-mode-title");
+  const copy = document.getElementById("auth-mode-copy");
+  const visual = document.getElementById("auth-showcase-visual");
+
+  signupPanel.classList.toggle("hidden", state.authMode !== "signup");
+  loginPanel.classList.toggle("hidden", state.authMode !== "login");
+  toggleResetMode(false);
+
+  if (state.authMode === "login") {
+    kicker.textContent = "Welcome back";
+    title.textContent = "Log in to Growr";
+    copy.textContent = "Pick up your budget, connected accounts, and investing plan right where you left them.";
+    visual.classList.add("auth-showcase-login");
+    visual.classList.remove("auth-showcase-signup");
     return;
   }
 
-  toggleResetMode(false);
+  kicker.textContent = "Growr access";
+  title.textContent = "Create your Growr account";
+  copy.textContent = "Set up your login, start your free trial, and bring budgeting plus investing into one place.";
+  visual.classList.add("auth-showcase-signup");
+  visual.classList.remove("auth-showcase-login");
+}
+
+function openAuthPanel(mode = "signup") {
+  setAuthView(mode);
+  setActivePage("auth");
   window.scrollTo({ top: 0, behavior: "smooth" });
-  authSection.scrollIntoView({ behavior: "smooth", block: "start" });
 
   if (mode === "login") {
     setAuthMessage("Welcome back. Log in to pick up where you left off.");
@@ -1971,6 +1996,7 @@ renderCategoryProgress();
 applyFeatureGate();
 renderAiMessages();
 syncAiAvailability();
+setAuthView(state.authMode);
 setActivePage(window.location.hash.replace("#", "") || "snapshot");
 loadConfig();
 handleCheckoutReturn();

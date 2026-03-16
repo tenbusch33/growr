@@ -305,89 +305,15 @@
           </div>
         </section>
 
-        <section id="auth" class="auth-section glass">
+        <section class="glass launch-cta-panel">
           <div class="section-heading">
-            <p class="eyebrow">Account setup</p>
-            <h2>Create your account</h2>
+            <p class="eyebrow">Ready to start</p>
+            <h2>Open your Growr account in a dedicated setup flow.</h2>
+            <p class="page-intro-text">The homepage stays focused on the product. When you are ready, sign up or log in on a clean full-page auth experience.</p>
           </div>
-          <div class="integration-banner">
-            <div class="integration-chip">
-              <span>Auth</span>
-              <strong id="auth-status">Checking...</strong>
-            </div>
-            <div class="integration-chip">
-              <span>Billing</span>
-              <strong id="billing-status">Checking...</strong>
-            </div>
-          </div>
-          <div id="signup-note" class="helper-banner hidden"></div>
-          <div id="auth-forms">
-            <p class="trial-copy">Every new account starts with a 7-day free trial, so you can try the app before paid billing begins.</p>
-            <form id="signup-form" class="auth-form">
-              <label>
-                Full name
-                <input type="text" id="fullName" placeholder="Jordan Miles" required />
-              </label>
-              <label>
-                Email
-                <input type="email" id="email" placeholder="jordan@email.com" required />
-              </label>
-              <label>
-                Password
-                <input type="password" id="password" placeholder="Create a password" required />
-              </label>
-              <label>
-                Plan
-                <select id="plan">
-                  <option value="budget">Budget Core - $7.99 after trial</option>
-                  <option value="bundle">Budget + Investing - $12.99 after trial</option>
-                </select>
-              </label>
-              <button type="submit" class="primary-btn" id="signup-button">Start free trial</button>
-            </form>
-            <form id="login-form" class="auth-form login-form">
-              <label>
-                Login email
-                <input type="email" id="loginEmail" placeholder="jordan@email.com" required />
-              </label>
-              <label>
-                Login password
-                <input type="password" id="loginPassword" placeholder="Enter your password" required />
-              </label>
-              <div class="auth-inline-actions">
-                <button type="submit" class="secondary-btn" id="login-button">Log in</button>
-                <button type="button" class="ghost-btn" id="show-reset-button">Forgot password?</button>
-              </div>
-            </form>
-            <form id="reset-request-form" class="auth-form login-form hidden">
-              <label>
-                Reset email
-                <input type="email" id="resetEmail" placeholder="jordan@email.com" />
-              </label>
-              <label>
-                Reset code
-                <input type="text" id="resetCode" placeholder="Enter code" />
-              </label>
-              <label>
-                New password
-                <input type="password" id="resetPassword" placeholder="Create a new password" />
-              </label>
-              <div class="auth-inline-actions">
-                <button type="button" class="secondary-btn" id="request-reset-button">Send reset code</button>
-                <button type="submit" class="primary-btn" id="reset-password-button">Reset password</button>
-                <button type="button" class="ghost-btn" id="cancel-reset-button">Back to login</button>
-              </div>
-            </form>
-          </div>
-          <p id="auth-message" class="status-message hidden"></p>
-          <div id="account-summary" class="account-summary hidden"></div>
-          <div id="account-actions" class="auth-inline-actions hidden">
-            <button type="button" class="ghost-btn" id="logout-button">Log out</button>
-            <button type="button" class="ghost-btn hidden" id="manage-billing-button">Manage billing</button>
-          </div>
-          <div class="upgrade-banner hidden" id="upgrade-banner">
-            <p id="upgrade-copy">Upgrade to unlock investing forecasts, age-based allocation guidance, and investment-linked Plaid data.</p>
-            <button type="button" class="primary-btn" id="upgrade-button">Upgrade to Bundle</button>
+          <div class="hero-cta-row">
+            <button type="button" class="primary-btn premium-cta" data-auth-target="signup">Create your account</button>
+            <button type="button" class="ghost-btn" data-auth-target="login">Existing member log in</button>
           </div>
         </section>
 
@@ -862,6 +788,123 @@
 
         </section>
 
+        <section class="app-page" data-page="auth">
+        <section class="auth-destination">
+          <article class="auth-showcase">
+            <div class="auth-brand-lockup">
+              <span class="brand-mark">G</span>
+              <div>
+                <p>Growr</p>
+                <span>Money clarity for real life.</span>
+              </div>
+            </div>
+            <div class="auth-showcase-copy">
+              <p class="eyebrow" id="auth-mode-kicker">Growr access</p>
+              <h2 id="auth-mode-title">Create your Growr account</h2>
+              <p id="auth-mode-copy">Set up your login, start your free trial, and bring budgeting plus investing into one place.</p>
+            </div>
+            <div class="auth-showcase-visual auth-showcase-signup" id="auth-showcase-visual">
+              <div class="auth-arch auth-arch-one"></div>
+              <div class="auth-arch auth-arch-two"></div>
+              <div class="auth-arch auth-arch-three"></div>
+              <div class="auth-arch auth-arch-four"></div>
+            </div>
+          </article>
+
+          <article class="auth-stage">
+            <div class="auth-stage-top">
+              <button type="button" class="ghost-btn" data-page-target="snapshot">Back to home</button>
+            </div>
+            <div class="integration-banner">
+              <div class="integration-chip">
+                <span>Auth</span>
+                <strong id="auth-status">Checking...</strong>
+              </div>
+              <div class="integration-chip">
+                <span>Billing</span>
+                <strong id="billing-status">Checking...</strong>
+              </div>
+            </div>
+            <div id="signup-note" class="helper-banner hidden"></div>
+            <div id="auth-forms">
+              <div id="signup-panel">
+                <p class="trial-copy">Every new account starts with a 7-day free trial, so you can try the app before paid billing begins.</p>
+                <form id="signup-form" class="auth-form auth-form-signup">
+                  <label>
+                    Full name
+                    <input type="text" id="fullName" placeholder="Jordan Miles" required />
+                  </label>
+                  <label>
+                    Email
+                    <input type="email" id="email" placeholder="jordan@email.com" required />
+                  </label>
+                  <label>
+                    Password
+                    <input type="password" id="password" placeholder="Create a password" required />
+                  </label>
+                  <label>
+                    Plan
+                    <select id="plan">
+                      <option value="budget">Budget Core - $7.99 after trial</option>
+                      <option value="bundle">Budget + Investing - $12.99 after trial</option>
+                    </select>
+                  </label>
+                  <button type="submit" class="primary-btn" id="signup-button">Start free trial</button>
+                </form>
+                <p class="auth-switch-line">Already have an account? <button type="button" class="text-link-btn" data-auth-target="login">Log in</button></p>
+              </div>
+
+              <div id="login-panel" class="hidden">
+                <form id="login-form" class="auth-form login-form auth-form-login">
+                  <label>
+                    Login email
+                    <input type="email" id="loginEmail" placeholder="jordan@email.com" required />
+                  </label>
+                  <label>
+                    Login password
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required />
+                  </label>
+                  <div class="auth-inline-actions">
+                    <button type="submit" class="secondary-btn" id="login-button">Log in</button>
+                    <button type="button" class="ghost-btn" id="show-reset-button">Forgot password?</button>
+                  </div>
+                </form>
+                <form id="reset-request-form" class="auth-form login-form auth-form-login hidden">
+                  <label>
+                    Reset email
+                    <input type="email" id="resetEmail" placeholder="jordan@email.com" />
+                  </label>
+                  <label>
+                    Reset code
+                    <input type="text" id="resetCode" placeholder="Enter code" />
+                  </label>
+                  <label>
+                    New password
+                    <input type="password" id="resetPassword" placeholder="Create a new password" />
+                  </label>
+                  <div class="auth-inline-actions">
+                    <button type="button" class="secondary-btn" id="request-reset-button">Send reset code</button>
+                    <button type="submit" class="primary-btn" id="reset-password-button">Reset password</button>
+                    <button type="button" class="ghost-btn" id="cancel-reset-button">Back to login</button>
+                  </div>
+                </form>
+                <p class="auth-switch-line">New to Growr? <button type="button" class="text-link-btn" data-auth-target="signup">Create an account</button></p>
+              </div>
+            </div>
+            <p id="auth-message" class="status-message hidden"></p>
+            <div id="account-summary" class="account-summary hidden"></div>
+            <div id="account-actions" class="auth-inline-actions hidden">
+              <button type="button" class="ghost-btn" id="logout-button">Log out</button>
+              <button type="button" class="ghost-btn hidden" id="manage-billing-button">Manage billing</button>
+            </div>
+            <div class="upgrade-banner hidden" id="upgrade-banner">
+              <p id="upgrade-copy">Upgrade to unlock investing forecasts, age-based allocation guidance, and investment-linked Plaid data.</p>
+              <button type="button" class="primary-btn" id="upgrade-button">Upgrade to Bundle</button>
+            </div>
+          </article>
+        </section>
+        </section>
+
         <section class="app-page" data-page="account">
         <section class="glass page-intro">
           <div>
@@ -886,7 +929,7 @@
               <h3>Sign in to manage your account</h3>
               <p>Update your email, verify your account, manage billing, and keep your plan details in one place.</p>
               <div class="auth-inline-actions">
-                <button type="button" class="primary-btn" data-page-target="snapshot">Go to Log in</button>
+                <button type="button" class="primary-btn" data-auth-target="login">Go to Log in</button>
               </div>
             </div>
             <form id="account-form" class="planner-form" autocomplete="off">
