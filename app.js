@@ -651,6 +651,10 @@ function formatBillingAmount(amount, billingInterval = "monthly") {
   return `${currency.format(amount)} / ${billingInterval === "yearly" ? "year" : "month"}`;
 }
 
+function formatBillingIntervalLabel(billingInterval = "monthly") {
+  return billingInterval === "yearly" ? "Yearly billing" : "Monthly billing";
+}
+
 function renderBillingStatements(user = state.user) {
   const panel = document.getElementById("account-statements-panel");
   const status = document.getElementById("account-statements-status");
@@ -718,11 +722,13 @@ function populateAccountForm() {
   const planLabel = document.getElementById("accountPlanLabel");
   const trialLabel = document.getElementById("accountTrialLabel");
   const subscriptionLabel = document.getElementById("accountSubscriptionLabel");
+  const billingIntervalLabel = document.getElementById("accountBillingIntervalLabel");
   const emailStatusLabel = document.getElementById("accountEmailStatusLabel");
   const verificationNote = document.getElementById("account-verify-note");
   const planPanel = document.getElementById("account-plan-panel");
   const planStatus = document.getElementById("account-plan-status");
   const planInputs = document.querySelectorAll('input[name="accountPlan"]');
+  const billingIntervalInputs = document.querySelectorAll('input[name="accountBillingInterval"]');
   const upgradePanel = document.getElementById("account-upgrade-panel");
   const upgradeCopy = document.getElementById("account-upgrade-copy");
   const billingPanel = document.getElementById("account-billing-panel");
@@ -750,12 +756,17 @@ function populateAccountForm() {
     planLabel.textContent = "Signed out";
     trialLabel.textContent = "Unavailable";
     subscriptionLabel.textContent = "Unavailable";
+    billingIntervalLabel.textContent = "Unavailable";
     emailStatusLabel.textContent = "Unavailable";
     verificationNote.classList.add("hidden");
     planPanel.classList.add("hidden");
     planStatus.textContent = "Sign in to change your subscription.";
     planInputs.forEach((input) => {
       input.checked = input.value === "budget";
+      input.disabled = true;
+    });
+    billingIntervalInputs.forEach((input) => {
+      input.checked = input.value === "monthly";
       input.disabled = true;
     });
     upgradePanel.classList.add("hidden");
@@ -795,17 +806,24 @@ function populateAccountForm() {
     ? `${Math.max(Number(state.user.trialDaysRemaining || 0), 0)} days left`
     : "No active trial";
   subscriptionLabel.textContent = state.user.subscriptionActive === false ? "Pending" : "Active";
+  billingIntervalLabel.textContent = formatBillingIntervalLabel(state.user.billingInterval);
   emailStatusLabel.textContent = state.user.emailVerified ? "Verified" : "Needs verification";
   const currentPlanKey = getCurrentPlanKey();
   planInputs.forEach((input) => {
     input.checked = input.value === currentPlanKey;
     input.disabled = false;
   });
+  billingIntervalInputs.forEach((input) => {
+    input.checked = input.value === (state.user.billingInterval || "monthly");
+    input.disabled = false;
+  });
+  const currentBillingInterval = state.user.billingInterval || "monthly";
+  const billingIntervalText = currentBillingInterval === "yearly" ? "yearly" : "monthly";
   planStatus.textContent = currentPlanKey === "bundle"
-    ? "Budget + Investing is active right now."
+    ? `Budget + Investing is active on ${billingIntervalText} billing.`
     : currentPlanKey === "couples"
-      ? "Couples is active right now."
-      : "Budget Core is active right now.";
+      ? `Couples is active on ${billingIntervalText} billing.`
+      : `Budget Core is active on ${billingIntervalText} billing.`;
   verificationNote.classList.remove("hidden");
   if (state.user.emailVerified) {
     verificationForm.classList.add("hidden");
@@ -3557,22 +3575,25 @@ function handleAccountPlanChange() {
 
   const selectedPlan =
     document.querySelector('input[name="accountPlan"]:checked')?.value || getCurrentPlanKey();
+  const selectedBillingInterval =
+    document.querySelector('input[name="accountBillingInterval"]:checked')?.value || state.user.billingInterval || "monthly";
   const currentPlan = getCurrentPlanKey();
+  const currentBillingInterval = state.user.billingInterval || "monthly";
   const button = document.getElementById("account-change-plan-button");
   const planStatus = document.getElementById("account-plan-status");
 
-  if (selectedPlan === currentPlan) {
+  if (selectedPlan === currentPlan && selectedBillingInterval === currentBillingInterval) {
     planStatus.textContent = "That subscription is already active.";
     return;
   }
 
   button.disabled = true;
-  planStatus.textContent = "Changing subscription...";
+  planStatus.textContent = "Updating subscription...";
 
   fetch("/api/account/change-plan", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ plan: selectedPlan }),
+    body: JSON.stringify({ plan: selectedPlan, billingInterval: selectedBillingInterval }),
   })
     .then(async (response) => {
       const payload = await response.json();

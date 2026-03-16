@@ -1587,6 +1587,10 @@
                 <strong id="accountSubscriptionLabel">Unavailable</strong>
               </article>
               <article class="mini-stat">
+                <span>Billing cadence</span>
+                <strong id="accountBillingIntervalLabel">Unavailable</strong>
+              </article>
+              <article class="mini-stat">
                 <span>Email status</span>
                 <strong id="accountEmailStatusLabel">Unavailable</strong>
               </article>
@@ -1631,6 +1635,16 @@
                 <h3>Switch your Growr plan</h3>
               </div>
               <p class="status-message" id="account-plan-status">Pick the plan that fits how you want to use Growr.</p>
+              <div class="billing-interval-toggle" id="account-billing-interval-toggle">
+                <label class="billing-interval-option">
+                  <input type="radio" name="accountBillingInterval" value="monthly" />
+                  <span>Monthly</span>
+                </label>
+                <label class="billing-interval-option">
+                  <input type="radio" name="accountBillingInterval" value="yearly" />
+                  <span>Yearly</span>
+                </label>
+              </div>
               <div class="account-plan-options" id="account-plan-options">
                 <label class="plan-option compact-plan-option">
                   <input type="radio" name="accountPlan" value="budget" />

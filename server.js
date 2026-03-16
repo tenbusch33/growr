@@ -1621,6 +1621,7 @@ const server = http.createServer((request, response) => {
         const requestedPlan = ["budget", "couples", "bundle"].includes(payload.plan)
           ? payload.plan
           : null;
+        const requestedBillingInterval = payload.billingInterval === "yearly" ? "yearly" : "monthly";
 
         if (!requestedPlan) {
           sendJson(response, 400, { error: "Choose Budget Core, Couples, or Budget + Investing." });
@@ -1636,14 +1637,14 @@ const server = http.createServer((request, response) => {
 
         account.plan = requestedPlan === "bundle" ? "bundle" : "budget";
         account.couplesAddOn = requestedPlan === "couples" || requestedPlan === "bundle";
-        account.billingInterval = account.billingInterval || "monthly";
+        account.billingInterval = requestedBillingInterval;
         account.subscriptionActive = true;
         const pricing = getPlanPricing(account.plan, account.couplesAddOn, account.billingInterval);
         addBillingHistoryEntry(account, {
           type: "plan_change",
           status: "updated",
           title: "Plan changed",
-          detail: `Subscription changed to ${pricing.label}.`,
+          detail: `Subscription changed to ${pricing.label} on ${pricing.billingInterval} billing.`,
           amount: 0,
           billingInterval: account.billingInterval,
         });
@@ -1653,10 +1654,10 @@ const server = http.createServer((request, response) => {
           account: publicAccount(account),
           message:
             requestedPlan === "bundle"
-              ? "Subscription changed to Budget + Investing."
+              ? `Subscription changed to Budget + Investing on ${pricing.billingInterval} billing.`
               : requestedPlan === "couples"
-                ? "Subscription changed to Couples."
-                : "Subscription changed to Budget Core.",
+                ? `Subscription changed to Couples on ${pricing.billingInterval} billing.`
+                : `Subscription changed to Budget Core on ${pricing.billingInterval} billing.`,
         });
       } catch {
         sendJson(response, 400, { error: "Invalid change subscription payload." });

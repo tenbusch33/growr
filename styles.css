@@ -2649,6 +2649,52 @@ select {
   color: var(--ink);
 }
 
+.billing-interval-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff8f2 0%, #ffffff 100%);
+  border: 1px solid rgba(27, 32, 45, 0.08);
+  margin: 6px 0 16px;
+}
+
+.billing-interval-option {
+  position: relative;
+  margin: 0;
+}
+
+.billing-interval-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.billing-interval-option span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  color: var(--subtle);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+.billing-interval-option input:checked + span {
+  background: linear-gradient(135deg, #2b1915 0%, #f15b34 100%);
+  color: #fffaf6;
+  box-shadow: 0 14px 28px rgba(209, 98, 46, 0.2);
+}
+
+.billing-interval-option input:disabled + span {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
 .compact-plan-option .plan-option-card em {
   color: #d86a2f;
 }
