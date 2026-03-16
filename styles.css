@@ -2708,10 +2708,26 @@ select {
 .compact-plan-option .plan-option-card {
   background: linear-gradient(180deg, #ffffff 0%, #fff8f2 100%);
   border: 1px solid rgba(27, 32, 45, 0.08);
+  position: relative;
 }
 
 .compact-plan-option .plan-option-card strong {
   color: var(--ink);
+}
+
+.plan-option-card[data-current="true"]::after {
+  content: "Current";
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.08);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .billing-interval-toggle {
@@ -2728,6 +2744,41 @@ select {
 .billing-interval-option {
   position: relative;
   margin: 0;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.38);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 80;
+}
+
+.modal-card {
+  width: min(520px, 100%);
+  padding: 28px;
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
+}
+
+.modal-card h3,
+.modal-card p {
+  margin: 0;
+}
+
+.modal-card h3 {
+  margin-top: 8px;
+  font-size: 1.65rem;
+}
+
+.modal-copy {
+  margin-top: 12px !important;
+  color: var(--subtle);
+  line-height: 1.6;
 }
 
 .billing-interval-option input {

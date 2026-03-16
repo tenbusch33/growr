@@ -593,6 +593,15 @@ function setAiWidgetOpen(open) {
   launcher.setAttribute("aria-expanded", open ? "true" : "false");
 }
 
+function setModalOpen(id, open) {
+  const modal = document.getElementById(id);
+  if (!modal) {
+    return;
+  }
+
+  modal.classList.toggle("hidden", !open);
+}
+
 function setVerificationStatus(text) {
   document.getElementById("account-verify-status").textContent = text;
 }
@@ -804,6 +813,7 @@ function populateAccountForm() {
   const upgradeCopy = document.getElementById("account-upgrade-copy");
   const billingPanel = document.getElementById("account-billing-panel");
   const billingHelp = document.getElementById("account-billing-help");
+  const cancelButton = document.getElementById("account-cancel-plan-button");
 
   if (!state.user) {
     nameInput.value = "";
@@ -844,6 +854,7 @@ function populateAccountForm() {
     upgradePanel.classList.add("hidden");
     billingPanel.classList.add("hidden");
     billingHelp.classList.add("hidden");
+    cancelButton.disabled = true;
     renderBillingStatements(null);
     setAccountStatus("Sign in to update your account details.");
     setVerificationStatus("Sign in to manage email verification.");
@@ -859,6 +870,7 @@ function populateAccountForm() {
   planPanel.classList.remove("hidden");
   billingPanel.classList.remove("hidden");
   billingHelp.classList.toggle("hidden", !state.config?.stripeApiConfigured);
+  cancelButton.disabled = false;
   nameInput.disabled = false;
   emailInput.disabled = false;
   saveButton.disabled = false;
@@ -884,6 +896,10 @@ function populateAccountForm() {
   planInputs.forEach((input) => {
     input.checked = input.value === currentPlanKey;
     input.disabled = false;
+    const card = input.nextElementSibling;
+    if (card) {
+      card.dataset.current = input.value === currentPlanKey ? "true" : "false";
+    }
   });
   billingIntervalInputs.forEach((input) => {
     input.checked = input.value === (state.user.billingInterval || "monthly");
@@ -931,6 +947,42 @@ function populateAccountForm() {
   billingHelp.classList.toggle("hidden", !state.config?.stripeApiConfigured);
   renderBillingStatements(state.user);
   updatePlannerActionState();
+}
+
+function handleCancelSubscription() {
+  if (!state.user) {
+    setAccountStatus("Sign in before canceling your subscription.");
+    return;
+  }
+
+  setModalOpen("subscription-cancel-modal", true);
+}
+
+function finishSubscriptionCancellation(action = "cancel") {
+  return fetch("/api/account/cancel-subscription", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action }),
+  })
+    .then(async (response) => {
+      const payload = await readJsonResponse(
+        response,
+        "Growr could not update this subscription right now. Refresh the page and try again."
+      );
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to update subscription.");
+      }
+      state.user = payload.account;
+      populateAccountForm();
+      renderAccountState();
+      updateDashboard();
+      setAccountStatus(payload.message);
+      document.getElementById("account-plan-status").textContent = payload.message;
+    })
+    .catch((error) => {
+      setAccountStatus(error.message);
+      document.getElementById("account-plan-status").textContent = error.message;
+    });
 }
 
 function getDefaultAiEmptyState() {
@@ -4257,6 +4309,7 @@ document.getElementById("logout-button").addEventListener("click", handleLogout)
 document.getElementById("manage-billing-button").addEventListener("click", handleManageBilling);
 document.getElementById("account-save-button").addEventListener("click", handleAccountSave);
 document.getElementById("account-change-plan-button").addEventListener("click", handleAccountPlanChange);
+document.getElementById("account-cancel-plan-button").addEventListener("click", handleCancelSubscription);
 document.getElementById("account-billing-button").addEventListener("click", handleManageBilling);
 document.getElementById("account-logout-button").addEventListener("click", handleLogout);
 document.getElementById("account-resend-verification-button").addEventListener("click", handleSendVerification);
@@ -4279,6 +4332,23 @@ document.getElementById("ai-reset-button").addEventListener("click", resetAiCoac
 document.getElementById("ai-dismiss-button").addEventListener("click", () => setAiWidgetOpen(false));
 document.getElementById("ai-widget-launcher").addEventListener("click", () => setAiWidgetOpen(true));
 document.getElementById("ai-widget-close").addEventListener("click", () => setAiWidgetOpen(false));
+document.getElementById("subscription-cancel-close-button").addEventListener("click", () => setModalOpen("subscription-cancel-modal", false));
+document.getElementById("subscription-cancel-confirm-button").addEventListener("click", () => {
+  setModalOpen("subscription-cancel-modal", false);
+  if (state.user?.retentionOfferUsed) {
+    finishSubscriptionCancellation("cancel");
+    return;
+  }
+  setModalOpen("subscription-offer-modal", true);
+});
+document.getElementById("subscription-offer-decline-button").addEventListener("click", () => {
+  setModalOpen("subscription-offer-modal", false);
+  finishSubscriptionCancellation("cancel");
+});
+document.getElementById("subscription-offer-accept-button").addEventListener("click", () => {
+  setModalOpen("subscription-offer-modal", false);
+  finishSubscriptionCancellation("accept_offer");
+});
 bindTransactionFilters();
 document.querySelectorAll("[data-ai-question]").forEach((button) => {
   button.addEventListener("click", () => {

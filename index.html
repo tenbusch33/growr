@@ -1710,6 +1710,7 @@
               </div>
               <div class="auth-inline-actions">
                 <button type="button" class="primary-btn" id="account-change-plan-button">Change subscription</button>
+                <button type="button" class="ghost-btn" id="account-cancel-plan-button">Cancel subscription</button>
               </div>
             </div>
             <div id="account-billing-help">
@@ -1833,6 +1834,28 @@
             <p>Growr may add, remove, pause, or update features over time. Continued use of the app after changes means the user accepts those updated terms.</p>
           </article>
         </section>
+        <div class="modal-backdrop hidden" id="subscription-cancel-modal">
+          <div class="modal-card">
+            <p class="eyebrow">Cancel subscription</p>
+            <h3>Are you sure you want to cancel Growr?</h3>
+            <p class="modal-copy">You will keep access until the end of your current period, but Growr will stop renewing after that.</p>
+            <div class="auth-inline-actions">
+              <button type="button" class="ghost-btn" id="subscription-cancel-close-button">Keep Growr</button>
+              <button type="button" class="primary-btn" id="subscription-cancel-confirm-button">Yes, cancel</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-backdrop hidden" id="subscription-offer-modal">
+          <div class="modal-card">
+            <p class="eyebrow">Wait before you go</p>
+            <h3>Keep Growr for 7 more days free</h3>
+            <p class="modal-copy">We can offer one extra 7-day free extension on this account before you cancel. This offer can only be used once.</p>
+            <div class="auth-inline-actions">
+              <button type="button" class="ghost-btn" id="subscription-offer-decline-button">No thanks, cancel</button>
+              <button type="button" class="primary-btn" id="subscription-offer-accept-button">Use my 7 free days</button>
+            </div>
+          </div>
+        </div>
         </section>
       </main>
       <div class="ai-widget" id="ai-widget">

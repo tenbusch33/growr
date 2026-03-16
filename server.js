@@ -187,6 +187,7 @@ function publicAccount(account) {
     trialActive,
     trialDaysRemaining,
     billingInterval: account.billingInterval || "monthly",
+    retentionOfferUsed: Boolean(account.retentionOfferUsed),
     billingHistory: Array.isArray(account.billingHistory) ? account.billingHistory.slice(-12).reverse() : [],
     createdAt: account.createdAt,
   };
@@ -1661,6 +1662,81 @@ const server = http.createServer((request, response) => {
         });
       } catch {
         sendJson(response, 400, { error: "Invalid change subscription payload." });
+      }
+    });
+    return;
+  }
+
+  if (request.method === "POST" && request.url === "/api/account/cancel-subscription") {
+    const session = getSessionAccount(request);
+    if (!session) {
+      sendJson(response, 401, { error: "Sign in before canceling your subscription." });
+      return;
+    }
+
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+
+    request.on("end", () => {
+      try {
+        const payload = JSON.parse(body || "{}");
+        const action = payload.action === "accept_offer" ? "accept_offer" : "cancel";
+        const accounts = readJson(accountsFile);
+        const account = accounts.find((entry) => entry.id === session.account.id);
+        if (!account) {
+          sendJson(response, 404, { error: "Account not found." });
+          return;
+        }
+
+        if (action === "accept_offer") {
+          if (account.retentionOfferUsed) {
+            sendJson(response, 400, { error: "This 7-day save offer was already used on this account." });
+            return;
+          }
+
+          const baseDate = account.trialEndsAt && new Date(account.trialEndsAt).getTime() > Date.now()
+            ? new Date(account.trialEndsAt)
+            : new Date();
+          baseDate.setDate(baseDate.getDate() + 7);
+          account.trialEndsAt = baseDate.toISOString();
+          account.subscriptionActive = true;
+          account.subscriptionStatus = "trialing";
+          account.retentionOfferUsed = true;
+          addBillingHistoryEntry(account, {
+            type: "retention_offer",
+            status: "accepted",
+            title: "7-day save offer used",
+            detail: "A one-time extra 7 free days were added before cancellation.",
+            amount: 0,
+            billingInterval: account.billingInterval || "monthly",
+          });
+          writeJson(accountsFile, accounts);
+          sendJson(response, 200, {
+            account: publicAccount(account),
+            message: "You kept Growr and got one extra 7-day free extension.",
+          });
+          return;
+        }
+
+        account.subscriptionActive = false;
+        account.subscriptionStatus = "canceled";
+        addBillingHistoryEntry(account, {
+          type: "cancellation",
+          status: "canceled",
+          title: "Subscription canceled",
+          detail: "Growr subscription was canceled from the account page.",
+          amount: 0,
+          billingInterval: account.billingInterval || "monthly",
+        });
+        writeJson(accountsFile, accounts);
+        sendJson(response, 200, {
+          account: publicAccount(account),
+          message: "Your Growr subscription was canceled.",
+        });
+      } catch {
+        sendJson(response, 400, { error: "Invalid cancel subscription payload." });
       }
     });
     return;
