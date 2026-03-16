@@ -1146,6 +1146,11 @@ select {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
+.auth-stage .auth-form select option {
+  background: #141821;
+  color: #ffffff;
+}
+
 .auth-stage .auth-form input::placeholder {
   color: rgba(255, 255, 255, 0.48);
 }
@@ -1297,6 +1302,13 @@ select {
 .planner-toolbar {
   justify-content: space-between;
   margin-bottom: 14px;
+}
+
+.planner-toolbar-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .auth-form label,

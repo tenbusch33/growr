@@ -325,7 +325,10 @@
           </div>
           <div class="planner-toolbar">
             <p id="planner-status" class="status-message">Planner changes save after you sign in.</p>
-            <button type="button" id="save-plan" class="ghost-btn">Save plan</button>
+            <div class="planner-toolbar-actions">
+              <button type="button" id="autofill-plan" class="secondary-btn">Auto-fill from connected data</button>
+              <button type="button" id="save-plan" class="ghost-btn">Save plan</button>
+            </div>
           </div>
           <form id="budget-form" class="planner-form">
               <label>Monthly take-home income<input type="number" id="income" value="6200" min="0" /></label>
@@ -574,10 +577,27 @@
             <p id="subscription-status" class="status-message">Import transactions or add recurring charges to see likely subscriptions here.</p>
             <div id="subscription-list" class="subscription-list"></div>
           </article>
-          <article class="glass coach-card">
-            <p class="eyebrow">Automation</p>
-            <h3>Growr should do the first pass for you</h3>
-            <p>Import transactions, let Growr detect recurring charges, then quickly confirm, ignore, or recategorize anything that looks off.</p>
+          <article class="glass recommendations-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Recurring bills</p>
+              <h2>Essential payments Growr found</h2>
+            </div>
+            <div class="transaction-summary-grid">
+              <article class="mini-stat">
+                <span>Estimated monthly total</span>
+                <strong id="bill-total">$0</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Recurring bills found</span>
+                <strong id="bill-count">0</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Use</span>
+                <strong id="bill-review-label">Auto-fill ready</strong>
+              </article>
+            </div>
+            <p id="bill-status" class="status-message">Connect accounts and import transactions to let Growr spot recurring bills automatically.</p>
+            <div id="bill-list" class="subscription-list"></div>
           </article>
         </section>
         <section class="budgeting-grid">

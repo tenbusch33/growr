@@ -31,6 +31,7 @@ const state = {
   },
   transactions: [],
   subscriptions: [],
+  recurringBills: [],
   transactionFilters: {
     category: "all",
     source: "all",
@@ -365,6 +366,10 @@ function setTransactionStatus(text) {
 
 function setSubscriptionStatus(text) {
   document.getElementById("subscription-status").textContent = text;
+}
+
+function setBillStatus(text) {
+  document.getElementById("bill-status").textContent = text;
 }
 
 function setAccountStatus(text) {
@@ -871,6 +876,47 @@ function renderSubscriptions() {
   });
 }
 
+function renderBills() {
+  const container = document.getElementById("bill-list");
+  const total = state.recurringBills.reduce(
+    (sum, item) => sum + Number(item.monthlyEstimate || 0),
+    0
+  );
+
+  document.getElementById("bill-total").textContent = currency.format(total);
+  document.getElementById("bill-count").textContent = String(state.recurringBills.length);
+  document.getElementById("bill-review-label").textContent = state.recurringBills.length
+    ? "Auto-fill ready"
+    : "Needs data";
+
+  if (!state.recurringBills.length) {
+    container.innerHTML = `
+      <div class="linked-item empty-state">
+        <strong>No recurring bills found yet</strong>
+        <p>Growr can separate likely bills from subscriptions after enough transaction history is available.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = state.recurringBills
+    .map(
+      (item) => `
+        <article class="subscription-item">
+          <div class="subscription-top">
+            <div>
+              <h3>${item.merchant}</h3>
+              <p>${item.nextReviewHint} · likely ${item.category}</p>
+            </div>
+            <strong>${currency.format(item.monthlyEstimate || item.amount || 0)}</strong>
+          </div>
+          <p class="subscription-meta">Latest charge ${currency.format(item.amount || 0)} · ${item.transactionsCount} matching charges</p>
+        </article>
+      `
+    )
+    .join("");
+}
+
 function updateTransactionSummary(transactions) {
   const total = transactions.reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
   const byCategory = transactions.reduce((accumulator, transaction) => {
@@ -960,16 +1006,20 @@ function loadTransactions() {
   if (!state.user) {
     state.transactions = [];
     state.subscriptions = [];
+    state.recurringBills = [];
     renderTransactions();
     renderSubscriptions();
+    renderBills();
     renderCategoryProgress();
     setTransactionStatus("Sign in to save and load transactions.");
     setSubscriptionStatus("Sign in to review recurring charges and subscriptions.");
+    setBillStatus("Sign in to review recurring bills.");
     return Promise.resolve();
   }
 
   setTransactionStatus("Loading transactions...");
   setSubscriptionStatus("Scanning for recurring charges...");
+  setBillStatus("Scanning for recurring bills...");
   return Promise.all([
     fetch("/api/transactions"),
     fetch("/api/transactions/subscriptions"),
@@ -986,8 +1036,10 @@ function loadTransactions() {
 
       state.transactions = payload.transactions || [];
       state.subscriptions = subscriptionPayload.subscriptions || [];
+      state.recurringBills = subscriptionPayload.bills || [];
       renderTransactions();
       renderSubscriptions();
+      renderBills();
       renderCategoryProgress();
       setTransactionStatus("Transactions loaded.");
       setSubscriptionStatus(
@@ -995,10 +1047,41 @@ function loadTransactions() {
           ? "Growr found likely recurring charges. Review anything that looks off."
           : "No recurring subscriptions found yet."
       );
+      setBillStatus(
+        state.recurringBills.length
+          ? "Recurring bills are ready to help prefill your planner."
+          : "No recurring bills found yet."
+      );
     })
     .catch((error) => {
       setTransactionStatus(error.message);
       setSubscriptionStatus(error.message);
+      setBillStatus(error.message);
+    });
+}
+
+function autofillPlannerFromConnectedData() {
+  if (!state.user) {
+    setPlannerStatus("Sign in before auto-filling your planner.");
+    return;
+  }
+
+  setPlannerStatus("Auto-filling from connected data...");
+  fetch("/api/planner/autofill", {
+    method: "POST",
+  })
+    .then(async (response) => {
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to auto-fill planner.");
+      }
+
+      applyPlannerPayload(payload.planner || {});
+      updateDashboard();
+      setPlannerStatus(payload.message || "Planner auto-filled. Review before saving.");
+    })
+    .catch((error) => {
+      setPlannerStatus(error.message);
     });
 }
 
@@ -1620,6 +1703,8 @@ function handleLogout() {
       renderAccountState();
       renderTransactions();
       renderCategoryProgress();
+      renderSubscriptions();
+      renderBills();
       renderLinkedSummary({
         cashTotal: 0,
         creditCardDebt: 0,
@@ -2103,6 +2188,7 @@ document.getElementById("account-verify-button").addEventListener("click", handl
 document.getElementById("connect-accounts").addEventListener("click", connectPlaidAccounts);
 document.getElementById("import-transactions").addEventListener("click", importPlaidTransactions);
 document.getElementById("save-plan").addEventListener("click", () => savePlanner(true));
+document.getElementById("autofill-plan").addEventListener("click", autofillPlannerFromConnectedData);
 document.getElementById("upgrade-button").addEventListener("click", handleUpgrade);
 document.getElementById("transaction-form").addEventListener("submit", createTransaction);
 document.getElementById("ai-form").addEventListener("submit", handleAiSubmit);

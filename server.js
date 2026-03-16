@@ -790,7 +790,7 @@ function average(values) {
 }
 
 function detectSubscriptionsFromTransactions(transactions) {
-  const recurringKeywords = [
+  const subscriptionKeywords = [
     "netflix",
     "spotify",
     "hulu",
@@ -807,6 +807,21 @@ function detectSubscriptionsFromTransactions(transactions) {
     "dropbox",
     "canva",
     "max",
+  ];
+  const billKeywords = [
+    "rent",
+    "mortgage",
+    "utility",
+    "water",
+    "electric",
+    "internet",
+    "phone",
+    "wireless",
+    "insurance",
+    "loan",
+    "credit card",
+    "student loan",
+    "car payment",
   ];
 
   const candidateGroups = new Map();
@@ -825,7 +840,7 @@ function detectSubscriptionsFromTransactions(transactions) {
       candidateGroups.get(merchantKey).push(entry);
     });
 
-  return Array.from(candidateGroups.entries())
+  const recurring = Array.from(candidateGroups.entries())
     .map(([merchantKey, entries]) => {
       const sorted = entries
         .slice()
@@ -848,14 +863,17 @@ function detectSubscriptionsFromTransactions(transactions) {
       const avgInterval = average(intervals);
       const manualTrue = sorted.some((entry) => entry.subscriptionStatus === "subscribed");
       const manualFalse = sorted.some((entry) => entry.subscriptionStatus === "ignored");
-      const keywordMatch = recurringKeywords.some((keyword) => merchantKey.includes(keyword));
+      const subscriptionKeywordMatch = subscriptionKeywords.some((keyword) => merchantKey.includes(keyword));
+      const billKeywordMatch = billKeywords.some((keyword) => merchantKey.includes(keyword));
       const cadenceMatch = sorted.length >= 2 && avgInterval >= 20 && avgInterval <= 40 && amountVariation <= 0.45;
+      const latest = sorted[sorted.length - 1];
+      const billCategory = ["housing", "debt", "car"].includes(latest.category) || billKeywordMatch;
+      const type = billCategory ? "bill" : "subscription";
 
-      if (manualFalse || (!manualTrue && !keywordMatch && !cadenceMatch)) {
+      if (manualFalse || (!manualTrue && !subscriptionKeywordMatch && !billKeywordMatch && !cadenceMatch)) {
         return null;
       }
 
-      const latest = sorted[sorted.length - 1];
       return {
         merchantKey,
         merchant: latest.merchant,
@@ -874,10 +892,64 @@ function detectSubscriptionsFromTransactions(transactions) {
         monthlyEstimate: avgInterval ? avgAmount * (30 / avgInterval) : avgAmount,
         transactionIds: sorted.map((entry) => entry.id),
         status: manualTrue ? "confirmed" : "detected",
+        type,
       };
     })
     .filter(Boolean)
     .sort((left, right) => right.monthlyEstimate - left.monthlyEstimate);
+
+  return {
+    subscriptions: recurring.filter((item) => item.type === "subscription"),
+    bills: recurring.filter((item) => item.type === "bill"),
+  };
+}
+
+function buildPlannerAutofill(account, plaidSummary = null) {
+  const planner = readJson(plannerFile).find((entry) => entry.userId === account.id)?.data || {};
+  const transactions = readJson(transactionsFile).filter((entry) => entry.userId === account.id);
+  const recent = transactions.filter((entry) => {
+    const daysAgo = (Date.now() - new Date(entry.date).getTime()) / (1000 * 60 * 60 * 24);
+    return daysAgo >= 0 && daysAgo <= 60;
+  });
+
+  const categoryTotals = recent.reduce((totals, entry) => {
+    const amount = Number(entry.amount || 0);
+    if (amount > 0) {
+      totals[entry.category || "other"] = (totals[entry.category || "other"] || 0) + amount;
+    }
+    return totals;
+  }, {});
+
+  const deposits = recent.filter((entry) => Number(entry.amount || 0) < 0);
+  const inferredIncome = Math.abs(deposits.reduce((sum, entry) => sum + Number(entry.amount || 0), 0)) / 2;
+
+  const autofill = {
+    ...planner,
+    income: Math.round(inferredIncome || Number(planner.income || 0)),
+    housing: Math.round((categoryTotals.housing || 0) / 2 || Number(planner.housing || 0)),
+    essentials: Math.round((categoryTotals.essentials || 0) / 2 || Number(planner.essentials || 0)),
+    creditCard: Math.round((categoryTotals.debt || 0) / 2 || Number(planner.creditCard || 0)),
+    otherDebt: Math.round(((categoryTotals.debt || 0) / 4) || Number(planner.otherDebt || 0)),
+    carPayment: Math.round((categoryTotals.car || 0) / 2 || Number(planner.carPayment || 0)),
+    carCosts: Math.round((categoryTotals.car || 0) / 4 || Number(planner.carCosts || 0)),
+    emergencyFund: Math.round(
+      plaidSummary?.cashTotal || Number(planner.emergencyFund || planner.cashAssets || 0)
+    ),
+    creditCardBalance: Math.round(
+      plaidSummary?.creditCardDebt || Number(planner.creditCardBalance || 0)
+    ),
+    cashAssets: Math.round(plaidSummary?.cashTotal || Number(planner.cashAssets || 0)),
+    otherLiabilities: Math.round(plaidSummary?.loanDebt || Number(planner.otherLiabilities || 0)),
+  };
+
+  return {
+    planner: autofill,
+    source: {
+      transactionsReviewed: recent.length,
+      usedLinkedAccounts: Boolean(plaidSummary),
+      depositsFound: deposits.length,
+    },
+  };
 }
 
 function currencyAmount(value) {
@@ -1485,13 +1557,60 @@ const server = http.createServer((request, response) => {
     const transactions = readJson(transactionsFile)
       .filter((entry) => entry.userId === session.account.id)
       .sort((first, second) => new Date(second.date) - new Date(first.date));
-    const subscriptions = detectSubscriptionsFromTransactions(transactions);
-    const total = subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0);
+    const recurring = detectSubscriptionsFromTransactions(transactions);
+    const total = recurring.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0);
+    const billsTotal = recurring.bills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0);
     sendJson(response, 200, {
-      subscriptions,
+      subscriptions: recurring.subscriptions,
+      bills: recurring.bills,
       totalMonthlyEstimate: total,
-      count: subscriptions.length,
+      billsMonthlyEstimate: billsTotal,
+      count: recurring.subscriptions.length,
+      billsCount: recurring.bills.length,
     });
+    return;
+  }
+
+  if (request.method === "POST" && request.url === "/api/planner/autofill") {
+    const session = getSessionAccount(request);
+    if (!session) {
+      sendJson(response, 401, { error: "Sign in to auto-fill your planner." });
+      return;
+    }
+
+    const item = getStoredPlaidItemForUser(session.account.id);
+    if (!item) {
+      const fallback = buildPlannerAutofill(session.account, null);
+      sendJson(response, 200, {
+        planner: fallback.planner,
+        message: "Auto-filled from saved transactions. Connect accounts for a more complete fill.",
+        source: fallback.source,
+      });
+      return;
+    }
+
+    Promise.all([
+      plaidRequest("/accounts/get", { access_token: item.accessToken }),
+      plaidRequest("/liabilities/get", { access_token: item.accessToken }),
+      plaidRequest("/investments/holdings/get", { access_token: item.accessToken }),
+    ])
+      .then(([accountsData, liabilitiesData, holdingsData]) => {
+        const summary = buildPlaidSummary(accountsData, liabilitiesData, holdingsData);
+        const autofill = buildPlannerAutofill(session.account, summary);
+        sendJson(response, 200, {
+          planner: autofill.planner,
+          message: "Planner auto-filled from recent transactions and linked balances. Review before saving.",
+          source: autofill.source,
+        });
+      })
+      .catch(() => {
+        const fallback = buildPlannerAutofill(session.account, null);
+        sendJson(response, 200, {
+          planner: fallback.planner,
+          message: "Auto-filled from saved transactions. Linked account data was unavailable right now.",
+          source: fallback.source,
+        });
+      });
     return;
   }
 
