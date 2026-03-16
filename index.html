@@ -63,8 +63,10 @@
               <button class="secondary-btn" data-scroll="#how-it-works">See how it works</button>
             </div>
             <div class="hero-badges">
-              <span>Budget Core from $7.99/mo</span>
-              <span>Investing add-on available</span>
+              <span>Budget Core from $6.99/mo</span>
+              <span>Budget + Investing from $14.99/mo</span>
+              <span>Couples add-on + $1.99/mo</span>
+              <span>Save 20% with annual billing</span>
               <span>Live account linking</span>
             </div>
           </div>
@@ -225,6 +227,43 @@
               <button type="button" class="ghost-btn" data-page-target="accounts">Connect accounts</button>
             </div>
           </article>
+
+          <article class="story-panel story-panel-couples">
+            <div class="story-visual story-visual-couples">
+              <div class="couples-visual-board">
+                <div class="couples-visual-top">
+                  <div class="couple-avatar-stack">
+                    <span class="couple-avatar">A</span>
+                    <span class="couple-avatar">J</span>
+                  </div>
+                  <strong>Household view</strong>
+                </div>
+                <div class="couples-visual-list">
+                  <div class="couples-visual-row">
+                    <span>Shared checking</span>
+                    <strong>$8,420</strong>
+                  </div>
+                  <div class="couples-visual-row">
+                    <span>Joint recurring bills</span>
+                    <strong>$2,180</strong>
+                  </div>
+                  <div class="couples-visual-row">
+                    <span>Household net worth</span>
+                    <strong>$412,000</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="story-copy">
+              <p class="eyebrow">For couples</p>
+              <h2>Stay on the same page about money.</h2>
+              <p>
+                Add a couples view to share one household picture, review recurring bills together,
+                and make monthly money check-ins faster without giving up your own accounts.
+              </p>
+              <button type="button" class="secondary-btn" data-auth-target="signup">Add couples access</button>
+            </div>
+          </article>
         </section>
 
         <section id="pricing" class="pricing-section">
@@ -235,8 +274,10 @@
           <div class="pricing-grid">
             <article class="glass price-card">
               <p class="plan-name">Budget Core</p>
-              <h3>$7.99<span>/month</span></h3>
+              <h3>$6.99<span>/month</span></h3>
               <p class="trial-pill">7-day free trial</p>
+              <p class="price-billing-note">or $67.10/year billed annually, about 20% off</p>
+              <p class="price-addon-note">Optional couples add-on: + $1.99/mo or $19.10/year</p>
               <ul>
                 <li>Income and bill tracking</li>
                 <li>Debt and car payment analysis</li>
@@ -244,9 +285,11 @@
               </ul>
             </article>
             <article class="glass price-card featured">
-              <p class="plan-name">Investing Add-on</p>
-              <h3>$12.99<span>/month total</span></h3>
+              <p class="plan-name">Budget + Investing</p>
+              <h3>$14.99<span>/month</span></h3>
               <p class="trial-pill">7-day free trial</p>
+              <p class="price-billing-note">or $143.90/year billed annually, about 20% off</p>
+              <p class="price-addon-note">Optional couples add-on: + $1.99/mo or $19.10/year</p>
               <ul>
                 <li>401(k), Roth IRA, Traditional IRA, HSA, 529, and brokerage forecasts</li>
                 <li>Age-based allocation suggestions</li>
@@ -1354,7 +1397,7 @@
                       <input type="radio" name="plan" value="budget" checked />
                       <span class="plan-option-card">
                         <strong>Budget Core</strong>
-                        <em>$7.99/mo after trial</em>
+                        <em>$6.99/mo or $67.10/year after trial</em>
                         <small>Budgeting, bills, debt analysis, and monthly recommendations.</small>
                       </span>
                     </label>
@@ -1362,8 +1405,19 @@
                       <input type="radio" name="plan" value="bundle" />
                       <span class="plan-option-card">
                         <strong>Budget + Investing</strong>
-                        <em>$12.99/mo after trial</em>
+                        <em>$14.99/mo or $143.90/year after trial</em>
                         <small>Everything in Budget Core plus forecasts and retirement guidance.</small>
+                      </span>
+                    </label>
+                  </fieldset>
+                  <fieldset class="plan-picker add-on-picker">
+                    <legend>Add-ons</legend>
+                    <label class="plan-option">
+                      <input type="checkbox" id="couplesAddOn" />
+                      <span class="plan-option-card">
+                        <strong>Couples view</strong>
+                        <em>+ $1.99/mo or $19.10/year</em>
+                        <small>Shared household view, recurring review together, and cleaner money check-ins as a pair.</small>
                       </span>
                     </label>
                   </fieldset>
@@ -1423,7 +1477,7 @@
             </div>
             <div class="upgrade-banner hidden" id="upgrade-banner">
               <p id="upgrade-copy">Upgrade to unlock investing forecasts, age-based allocation guidance, and investment-linked Plaid data.</p>
-              <button type="button" class="primary-btn" id="upgrade-button">Upgrade to Bundle</button>
+              <button type="button" class="primary-btn" id="upgrade-button">Upgrade to Budget + Investing</button>
             </div>
           </article>
         </section>

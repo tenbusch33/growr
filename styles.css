@@ -203,11 +203,12 @@ select {
 }
 
 .brand-mark {
-  min-height: 54px;
+  min-height: 60px;
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 18px 10px 12px;
+  gap: 16px;
+  min-width: 168px;
+  padding: 11px 24px 11px 14px;
   border-radius: 999px;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
@@ -235,13 +236,13 @@ select {
 
 .brand-icon {
   position: relative;
-  width: 42px;
-  height: 32px;
+  width: 46px;
+  height: 34px;
   display: inline-flex;
   align-items: flex-end;
   gap: 4px;
-  padding: 6px 7px 5px;
-  border-radius: 12px;
+  padding: 6px 8px 5px;
+  border-radius: 13px;
   background:
     radial-gradient(circle at 22% 22%, rgba(255, 211, 61, 0.3), transparent 45%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
@@ -284,9 +285,11 @@ select {
 .brand-word {
   color: #fff;
   font-family: "Sora", sans-serif;
-  font-size: 1.2rem;
-  letter-spacing: -0.04em;
+  font-size: 1.32rem;
+  letter-spacing: -0.05em;
   font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .topbar-actions,
@@ -725,6 +728,10 @@ select {
   background: linear-gradient(135deg, #eff2ee 0%, #fcfaf4 100%);
 }
 
+.story-panel-couples {
+  background: linear-gradient(135deg, #fff6ef 0%, #fffdf8 100%);
+}
+
 .story-panel:nth-child(even) .story-visual {
   order: 2;
 }
@@ -992,6 +999,86 @@ select {
   place-items: center;
 }
 
+.story-visual-couples {
+  padding: 50px;
+  display: grid;
+  place-items: center;
+}
+
+.couples-visual-board {
+  width: min(460px, 100%);
+  padding: 24px;
+  border-radius: 34px;
+  background: linear-gradient(180deg, #fffdfb 0%, #fff8f1 100%);
+  border: 1px solid rgba(109, 74, 41, 0.08);
+  box-shadow: 0 26px 48px rgba(126, 90, 58, 0.12);
+}
+
+.couples-visual-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.couples-visual-top strong {
+  font-family: "Sora", sans-serif;
+  font-size: 1.08rem;
+  color: #261d17;
+}
+
+.couple-avatar-stack {
+  display: flex;
+  align-items: center;
+}
+
+.couple-avatar {
+  width: 50px;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 3px solid #fff8f1;
+  background: linear-gradient(135deg, #ff7b4d, #ffd869);
+  color: #fff;
+  font-family: "Sora", sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  box-shadow: 0 10px 20px rgba(255, 123, 77, 0.18);
+}
+
+.couple-avatar + .couple-avatar {
+  margin-left: -12px;
+  background: linear-gradient(135deg, #6f83ff, #4fc3ff);
+}
+
+.couples-visual-list {
+  display: grid;
+  gap: 14px;
+}
+
+.couples-visual-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(109, 74, 41, 0.07);
+}
+
+.couples-visual-row span {
+  color: rgba(38, 29, 23, 0.62);
+}
+
+.couples-visual-row strong {
+  color: #261d17;
+  font-family: "Sora", sans-serif;
+}
+
 .visual-device {
   width: min(470px, 100%);
   min-height: 430px;
@@ -1189,6 +1276,24 @@ select {
 .price-card h3 span {
   font-size: 1rem;
   color: var(--subtle);
+}
+
+.price-billing-note {
+  margin: -2px 0 16px;
+  color: rgba(35, 29, 23, 0.62);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.price-addon-note {
+  margin: -6px 0 18px;
+  color: rgba(255, 123, 77, 0.92);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.add-on-picker {
+  grid-column: 1 / -1;
 }
 
 .trial-pill {
@@ -2515,11 +2620,13 @@ select {
   display: grid;
   place-items: center;
   border-radius: 18px;
-  background: linear-gradient(135deg, rgba(56, 103, 255, 0.14), rgba(20, 184, 255, 0.18));
-  color: #1e3a8a;
+  background: var(--identity-bg, linear-gradient(135deg, rgba(56, 103, 255, 0.14), rgba(20, 184, 255, 0.18)));
+  color: var(--identity-color, #1e3a8a);
   font-family: "Sora", sans-serif;
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 0.92rem;
+  letter-spacing: -0.03em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .transaction-main-copy {
@@ -2999,6 +3106,49 @@ select {
   border-radius: 18px;
   background: #fafafa;
   border: 1px solid var(--line);
+}
+
+.linked-item-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.linked-avatar {
+  min-width: 46px;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--identity-bg, linear-gradient(135deg, rgba(56, 103, 255, 0.14), rgba(20, 184, 255, 0.18)));
+  color: var(--identity-color, #1e3a8a);
+  font-family: "Sora", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.linked-item-copy {
+  min-width: 0;
+}
+
+.linked-item-copy p,
+.linked-item-copy strong {
+  margin: 0;
+}
+
+.linked-item-copy strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.linked-amount {
+  font-family: "Sora", sans-serif;
+  font-size: 1rem;
+  white-space: nowrap;
 }
 
 .empty-state {

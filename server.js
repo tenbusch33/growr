@@ -180,6 +180,7 @@ function publicAccount(account) {
     fullName: account.fullName,
     email: account.email,
     plan: account.plan,
+    couplesAddOn: Boolean(account.couplesAddOn),
     subscriptionActive: account.subscriptionActive !== false,
     emailVerified: Boolean(account.emailVerified),
     trialEndsAt,
@@ -1200,6 +1201,7 @@ const server = http.createServer((request, response) => {
         const email = String(payload.email || "").trim().toLowerCase();
         const password = String(payload.password || "").trim();
         const plan = payload.plan === "bundle" ? "bundle" : "budget";
+        const couplesAddOn = Boolean(payload.couplesAddOn);
 
         if (!fullName || !email || !password) {
           sendJson(response, 400, { error: "Name, email, and password are required." });
@@ -1220,6 +1222,7 @@ const server = http.createServer((request, response) => {
           fullName,
           email,
           plan,
+          couplesAddOn,
           subscriptionActive: true,
           subscriptionStatus: "trialing",
           trialEndsAt,

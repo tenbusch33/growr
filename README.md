@@ -8,6 +8,7 @@ Colorful budgeting and investment forecasting prototype with:
 - local multi-user account signup and login flow
 - planner save/load per signed-in user
 - plan-based feature gating for Budget Core vs Bundle
+- optional couples add-on for a shared household view
 - Stripe/Supabase-ready configuration hooks
 - Plaid account linking scaffold for balances, liabilities, and investments
 
@@ -63,8 +64,8 @@ Without a persistent disk, local JSON data like accounts, sessions, planners, an
 - `DATA_DIR`: optional override for where Growr stores JSON app data
 - `SUPABASE_URL`: used to indicate auth is connected
 - `SUPABASE_ANON_KEY`: used to indicate auth is connected
-- `STRIPE_CHECKOUT_BUDGET_URL`: hosted checkout or payment link for the `$7.99` plan
-- `STRIPE_CHECKOUT_BUNDLE_URL`: hosted checkout or payment link for the `$12.99` bundle
+- `STRIPE_CHECKOUT_BUDGET_URL`: hosted checkout or payment link for the `$6.99` plan
+- `STRIPE_CHECKOUT_BUNDLE_URL`: hosted checkout or payment link for the `$14.99` bundle
 - `STRIPE_SECRET_KEY`: Stripe secret key for Checkout, customer portal, and subscription management
 - `STRIPE_WEBHOOK_SECRET`: Stripe webhook signing secret
 - `STRIPE_PRICE_BUDGET`: recurring monthly price id for Budget Core
@@ -93,9 +94,13 @@ Without a persistent disk, local JSON data like accounts, sessions, planners, an
 Create two recurring monthly products in Stripe:
 
 1. `Growr Budget Core`
-   - monthly recurring price: `$7.99`
+   - monthly recurring price: `$6.99`
+   - optional annual price at about 20% off: `$67.10`
+   - optional couples add-on: `$1.99/month` or `$19.10/year`
 2. `Growr Budget + Investing`
-   - monthly recurring price: `$12.99`
+   - monthly recurring price: `$14.99`
+   - optional annual price at about 20% off: `$143.90`
+   - optional couples add-on: `$1.99/month` or `$19.10/year`
 
 Copy the two Stripe price ids into:
 

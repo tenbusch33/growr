@@ -300,6 +300,56 @@ function getMerchantBadge(value) {
   return `${words[0][0]}${words[1][0]}`.toUpperCase();
 }
 
+const identityProfiles = [
+  { match: /chase/i, label: "C", bg: "linear-gradient(135deg, #1d4ed8, #60a5fa)", color: "#ffffff" },
+  { match: /bank of america|bofa/i, label: "BofA", bg: "linear-gradient(135deg, #c81e1e, #2563eb)", color: "#ffffff" },
+  { match: /american express|amex/i, label: "Amex", bg: "linear-gradient(135deg, #0f5db8, #37b2ff)", color: "#ffffff" },
+  { match: /capital one/i, label: "CO", bg: "linear-gradient(135deg, #1d4ed8, #ef4444)", color: "#ffffff" },
+  { match: /citi|citibank/i, label: "Citi", bg: "linear-gradient(135deg, #2563eb, #60a5fa)", color: "#ffffff" },
+  { match: /wells fargo/i, label: "WF", bg: "linear-gradient(135deg, #b91c1c, #f59e0b)", color: "#ffffff" },
+  { match: /discover/i, label: "Disc", bg: "linear-gradient(135deg, #111827, #f97316)", color: "#ffffff" },
+  { match: /us bank|u\.s\. bank/i, label: "US", bg: "linear-gradient(135deg, #ef4444, #2563eb)", color: "#ffffff" },
+  { match: /td bank|toronto dominion|\btd\b/i, label: "TD", bg: "linear-gradient(135deg, #16a34a, #84cc16)", color: "#ffffff" },
+  { match: /pnc/i, label: "PNC", bg: "linear-gradient(135deg, #f97316, #fb923c)", color: "#ffffff" },
+  { match: /ally/i, label: "ally", bg: "linear-gradient(135deg, #5b21b6, #7c3aed)", color: "#ffffff" },
+  { match: /sofi/i, label: "SoFi", bg: "linear-gradient(135deg, #0ea5e9, #22d3ee)", color: "#ffffff" },
+  { match: /fidelity/i, label: "F", bg: "linear-gradient(135deg, #15803d, #65a30d)", color: "#ffffff" },
+  { match: /vanguard/i, label: "V", bg: "linear-gradient(135deg, #b91c1c, #ef4444)", color: "#ffffff" },
+  { match: /schwab/i, label: "CS", bg: "linear-gradient(135deg, #0284c7, #38bdf8)", color: "#ffffff" },
+  { match: /robinhood/i, label: "RH", bg: "linear-gradient(135deg, #14532d, #84cc16)", color: "#ffffff" },
+  { match: /paypal/i, label: "PP", bg: "linear-gradient(135deg, #1d4ed8, #0ea5e9)", color: "#ffffff" },
+  { match: /apple/i, label: "Apple", bg: "linear-gradient(135deg, #111827, #374151)", color: "#ffffff" },
+  { match: /starbucks/i, label: "Sb", bg: "linear-gradient(135deg, #047857, #34d399)", color: "#ffffff" },
+  { match: /amazon/i, label: "az", bg: "linear-gradient(135deg, #111827, #f59e0b)", color: "#ffffff" },
+  { match: /whole foods/i, label: "WF", bg: "linear-gradient(135deg, #15803d, #4ade80)", color: "#ffffff" },
+  { match: /netflix/i, label: "N", bg: "linear-gradient(135deg, #7f1d1d, #dc2626)", color: "#ffffff" },
+  { match: /spotify/i, label: "S", bg: "linear-gradient(135deg, #166534, #22c55e)", color: "#ffffff" },
+  { match: /uber/i, label: "U", bg: "linear-gradient(135deg, #111827, #4b5563)", color: "#ffffff" },
+  { match: /lyft/i, label: "Ly", bg: "linear-gradient(135deg, #be185d, #f472b6)", color: "#ffffff" },
+  { match: /adobe/i, label: "Ae", bg: "linear-gradient(135deg, #b91c1c, #ef4444)", color: "#ffffff" },
+  { match: /notion/i, label: "N", bg: "linear-gradient(135deg, #111827, #6b7280)", color: "#ffffff" },
+];
+
+function getIdentityProfile(value) {
+  const raw = String(value || "").trim();
+  const formatted = formatMerchantName(raw);
+  const match = identityProfiles.find((profile) => profile.match.test(raw) || profile.match.test(formatted));
+  if (match) {
+    return match;
+  }
+
+  return {
+    label: getMerchantBadge(formatted),
+    bg: "linear-gradient(135deg, rgba(56, 103, 255, 0.16), rgba(20, 184, 255, 0.22))",
+    color: "#1e3a8a",
+  };
+}
+
+function renderIdentityBadge(value, className = "transaction-avatar") {
+  const profile = getIdentityProfile(value);
+  return `<div class="${className}" style="--identity-bg:${profile.bg}; --identity-color:${profile.color};">${escapeHtml(profile.label)}</div>`;
+}
+
 function formatTransactionDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -610,6 +660,9 @@ function populateAccountForm() {
   nameInput.value = state.user.fullName || "";
   emailInput.value = state.user.email || "";
   planLabel.textContent = state.user.plan === "bundle" ? "Budget + Investing" : "Budget Core";
+  if (state.user.couplesAddOn) {
+    planLabel.textContent += " + Couples";
+  }
   trialLabel.textContent = state.user.trialActive
     ? `${Math.max(Number(state.user.trialDaysRemaining || 0), 0)} days left`
     : "No active trial";
@@ -622,8 +675,8 @@ function populateAccountForm() {
   if (state.user.plan !== "bundle") {
     upgradePanel.classList.remove("hidden");
     upgradeCopy.textContent = state.user.trialActive
-      ? "Your trial is live. Upgrade now to unlock retirement planning, investing forecasts, and richer connected-account views before it ends."
-      : "Move to Budget + Investing to unlock forecasts, retirement planning, and investment-linked account views.";
+      ? `Your trial is live. Upgrade to Budget + Investing for $14.99/month${state.user.couplesAddOn ? ", plus your $1.99 couples add-on," : ""} or save 20% with annual billing before it ends.`
+      : `Move to Budget + Investing for $14.99/month${state.user.couplesAddOn ? ", plus your $1.99 couples add-on," : ""} or save 20% with annual billing to unlock forecasts, retirement planning, and investment-linked account views.`;
   } else {
     upgradePanel.classList.add("hidden");
   }
@@ -854,7 +907,7 @@ function renderAccountState() {
       <span class="trial-pill">${formatTrialMessage()}</span>
     </div>
     <p>You are signed in on the ${
-      state.user.plan === "bundle" ? "Budget + Investing" : "Budget Core"
+      `${state.user.plan === "bundle" ? "Budget + Investing" : "Budget Core"}${state.user.couplesAddOn ? " + Couples" : ""}`
     } plan.</p>
     <p>${
       state.user.trialActive
@@ -1432,7 +1485,7 @@ function renderTransactions() {
                 return `
                   <article class="transaction-item premium-transaction-item">
                     <div class="transaction-main-row">
-                      <div class="transaction-avatar">${merchantLabel}</div>
+                      ${renderIdentityBadge(transaction.merchant, "transaction-avatar")}
                       <div class="transaction-main-copy">
                         <div class="transaction-top">
                           <h3>${merchantName}</h3>
@@ -1806,9 +1859,14 @@ function renderLinkedSummary(summary) {
     (summary.accounts || []).map(
       (account) => `
         <article class="linked-item">
-          <strong>${account.name}</strong>
-          <p>${account.typeLabel}</p>
-          <p>${currency.format(account.currentBalance || 0)}</p>
+          <div class="linked-item-row">
+            ${renderIdentityBadge(account.name, "linked-avatar")}
+            <div class="linked-item-copy">
+              <strong>${account.name}</strong>
+              <p>${account.typeLabel}</p>
+            </div>
+            <strong class="linked-amount">${currency.format(account.currentBalance || 0)}</strong>
+          </div>
         </article>
       `
     ),
@@ -1820,9 +1878,14 @@ function renderLinkedSummary(summary) {
     (summary.liabilities || []).map(
       (liability) => `
         <article class="linked-item">
-          <strong>${liability.name}</strong>
-          <p>${liability.kind}</p>
-          <p>${currency.format(liability.amount || 0)}</p>
+          <div class="linked-item-row">
+            ${renderIdentityBadge(liability.name, "linked-avatar")}
+            <div class="linked-item-copy">
+              <strong>${liability.name}</strong>
+              <p>${liability.kind}</p>
+            </div>
+            <strong class="linked-amount">${currency.format(liability.amount || 0)}</strong>
+          </div>
         </article>
       `
     ),
@@ -1834,9 +1897,14 @@ function renderLinkedSummary(summary) {
     (hasInvestmentAccess() ? summary.investments || [] : []).map(
       (investment) => `
         <article class="linked-item">
-          <strong>${investment.accountName}</strong>
-          <p>${investment.holdingsCount} holdings</p>
-          <p>${currency.format(investment.value || 0)}</p>
+          <div class="linked-item-row">
+            ${renderIdentityBadge(investment.accountName, "linked-avatar")}
+            <div class="linked-item-copy">
+              <strong>${investment.accountName}</strong>
+              <p>${investment.holdingsCount} holdings</p>
+            </div>
+            <strong class="linked-amount">${currency.format(investment.value || 0)}</strong>
+          </div>
         </article>
       `
     ),
@@ -3007,6 +3075,7 @@ function handleSignup(event) {
   const fullName = document.getElementById("fullName").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
+  const couplesAddOn = Boolean(document.getElementById("couplesAddOn")?.checked);
   const plan =
     document.querySelector('input[name="plan"]:checked')?.value || "budget";
   const button = document.getElementById("signup-button");
@@ -3017,7 +3086,7 @@ function handleSignup(event) {
   fetch("/api/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fullName, email, password, plan }),
+    body: JSON.stringify({ fullName, email, password, plan, couplesAddOn }),
   })
     .then(async (response) => {
       const payload = await response.json();
