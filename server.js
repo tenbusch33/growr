@@ -1475,6 +1475,26 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  if (request.method === "GET" && request.url === "/api/transactions/subscriptions") {
+    const session = getSessionAccount(request);
+    if (!session) {
+      sendJson(response, 401, { error: "Sign in to load subscriptions." });
+      return;
+    }
+
+    const transactions = readJson(transactionsFile)
+      .filter((entry) => entry.userId === session.account.id)
+      .sort((first, second) => new Date(second.date) - new Date(first.date));
+    const subscriptions = detectSubscriptionsFromTransactions(transactions);
+    const total = subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0);
+    sendJson(response, 200, {
+      subscriptions,
+      totalMonthlyEstimate: total,
+      count: subscriptions.length,
+    });
+    return;
+  }
+
   if (request.method === "POST" && request.url === "/api/transactions") {
     const session = getSessionAccount(request);
     if (!session) {
@@ -1497,6 +1517,7 @@ const server = http.createServer((request, response) => {
           amount: Number(payload.amount) || 0,
           category: String(payload.category || "other").trim(),
           date: String(payload.date || "").trim(),
+          subscriptionStatus: "auto",
           createdAt: new Date().toISOString(),
         };
 
@@ -1511,6 +1532,53 @@ const server = http.createServer((request, response) => {
         sendJson(response, 200, { transaction });
       } catch {
         sendJson(response, 400, { error: "Invalid transaction payload." });
+      }
+    });
+
+    return;
+  }
+
+  if (request.method === "POST" && request.url === "/api/transactions/update") {
+    const session = getSessionAccount(request);
+    if (!session) {
+      sendJson(response, 401, { error: "Sign in to manage transactions." });
+      return;
+    }
+
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+
+    request.on("end", () => {
+      try {
+        const payload = JSON.parse(body || "{}");
+        const id = String(payload.id || "").trim();
+        const category = String(payload.category || "").trim();
+        const subscriptionStatus =
+          payload.subscriptionStatus === "subscribed" || payload.subscriptionStatus === "ignored"
+            ? payload.subscriptionStatus
+            : "auto";
+
+        const transactions = readJson(transactionsFile);
+        const transaction = transactions.find(
+          (entry) => entry.userId === session.account.id && entry.id === id
+        );
+
+        if (!transaction) {
+          sendJson(response, 404, { error: "Transaction not found." });
+          return;
+        }
+
+        if (category) {
+          transaction.category = category;
+        }
+        transaction.subscriptionStatus = subscriptionStatus;
+        transaction.updatedAt = new Date().toISOString();
+        writeJson(transactionsFile, transactions);
+        sendJson(response, 200, { transaction, message: "Transaction updated." });
+      } catch {
+        sendJson(response, 400, { error: "Invalid update payload." });
       }
     });
 
@@ -1738,6 +1806,7 @@ const server = http.createServer((request, response) => {
                 createdAt: new Date().toISOString(),
                 source: "plaid",
                 sourceTransactionId: transaction.transaction_id,
+                subscriptionStatus: "auto",
               };
 
               existingTransactions.push(localTransaction);

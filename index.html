@@ -551,6 +551,35 @@
             <p>If one category runs hot, adjust there first before cutting everywhere else.</p>
           </article>
         </section>
+        <section class="subscription-grid">
+          <article class="glass recommendations-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Subscriptions</p>
+              <h2>Recurring charges Growr found</h2>
+            </div>
+            <div class="transaction-summary-grid">
+              <article class="mini-stat">
+                <span>Estimated monthly total</span>
+                <strong id="subscription-total">$0</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Recurring charges found</span>
+                <strong id="subscription-count">0</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Review status</span>
+                <strong id="subscription-review-label">Needs data</strong>
+              </article>
+            </div>
+            <p id="subscription-status" class="status-message">Import transactions or add recurring charges to see likely subscriptions here.</p>
+            <div id="subscription-list" class="subscription-list"></div>
+          </article>
+          <article class="glass coach-card">
+            <p class="eyebrow">Automation</p>
+            <h3>Growr should do the first pass for you</h3>
+            <p>Import transactions, let Growr detect recurring charges, then quickly confirm, ignore, or recategorize anything that looks off.</p>
+          </article>
+        </section>
         <section class="budgeting-grid">
           <article class="glass budget-workbench">
             <div class="section-heading">
@@ -582,7 +611,7 @@
               <button type="submit" class="primary-btn">Add transaction</button>
             </form>
             <p id="transaction-status" class="status-message">Sign in to save and load transactions.</p>
-            <div class="transaction-dashboard">
+      <div class="transaction-dashboard">
               <div class="transaction-summary-grid">
                 <article class="mini-stat">
                   <span>Visible spend</span>

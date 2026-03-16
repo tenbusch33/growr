@@ -30,6 +30,7 @@ const state = {
     messages: [],
   },
   transactions: [],
+  subscriptions: [],
   transactionFilters: {
     category: "all",
     source: "all",
@@ -360,6 +361,10 @@ function setPlannerStatus(text) {
 
 function setTransactionStatus(text) {
   document.getElementById("transaction-status").textContent = text;
+}
+
+function setSubscriptionStatus(text) {
+  document.getElementById("subscription-status").textContent = text;
 }
 
 function setAccountStatus(text) {
@@ -765,7 +770,31 @@ function renderTransactions() {
             <strong>${currency.format(transaction.amount)}</strong>
           </div>
           <p>${transaction.category} | ${transaction.source || "manual"} | ${transaction.date}</p>
-          <button type="button" class="ghost-btn" data-delete-transaction="${transaction.id}">Delete</button>
+          <div class="transaction-review-row">
+            <label>
+              Category
+              <select data-transaction-category="${transaction.id}">
+                <option value="housing" ${transaction.category === "housing" ? "selected" : ""}>Housing</option>
+                <option value="essentials" ${transaction.category === "essentials" ? "selected" : ""}>Essentials</option>
+                <option value="debt" ${transaction.category === "debt" ? "selected" : ""}>Debt</option>
+                <option value="car" ${transaction.category === "car" ? "selected" : ""}>Car</option>
+                <option value="fun" ${transaction.category === "fun" ? "selected" : ""}>Fun</option>
+                <option value="other" ${transaction.category === "other" ? "selected" : ""}>Other</option>
+              </select>
+            </label>
+            <label>
+              Recurring
+              <select data-transaction-subscription="${transaction.id}">
+                <option value="auto" ${(!transaction.subscriptionStatus || transaction.subscriptionStatus === "auto") ? "selected" : ""}>Auto</option>
+                <option value="subscribed" ${transaction.subscriptionStatus === "subscribed" ? "selected" : ""}>Subscription</option>
+                <option value="ignored" ${transaction.subscriptionStatus === "ignored" ? "selected" : ""}>Not a subscription</option>
+              </select>
+            </label>
+          </div>
+          <div class="transaction-actions-row">
+            <button type="button" class="ghost-btn" data-save-transaction="${transaction.id}">Save review</button>
+            <button type="button" class="ghost-btn" data-delete-transaction="${transaction.id}">Delete</button>
+          </div>
         </article>
       `
     )
@@ -774,8 +803,72 @@ function renderTransactions() {
   container.querySelectorAll("[data-delete-transaction]").forEach((button) => {
     button.addEventListener("click", () => deleteTransaction(button.dataset.deleteTransaction));
   });
+  container.querySelectorAll("[data-save-transaction]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.saveTransaction;
+      const category = container.querySelector(`[data-transaction-category="${id}"]`)?.value || "other";
+      const subscriptionStatus =
+        container.querySelector(`[data-transaction-subscription="${id}"]`)?.value || "auto";
+      updateTransactionReview(id, category, subscriptionStatus);
+    });
+  });
 
   updateTransactionSummary(filteredTransactions);
+}
+
+function renderSubscriptions() {
+  const container = document.getElementById("subscription-list");
+  const total = state.subscriptions.reduce(
+    (sum, item) => sum + Number(item.monthlyEstimate || 0),
+    0
+  );
+
+  document.getElementById("subscription-total").textContent = currency.format(total);
+  document.getElementById("subscription-count").textContent = String(state.subscriptions.length);
+  document.getElementById("subscription-review-label").textContent = state.subscriptions.length
+    ? "Ready to review"
+    : "Needs data";
+
+  if (!state.subscriptions.length) {
+    container.innerHTML = `
+      <div class="linked-item empty-state">
+        <strong>No likely subscriptions yet</strong>
+        <p>Import transactions from Plaid and Growr will look for recurring merchants automatically.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = state.subscriptions
+    .map(
+      (item) => `
+        <article class="subscription-item">
+          <div class="subscription-top">
+            <div>
+              <h3>${item.merchant}</h3>
+              <p>${item.nextReviewHint} · ${item.status === "confirmed" ? "confirmed by you" : "detected by Growr"}</p>
+            </div>
+            <strong>${currency.format(item.monthlyEstimate || item.amount || 0)}</strong>
+          </div>
+          <p class="subscription-meta">Latest charge ${currency.format(item.amount || 0)} · ${item.category} · ${item.transactionsCount} matching charges</p>
+          <div class="subscription-actions">
+            <button type="button" class="ghost-btn" data-subscription-review="${item.transactionIds[0]}" data-subscription-status="subscribed">Keep as subscription</button>
+            <button type="button" class="ghost-btn" data-subscription-review="${item.transactionIds[0]}" data-subscription-status="ignored">Ignore</button>
+          </div>
+        </article>
+      `
+    )
+    .join("");
+
+  container.querySelectorAll("[data-subscription-review]").forEach((button) => {
+    button.addEventListener("click", () => {
+      updateTransactionReview(
+        button.dataset.subscriptionReview,
+        "",
+        button.dataset.subscriptionStatus
+      );
+    });
+  });
 }
 
 function updateTransactionSummary(transactions) {
@@ -866,27 +959,46 @@ function renderLinkedSummary(summary) {
 function loadTransactions() {
   if (!state.user) {
     state.transactions = [];
+    state.subscriptions = [];
     renderTransactions();
+    renderSubscriptions();
     renderCategoryProgress();
     setTransactionStatus("Sign in to save and load transactions.");
+    setSubscriptionStatus("Sign in to review recurring charges and subscriptions.");
     return Promise.resolve();
   }
 
   setTransactionStatus("Loading transactions...");
-  return fetch("/api/transactions")
-    .then(async (response) => {
-      const payload = await response.json();
-      if (!response.ok) {
+  setSubscriptionStatus("Scanning for recurring charges...");
+  return Promise.all([
+    fetch("/api/transactions"),
+    fetch("/api/transactions/subscriptions"),
+  ])
+    .then(async ([transactionsResponse, subscriptionsResponse]) => {
+      const payload = await transactionsResponse.json();
+      const subscriptionPayload = await subscriptionsResponse.json();
+      if (!transactionsResponse.ok) {
         throw new Error(payload.error || "Unable to load transactions.");
+      }
+      if (!subscriptionsResponse.ok) {
+        throw new Error(subscriptionPayload.error || "Unable to load subscriptions.");
       }
 
       state.transactions = payload.transactions || [];
+      state.subscriptions = subscriptionPayload.subscriptions || [];
       renderTransactions();
+      renderSubscriptions();
       renderCategoryProgress();
       setTransactionStatus("Transactions loaded.");
+      setSubscriptionStatus(
+        state.subscriptions.length
+          ? "Growr found likely recurring charges. Review anything that looks off."
+          : "No recurring subscriptions found yet."
+      );
     })
     .catch((error) => {
       setTransactionStatus(error.message);
+      setSubscriptionStatus(error.message);
     });
 }
 
@@ -939,6 +1051,27 @@ function deleteTransaction(id) {
       }
 
       setTransactionStatus("Transaction deleted.");
+      return loadTransactions();
+    })
+    .catch((error) => {
+      setTransactionStatus(error.message);
+    });
+}
+
+function updateTransactionReview(id, category, subscriptionStatus) {
+  setTransactionStatus("Saving transaction review...");
+  fetch("/api/transactions/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, category, subscriptionStatus }),
+  })
+    .then(async (response) => {
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to update transaction.");
+      }
+
+      setTransactionStatus("Transaction review saved.");
       return loadTransactions();
     })
     .catch((error) => {
