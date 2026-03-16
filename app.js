@@ -670,6 +670,7 @@ function populateAccountForm() {
   const upgradePanel = document.getElementById("account-upgrade-panel");
   const upgradeCopy = document.getElementById("account-upgrade-copy");
   const billingPanel = document.getElementById("account-billing-panel");
+  const billingHelp = document.getElementById("account-billing-help");
 
   if (!state.user) {
     nameInput.value = "";
@@ -703,6 +704,7 @@ function populateAccountForm() {
     });
     upgradePanel.classList.add("hidden");
     billingPanel.classList.add("hidden");
+    billingHelp.classList.add("hidden");
     setAccountStatus("Sign in to update your account details.");
     setVerificationStatus("Sign in to manage email verification.");
     updatePlannerActionState();
@@ -716,6 +718,7 @@ function populateAccountForm() {
   primaryActions.classList.remove("hidden");
   planPanel.classList.remove("hidden");
   billingPanel.classList.remove("hidden");
+  billingHelp.classList.toggle("hidden", !state.config?.stripeApiConfigured);
   nameInput.disabled = false;
   emailInput.disabled = false;
   saveButton.disabled = false;
@@ -784,7 +787,7 @@ function populateAccountForm() {
       : "Your email is not verified yet. Send a code, then enter it here."
   );
   billingButton.classList.toggle("hidden", !state.config?.stripeApiConfigured);
-  billingPanel.classList.toggle("hidden", !state.config?.stripeApiConfigured);
+  billingHelp.classList.toggle("hidden", !state.config?.stripeApiConfigured);
   updatePlannerActionState();
 }
 
