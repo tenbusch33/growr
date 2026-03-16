@@ -24,6 +24,10 @@ const state = {
   plaidHandler: null,
   user: null,
   saveTimer: null,
+  ai: {
+    previousResponseId: null,
+    messages: [],
+  },
   transactions: [],
   transactionFilters: {
     category: "all",
@@ -209,6 +213,15 @@ function renderRecommendations(items) {
     .join("");
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 function updateIntegrationStatus(config) {
   document.getElementById("auth-status").textContent = config.supabaseConfigured
     ? "Connected"
@@ -220,23 +233,32 @@ function updateIntegrationStatus(config) {
   const signupNote = document.getElementById("signup-note");
   const accountsNote = document.getElementById("accounts-note");
   const billingNote = document.getElementById("billing-note");
+  const aiNote = document.getElementById("ai-note");
 
   signupNote.classList.remove("hidden");
   accountsNote.classList.remove("hidden");
   billingNote.classList.remove("hidden");
+  aiNote.classList.remove("hidden");
 
   signupNote.textContent =
     config.stripeApiConfigured || (config.stripeBudgetConfigured && config.stripeBundleConfigured)
-      ? "Billing is connected. New members can start a free trial and move into checkout."
+      ? config.emailConfigured
+        ? "Billing is connected. New members can start a free trial, move into checkout, and receive verification emails."
+        : "Billing is connected. New members can start a free trial and move into checkout, but account emails are not on yet."
       : "Billing is still in demo mode. Accounts can be created, but live subscription charging is not on yet.";
 
   accountsNote.textContent = config.plaidConfigured
-    ? "Plaid is connected in sandbox mode right now, so account linking is ready for testing."
+    ? "Plaid is connected in sandbox mode right now, so account linking is ready for testing after email verification."
     : "Account linking will come to life here once Plaid is fully connected.";
 
   billingNote.textContent = config.stripeApiConfigured
     ? "Billing portal is ready. Payment method updates and cancellation should happen there."
     : "Billing portal is not live yet, so payment-method changes and cancellation are still placeholder flows.";
+
+  aiNote.textContent = config.openaiConfigured
+    ? "Ask Growr is live. It can answer general money questions, and signed-in users can get answers shaped by their saved plan."
+    : "Ask Growr is waiting on an OpenAI API key. The chat UI is ready, but responses will stay offline until AI is connected.";
+  syncAiAvailability();
 }
 
 function setAuthMessage(text) {
@@ -292,6 +314,36 @@ function setAccountStatus(text) {
   document.getElementById("account-status").textContent = text;
 }
 
+function setAiStatus(text) {
+  document.getElementById("ai-status").textContent = text;
+}
+
+function setVerificationStatus(text) {
+  document.getElementById("account-verify-status").textContent = text;
+}
+
+function isEmailVerified() {
+  return Boolean(state.user?.emailVerified);
+}
+
+function syncAiAvailability() {
+  const disabled = !state.config?.openaiConfigured;
+  const input = document.getElementById("ai-question");
+  const sendButton = document.getElementById("ai-send-button");
+  const resetButton = document.getElementById("ai-reset-button");
+
+  input.disabled = disabled;
+  sendButton.disabled = disabled;
+  resetButton.disabled = disabled && !state.ai.messages.length;
+  input.placeholder = disabled
+    ? "Add OPENAI_API_KEY to turn on Ask Growr."
+    : "Example: How is a 401(k) taxed compared with a Roth IRA?";
+
+  document.querySelectorAll("[data-ai-question]").forEach((button) => {
+    button.disabled = disabled;
+  });
+}
+
 function hasInvestmentAccess() {
   return Boolean(state.user && state.user.plan === "bundle" && state.user.subscriptionActive !== false);
 }
@@ -311,9 +363,14 @@ function populateAccountForm() {
   const saveButton = document.getElementById("account-save-button");
   const billingButton = document.getElementById("account-billing-button");
   const logoutButton = document.getElementById("account-logout-button");
+  const resendButton = document.getElementById("account-resend-verification-button");
+  const verifyButton = document.getElementById("account-verify-button");
+  const verificationInput = document.getElementById("accountVerificationCode");
   const planLabel = document.getElementById("accountPlanLabel");
   const trialLabel = document.getElementById("accountTrialLabel");
   const subscriptionLabel = document.getElementById("accountSubscriptionLabel");
+  const emailStatusLabel = document.getElementById("accountEmailStatusLabel");
+  const verificationNote = document.getElementById("account-verify-note");
 
   if (!state.user) {
     nameInput.value = "";
@@ -323,10 +380,17 @@ function populateAccountForm() {
     saveButton.disabled = true;
     billingButton.disabled = true;
     logoutButton.disabled = true;
+    resendButton.disabled = true;
+    verifyButton.disabled = true;
+    verificationInput.disabled = true;
+    verificationInput.value = "";
     planLabel.textContent = "Signed out";
     trialLabel.textContent = "Unavailable";
     subscriptionLabel.textContent = "Unavailable";
+    emailStatusLabel.textContent = "Unavailable";
+    verificationNote.classList.add("hidden");
     setAccountStatus("Sign in to update your account details.");
+    setVerificationStatus("Sign in to manage email verification.");
     return;
   }
 
@@ -335,6 +399,9 @@ function populateAccountForm() {
   saveButton.disabled = false;
   billingButton.disabled = !state.config?.stripeApiConfigured;
   logoutButton.disabled = false;
+  resendButton.disabled = false;
+  verifyButton.disabled = false;
+  verificationInput.disabled = false;
   nameInput.value = state.user.fullName || "";
   emailInput.value = state.user.email || "";
   planLabel.textContent = state.user.plan === "bundle" ? "Budget + Investing" : "Budget Core";
@@ -342,11 +409,76 @@ function populateAccountForm() {
     ? `${Math.max(Number(state.user.trialDaysRemaining || 0), 0)} days left`
     : "No active trial";
   subscriptionLabel.textContent = state.user.subscriptionActive === false ? "Pending" : "Active";
+  emailStatusLabel.textContent = state.user.emailVerified ? "Verified" : "Needs verification";
+  verificationNote.classList.remove("hidden");
+  verificationNote.textContent = state.config?.emailConfigured
+    ? "We can send a verification code to this email so the account feels more secure and recoverable."
+    : "Email delivery is not connected yet, so verification will stay in app until a provider is added.";
   setAccountStatus(
     state.user.trialActive
       ? `Signed in. Your free trial ends ${new Date(state.user.trialEndsAt).toLocaleDateString()}.`
       : "Signed in. Update your profile or manage your subscription here."
   );
+  setVerificationStatus(
+    state.user.emailVerified
+      ? "Your email is verified."
+      : "Your email is not verified yet. Send a code, then enter it here."
+  );
+}
+
+function getDefaultAiEmptyState() {
+  const personalized = state.user
+    ? "Ask about your own budget too, like whether to focus on debt, savings, or investing next."
+    : "Sign in if you want answers that also use your saved numbers.";
+
+  return `
+    <div class="ai-empty">
+      <p><strong>Start with a quick question.</strong></p>
+      <ul>
+        <li>What is a 401(k) and how is it taxed?</li>
+        <li>What is the difference between a Roth IRA and a Traditional IRA?</li>
+        <li>Should I pay off credit cards before increasing investing?</li>
+        <li>${personalized}</li>
+      </ul>
+    </div>
+  `;
+}
+
+function renderAiMessages() {
+  const thread = document.getElementById("ai-thread");
+  if (!state.ai.messages.length) {
+    thread.innerHTML = getDefaultAiEmptyState();
+    return;
+  }
+
+  thread.innerHTML = state.ai.messages
+    .map(
+      (message) => `
+        <article class="ai-message ${message.role}">
+          <div class="ai-message-header">
+            <strong>${message.role === "user" ? "You" : "Growr"}</strong>
+            <span>${message.role === "assistant" ? "Educational guidance" : "Question"}</span>
+          </div>
+          <p>${escapeHtml(message.text)}</p>
+        </article>
+      `
+    )
+    .join("");
+
+  thread.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+function resetAiCoach() {
+  state.ai.previousResponseId = null;
+  state.ai.messages = [];
+  document.getElementById("ai-question").value = "";
+  setAiStatus(
+    state.config?.openaiConfigured
+      ? "Ask educational questions anytime. If you are signed in, Growr can also answer using your saved plan."
+      : "Ask Growr needs an OpenAI API key before it can reply."
+  );
+  renderAiMessages();
+  syncAiAvailability();
 }
 
 function getPlannerPayload() {
@@ -427,6 +559,9 @@ function renderAccountState() {
     populateAccountForm();
     applyFeatureGate();
     renderHeroState();
+    if (!state.ai.messages.length) {
+      renderAiMessages();
+    }
     return;
   }
 
@@ -456,12 +591,20 @@ function renderAccountState() {
   populateAccountForm();
   applyFeatureGate();
   renderHeroState();
+  if (!state.ai.messages.length) {
+    renderAiMessages();
+  }
 }
 
 function setPlaidMessage(text) {
   const message = document.getElementById("plaid-message");
   message.classList.remove("hidden");
   message.textContent = text;
+}
+
+function toggleResetMode(showReset) {
+  document.getElementById("login-form").classList.toggle("hidden", showReset);
+  document.getElementById("reset-request-form").classList.toggle("hidden", !showReset);
 }
 
 function renderList(containerId, rows, emptyText) {
@@ -748,6 +891,70 @@ function getInvestmentInputs() {
     brokerageContribution: getValue("brokerageContribution"),
     forecastYears: getValue("forecastYears"),
   };
+}
+
+function submitAiQuestion(question) {
+  const trimmedQuestion = String(question || "").trim();
+  const input = document.getElementById("ai-question");
+  const sendButton = document.getElementById("ai-send-button");
+  const resetButton = document.getElementById("ai-reset-button");
+
+  if (!trimmedQuestion) {
+    setAiStatus("Type a question first.");
+    return Promise.resolve();
+  }
+
+  if (!state.config?.openaiConfigured) {
+    setAiStatus("Ask Growr is not connected yet. Add OPENAI_API_KEY to turn on AI answers.");
+    return Promise.resolve();
+  }
+
+  state.ai.messages.push({ role: "user", text: trimmedQuestion });
+  renderAiMessages();
+  setAiStatus(state.user ? "Thinking with your saved plan in mind..." : "Thinking...");
+  input.value = "";
+  sendButton.disabled = true;
+  resetButton.disabled = true;
+
+  return fetch("/api/ai/coach", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      question: trimmedQuestion,
+      previousResponseId: state.ai.previousResponseId,
+    }),
+  })
+    .then(async (response) => {
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to get an AI answer right now.");
+      }
+
+      state.ai.previousResponseId = payload.responseId || null;
+      state.ai.messages.push({ role: "assistant", text: payload.answer });
+      renderAiMessages();
+      setAiStatus(
+        payload.personalized
+          ? "Answer ready. Growr used your saved plan for extra context."
+          : "Answer ready."
+      );
+    })
+    .catch((error) => {
+      state.ai.messages.push({
+        role: "assistant",
+        text: error.message,
+      });
+      renderAiMessages();
+      setAiStatus("Ask Growr hit a snag. Try a shorter question.");
+    })
+    .finally(() => {
+      syncAiAvailability();
+    });
+}
+
+function handleAiSubmit(event) {
+  event.preventDefault();
+  submitAiQuestion(document.getElementById("ai-question").value);
 }
 
 function savePlanner(showMessage = false) {
@@ -1146,6 +1353,7 @@ function handleSignup(event) {
       setAuthMessage(payload.checkoutUrl
         ? "Free trial started. Opening checkout to secure billing after the trial..."
         : payload.message);
+      resetAiCoach();
       setActivePage("snapshot");
 
       if (payload.checkoutUrl) {
@@ -1183,6 +1391,7 @@ function handleLogin(event) {
       state.user = payload.account;
       renderAccountState();
       setAuthMessage(payload.message);
+      resetAiCoach();
       setActivePage("snapshot");
       return Promise.all([loadPlanner(), loadLinkedSummary(), loadTransactions()]);
     })
@@ -1214,6 +1423,7 @@ function handleLogout() {
       setAuthMessage("Logged out.");
       setPlaidMessage("Sign in before linking or loading account data.");
       applyFeatureGate();
+      resetAiCoach();
       setActivePage("snapshot");
     });
 }
@@ -1296,6 +1506,144 @@ function handleAccountSave() {
     })
     .catch((error) => {
       setAccountStatus(error.message);
+    })
+    .finally(() => {
+      button.disabled = false;
+    });
+}
+
+function handleSendVerification() {
+  if (!state.user) {
+    setVerificationStatus("Sign in before requesting verification.");
+    return;
+  }
+
+  const button = document.getElementById("account-resend-verification-button");
+  button.disabled = true;
+  setVerificationStatus("Sending verification code...");
+
+  fetch("/api/account/send-verification", { method: "POST" })
+    .then(async (response) => {
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to send verification.");
+      }
+
+      state.user = payload.account;
+      renderAccountState();
+      setAuthMessage(payload.message);
+      setVerificationStatus(
+        payload.debugCode
+          ? `Verification code refreshed. Dev code: ${payload.debugCode}`
+          : payload.message
+      );
+    })
+    .catch((error) => {
+      setVerificationStatus(error.message);
+    })
+    .finally(() => {
+      button.disabled = false;
+    });
+}
+
+function handleVerifyEmail() {
+  if (!state.user) {
+    setVerificationStatus("Sign in before verifying your email.");
+    return;
+  }
+
+  const code = document.getElementById("accountVerificationCode").value.trim();
+  const button = document.getElementById("account-verify-button");
+  button.disabled = true;
+  setVerificationStatus("Verifying email...");
+
+  fetch("/api/account/verify-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code }),
+  })
+    .then(async (response) => {
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to verify email.");
+      }
+
+      state.user = payload.account;
+      document.getElementById("accountVerificationCode").value = "";
+      renderAccountState();
+      setAuthMessage(payload.message);
+      setVerificationStatus(payload.message);
+    })
+    .catch((error) => {
+      setVerificationStatus(error.message);
+    })
+    .finally(() => {
+      button.disabled = false;
+    });
+}
+
+function handleRequestPasswordReset() {
+  const email = document.getElementById("resetEmail").value.trim();
+  const button = document.getElementById("request-reset-button");
+
+  button.disabled = true;
+  setAuthMessage("Preparing password reset...");
+
+  fetch("/api/account/request-password-reset", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  })
+    .then(async (response) => {
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to start password reset.");
+      }
+
+      setAuthMessage(
+        payload.debugCode
+          ? `${payload.message} Dev code: ${payload.debugCode}`
+          : payload.message
+      );
+    })
+    .catch((error) => {
+      setAuthMessage(error.message);
+    })
+    .finally(() => {
+      button.disabled = false;
+    });
+}
+
+function handleResetPassword(event) {
+  event.preventDefault();
+  const email = document.getElementById("resetEmail").value.trim();
+  const code = document.getElementById("resetCode").value.trim();
+  const password = document.getElementById("resetPassword").value.trim();
+  const button = document.getElementById("reset-password-button");
+
+  button.disabled = true;
+  setAuthMessage("Resetting password...");
+
+  fetch("/api/account/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code, password }),
+  })
+    .then(async (response) => {
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to reset password.");
+      }
+
+      setAuthMessage(payload.message);
+      toggleResetMode(false);
+      document.getElementById("loginEmail").value = email;
+      document.getElementById("loginPassword").value = "";
+      document.getElementById("resetCode").value = "";
+      document.getElementById("resetPassword").value = "";
+    })
+    .catch((error) => {
+      setAuthMessage(error.message);
     })
     .finally(() => {
       button.disabled = false;
@@ -1391,6 +1739,16 @@ function initializePlaidLink(token) {
 }
 
 function connectPlaidAccounts() {
+  if (!state.user) {
+    setPlaidMessage("Sign in before linking accounts.");
+    return;
+  }
+
+  if (!isEmailVerified()) {
+    setPlaidMessage("Verify your email in Account before linking bank accounts.");
+    return;
+  }
+
   setPlaidMessage("Creating a Plaid Link session...");
 
   fetch("/api/plaid/create-link-token", {
@@ -1413,6 +1771,11 @@ function connectPlaidAccounts() {
 function importPlaidTransactions() {
   if (!state.user) {
     setPlaidMessage("Sign in before importing transactions.");
+    return;
+  }
+
+  if (!isEmailVerified()) {
+    setPlaidMessage("Verify your email in Account before importing Plaid transactions.");
     return;
   }
 
@@ -1483,6 +1846,7 @@ function loadConfig() {
     .catch(() => {
       document.getElementById("auth-status").textContent = "Unavailable";
       document.getElementById("billing-status").textContent = "Unavailable";
+      setAiStatus("Configuration is unavailable right now.");
     });
 }
 
@@ -1504,17 +1868,36 @@ document.querySelectorAll("[data-page-target]").forEach((button) => {
 
 document.getElementById("signup-form").addEventListener("submit", handleSignup);
 document.getElementById("login-form").addEventListener("submit", handleLogin);
+document.getElementById("reset-request-form").addEventListener("submit", handleResetPassword);
+document.getElementById("show-reset-button").addEventListener("click", () => {
+  toggleResetMode(true);
+  setAuthMessage("Enter your email, request a code, then set a new password.");
+});
+document.getElementById("cancel-reset-button").addEventListener("click", () => {
+  toggleResetMode(false);
+  setAuthMessage("Back to login.");
+});
+document.getElementById("request-reset-button").addEventListener("click", handleRequestPasswordReset);
 document.getElementById("logout-button").addEventListener("click", handleLogout);
 document.getElementById("manage-billing-button").addEventListener("click", handleManageBilling);
 document.getElementById("account-save-button").addEventListener("click", handleAccountSave);
 document.getElementById("account-billing-button").addEventListener("click", handleManageBilling);
 document.getElementById("account-logout-button").addEventListener("click", handleLogout);
+document.getElementById("account-resend-verification-button").addEventListener("click", handleSendVerification);
+document.getElementById("account-verify-button").addEventListener("click", handleVerifyEmail);
 document.getElementById("connect-accounts").addEventListener("click", connectPlaidAccounts);
 document.getElementById("import-transactions").addEventListener("click", importPlaidTransactions);
 document.getElementById("save-plan").addEventListener("click", () => savePlanner(true));
 document.getElementById("upgrade-button").addEventListener("click", handleUpgrade);
 document.getElementById("transaction-form").addEventListener("submit", createTransaction);
+document.getElementById("ai-form").addEventListener("submit", handleAiSubmit);
+document.getElementById("ai-reset-button").addEventListener("click", resetAiCoach);
 bindTransactionFilters();
+document.querySelectorAll("[data-ai-question]").forEach((button) => {
+  button.addEventListener("click", () => {
+    submitAiQuestion(button.dataset.aiQuestion);
+  });
+});
 
 document
   .querySelectorAll("#budget-form input, #investment-form input, #networth-form input")
@@ -1529,6 +1912,8 @@ updateDashboard();
 renderTransactions();
 renderCategoryProgress();
 applyFeatureGate();
+renderAiMessages();
+syncAiAvailability();
 setActivePage(window.location.hash.replace("#", "") || "snapshot");
 loadConfig();
 handleCheckoutReturn();

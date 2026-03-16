@@ -110,6 +110,36 @@
             </article>
           </div>
         </section>
+        <section class="glass ai-coach-panel">
+          <div class="section-heading">
+            <p class="eyebrow">Ask Growr</p>
+            <h2>Ask money questions in plain English</h2>
+            <p class="page-intro-text">
+              Ask about 401(k)s, Roth IRA taxes, HSAs, debt payoff, or what Growr thinks you should focus on next.
+            </p>
+          </div>
+          <div id="ai-note" class="helper-banner hidden"></div>
+          <div class="ai-starter-row">
+            <button type="button" class="prompt-chip" data-ai-question="What is a 401(k)?">What is a 401(k)?</button>
+            <button type="button" class="prompt-chip" data-ai-question="How are Roth IRA and Traditional IRA taxes different?">Roth vs Traditional IRA taxes</button>
+            <button type="button" class="prompt-chip" data-ai-question="Should I pay off my credit card before investing more?">Debt or investing first?</button>
+            <button type="button" class="prompt-chip" data-ai-question="What is an HSA and why do people use it?">What is an HSA?</button>
+          </div>
+          <div id="ai-thread" class="ai-thread"></div>
+          <form id="ai-form" class="ai-form">
+            <label class="ai-input-wrap" for="ai-question">
+              <span>Ask Growr anything about budgeting, investing, or account types</span>
+              <textarea id="ai-question" rows="3" placeholder="Example: How is a 401(k) taxed compared with a Roth IRA?"></textarea>
+            </label>
+            <div class="ai-actions">
+              <button type="submit" class="primary-btn" id="ai-send-button">Ask Growr</button>
+              <button type="button" class="ghost-btn" id="ai-reset-button">Clear chat</button>
+            </div>
+          </form>
+          <p id="ai-status" class="status-message">
+            Ask educational questions anytime. If you are signed in, Growr can also answer using your saved plan.
+          </p>
+        </section>
         <section id="how-it-works" class="info-grid">
           <article class="glass info-card">
             <h2>Plan your month</h2>
@@ -211,6 +241,26 @@
               </label>
               <div class="auth-inline-actions">
                 <button type="submit" class="secondary-btn" id="login-button">Log in</button>
+                <button type="button" class="ghost-btn" id="show-reset-button">Forgot password?</button>
+              </div>
+            </form>
+            <form id="reset-request-form" class="auth-form login-form hidden">
+              <label>
+                Reset email
+                <input type="email" id="resetEmail" placeholder="jordan@email.com" />
+              </label>
+              <label>
+                Reset code
+                <input type="text" id="resetCode" placeholder="Enter code" />
+              </label>
+              <label>
+                New password
+                <input type="password" id="resetPassword" placeholder="Create a new password" />
+              </label>
+              <div class="auth-inline-actions">
+                <button type="button" class="secondary-btn" id="request-reset-button">Send reset code</button>
+                <button type="submit" class="primary-btn" id="reset-password-button">Reset password</button>
+                <button type="button" class="ghost-btn" id="cancel-reset-button">Back to login</button>
               </div>
             </form>
           </div>
@@ -734,6 +784,28 @@
                 <span>Billing state</span>
                 <strong id="accountSubscriptionLabel">Unavailable</strong>
               </article>
+              <article class="mini-stat">
+                <span>Email status</span>
+                <strong id="accountEmailStatusLabel">Unavailable</strong>
+              </article>
+            </div>
+            <div class="account-verify-card">
+              <div class="section-heading compact">
+                <p class="eyebrow">Verification</p>
+                <h3>Confirm your email</h3>
+              </div>
+              <p id="account-verify-status" class="status-message">Sign in to manage email verification.</p>
+              <div id="account-verify-note" class="helper-banner hidden"></div>
+              <form id="account-verify-form" class="account-verify-form">
+                <label>
+                  Verification code
+                  <input type="text" id="accountVerificationCode" placeholder="Enter 6-digit code" />
+                </label>
+              </form>
+              <div class="auth-inline-actions">
+                <button type="button" class="ghost-btn" id="account-resend-verification-button">Send verification email</button>
+                <button type="button" class="primary-btn" id="account-verify-button">Verify email</button>
+              </div>
             </div>
             <div class="auth-inline-actions">
               <button type="button" class="primary-btn" id="account-save-button">Save account details</button>
@@ -765,10 +837,104 @@
           </article>
         </section>
         </section>
+
+        <section class="app-page" data-page="privacy">
+        <section class="glass page-intro">
+          <div>
+            <p class="eyebrow">Privacy</p>
+            <h2>How Growr handles your data</h2>
+            <p class="page-intro-text">This page explains what Growr stores, what outside services may be used, and what users should expect from the current product.</p>
+          </div>
+          <div class="page-intro-callouts">
+            <span>Plain English</span>
+            <span>App-specific</span>
+            <span>Updated for current build</span>
+          </div>
+        </section>
+        <section class="glass legal-page">
+          <article class="legal-block">
+            <h3>What Growr collects</h3>
+            <p>Growr may collect account details such as name, email address, password hash, selected plan, saved planner inputs, transaction entries, connected-account summaries, and subscription metadata.</p>
+          </article>
+          <article class="legal-block">
+            <h3>Why the app collects it</h3>
+            <p>That information is used to create accounts, save budgeting data, connect financial accounts, improve recommendations, manage subscriptions, and support password reset or email verification flows.</p>
+          </article>
+          <article class="legal-block">
+            <h3>Connected accounts</h3>
+            <p>If a user links financial accounts, Growr may receive balances, liabilities, transactions, and investment details through Plaid. Coverage depends on the institution and products available through Plaid.</p>
+          </article>
+          <article class="legal-block">
+            <h3>AI features</h3>
+            <p>If Ask Growr is enabled, user questions and relevant saved financial context may be sent to OpenAI to generate educational answers inside the app. Growr should not be used as a substitute for licensed tax, legal, or investment advice.</p>
+          </article>
+          <article class="legal-block">
+            <h3>Email and billing providers</h3>
+            <p>Growr may use third-party providers such as Stripe for billing, Plaid for account linking, OpenAI for AI answers, and an email provider such as Resend for verification and password reset messages.</p>
+          </article>
+          <article class="legal-block">
+            <h3>Data retention and security</h3>
+            <p>Growr aims to store only what is needed to run the service, but no online service can promise perfect security. Users should use strong passwords and protect access to their email account.</p>
+          </article>
+          <article class="legal-block">
+            <h3>Your choices</h3>
+            <p>Users can update profile details, manage billing when Stripe is connected, and choose whether to link external accounts. If you do not want linked financial data used, do not connect those accounts.</p>
+          </article>
+        </section>
+        </section>
+
+        <section class="app-page" data-page="terms">
+        <section class="glass page-intro">
+          <div>
+            <p class="eyebrow">Terms</p>
+            <h2>Basic terms for using Growr</h2>
+            <p class="page-intro-text">These terms are written for the current app and are meant to set straightforward expectations for normal users.</p>
+          </div>
+          <div class="page-intro-callouts">
+            <span>Consumer-friendly</span>
+            <span>Educational product</span>
+            <span>Not financial advice</span>
+          </div>
+        </section>
+        <section class="glass legal-page">
+          <article class="legal-block">
+            <h3>Educational use only</h3>
+            <p>Growr is an educational budgeting and planning tool. It may surface ideas, forecasts, and suggestions, but it does not provide legal, tax, accounting, or personalized investment advice.</p>
+          </article>
+          <article class="legal-block">
+            <h3>User responsibility</h3>
+            <p>Users are responsible for the accuracy of the information they enter or connect. If figures are incomplete or incorrect, recommendations and forecasts may also be incomplete or incorrect.</p>
+          </article>
+          <article class="legal-block">
+            <h3>Forecasts and assumptions</h3>
+            <p>Investment projections and financial suggestions are estimates built from assumptions. Actual market performance, taxes, fees, rates, and personal circumstances can change outcomes materially.</p>
+          </article>
+          <article class="legal-block">
+            <h3>Accounts and security</h3>
+            <p>Users should keep login credentials private and use a valid email address they control. Growr may require email verification for sensitive actions like linked-account access or billing actions.</p>
+          </article>
+          <article class="legal-block">
+            <h3>Billing</h3>
+            <p>If paid plans are enabled, subscription billing, payment updates, and cancellation may be handled by Stripe or another billing provider. Pricing, trial availability, and access controls may change over time.</p>
+          </article>
+          <article class="legal-block">
+            <h3>Third-party services</h3>
+            <p>Some features depend on outside providers. Growr is not responsible for outages, errors, institution coverage gaps, or policy changes made by Plaid, Stripe, OpenAI, or email providers.</p>
+          </article>
+          <article class="legal-block">
+            <h3>Service changes</h3>
+            <p>Growr may add, remove, pause, or update features over time. Continued use of the app after changes means the user accepts those updated terms.</p>
+          </article>
+        </section>
+        </section>
       </main>
       <footer class="site-footer">
         <p>Growr is built to help everyday people budget, plan, and invest with more clarity.</p>
-        <span>Educational guidance only. Not personalized financial advice.</span>
+        <div class="footer-links">
+          <button type="button" class="footer-link" data-page-target="privacy">Privacy Policy</button>
+          <button type="button" class="footer-link" data-page-target="terms">Terms of Use</button>
+          <span>Educational guidance only. Not personalized financial advice.</span>
+        </div>
       </footer>
     </div>
 

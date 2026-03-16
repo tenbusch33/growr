@@ -181,6 +181,7 @@ function publicAccount(account) {
     email: account.email,
     plan: account.plan,
     subscriptionActive: account.subscriptionActive !== false,
+    emailVerified: Boolean(account.emailVerified),
     trialEndsAt,
     trialActive,
     trialDaysRemaining,
@@ -227,6 +228,8 @@ function getConfig() {
     plaidConfigured: Boolean(
       process.env.PLAID_CLIENT_ID && process.env.PLAID_SECRET && process.env.PLAID_ENV
     ),
+    openaiConfigured: Boolean(process.env.OPENAI_API_KEY),
+    emailConfigured: Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM),
     dataDir,
   };
 }
@@ -475,6 +478,242 @@ function getPlaidBaseUrl() {
     : "https://sandbox.plaid.com";
 }
 
+function isOpenAIConfigured() {
+  return Boolean(process.env.OPENAI_API_KEY);
+}
+
+function isEmailConfigured() {
+  return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
+}
+
+function generateVerificationCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function applyEmailVerificationState(account) {
+  account.emailVerified = false;
+  account.emailVerificationCode = generateVerificationCode();
+  account.emailVerificationExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+}
+
+function applyPasswordResetState(account) {
+  account.passwordResetCode = generateVerificationCode();
+  account.passwordResetExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+}
+
+async function sendEmailMessage({ to, subject, html }) {
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.RESEND_API_KEY || ""}`,
+    },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM,
+      to: [to],
+      subject,
+      html,
+    }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || data.error || "Email send failed.");
+  }
+
+  return data;
+}
+
+async function sendVerificationEmail(account) {
+  if (!isEmailConfigured()) {
+    return { delivered: false };
+  }
+
+  const expiresAt = account.emailVerificationExpiresAt
+    ? new Date(account.emailVerificationExpiresAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    : "soon";
+
+  await sendEmailMessage({
+    to: account.email,
+    subject: "Verify your Growr account",
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827">
+        <h2>Welcome to Growr</h2>
+        <p>Use this verification code to confirm your email address:</p>
+        <p style="font-size:28px;font-weight:700;letter-spacing:4px">${account.emailVerificationCode}</p>
+        <p>This code expires at ${expiresAt}.</p>
+        <p>Growr helps you see where your money goes and what to do next.</p>
+      </div>
+    `,
+  });
+
+  return { delivered: true };
+}
+
+async function sendPasswordResetEmail(account) {
+  if (!isEmailConfigured()) {
+    return { delivered: false };
+  }
+
+  await sendEmailMessage({
+    to: account.email,
+    subject: "Reset your Growr password",
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827">
+        <h2>Reset your Growr password</h2>
+        <p>Use this reset code to create a new password:</p>
+        <p style="font-size:28px;font-weight:700;letter-spacing:4px">${account.passwordResetCode}</p>
+        <p>This code expires in 30 minutes.</p>
+      </div>
+    `,
+  });
+
+  return { delivered: true };
+}
+
+function requireVerifiedEmail(session, response, actionLabel) {
+  if (!session?.account?.emailVerified) {
+    sendJson(response, 403, {
+      error: `Verify your email before ${actionLabel}.`,
+    });
+    return false;
+  }
+
+  return true;
+}
+
+function getOpenAIModel() {
+  return process.env.OPENAI_MODEL || "gpt-5-mini";
+}
+
+function readRequestBody(request) {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+    request.on("end", () => resolve(body));
+    request.on("error", reject);
+  });
+}
+
+async function openAIResponsesRequest(payload) {
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY || ""}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || "OpenAI request failed.");
+  }
+
+  return data;
+}
+
+function buildAiFinancialContext(account) {
+  if (!account) {
+    return {
+      personalized: false,
+      summary: "No signed-in user context is available. Answer as a general educational coach only.",
+    };
+  }
+
+  const planner = readJson(plannerFile).find((entry) => entry.userId === account.id)?.data || null;
+  const transactions = readJson(transactionsFile)
+    .filter((entry) => entry.userId === account.id)
+    .slice(-20);
+
+  if (!planner) {
+    return {
+      personalized: false,
+      summary: `User is signed in on the ${account.plan} plan, but no saved planner exists yet. Answer generally unless the question can be answered from basic account state alone.`,
+    };
+  }
+
+  const income = Number(planner.income || 0);
+  const housing = Number(planner.housing || 0);
+  const essentials = Number(planner.essentials || 0);
+  const creditCardPayment = Number(planner.creditCard || 0);
+  const otherDebt = Number(planner.otherDebt || 0);
+  const carPayment = Number(planner.carPayment || 0);
+  const carCosts = Number(planner.carCosts || 0);
+  const emergencyFund = Number(planner.emergencyFund || 0);
+  const creditCardBalance = Number(planner.creditCardBalance || 0);
+  const homeValue = Number(planner.homeValue || 0);
+  const mortgageBalance = Number(planner.mortgageBalance || 0);
+  const carValue = Number(planner.carValue || 0);
+  const carLoanBalance = Number(planner.carLoanBalance || 0);
+  const cashAssets = Number(planner.cashAssets || 0);
+  const otherAssets = Number(planner.otherAssets || 0);
+  const otherLiabilities = Number(planner.otherLiabilities || 0);
+  const totalExpenses = housing + essentials + creditCardPayment + otherDebt + carPayment + carCosts;
+  const leftover = income - totalExpenses;
+  const essentialBase = housing + essentials || 1;
+  const emergencyMonths = emergencyFund / essentialBase;
+  const debtRatio = income ? (creditCardPayment + otherDebt + carPayment) / income : 0;
+  const carRatio = income ? (carPayment + carCosts) / income : 0;
+  const investmentTotal = [
+    "k401Balance",
+    "rothBalance",
+    "traditionalIraBalance",
+    "hsaBalance",
+    "college529Balance",
+    "brokerageBalance",
+  ].reduce((sum, key) => sum + Number(planner[key] || 0), 0);
+  const homeEquity = homeValue - mortgageBalance;
+  const carEquity = carValue - carLoanBalance;
+  const netWorth = homeValue + carValue + cashAssets + otherAssets + investmentTotal
+    - mortgageBalance - carLoanBalance - otherLiabilities - creditCardBalance;
+
+  const categoryTotals = transactions.reduce((totals, entry) => {
+    const key = entry.category || "other";
+    totals[key] = (totals[key] || 0) + Number(entry.amount || 0);
+    return totals;
+  }, {});
+
+  const topCategories = Object.entries(categoryTotals)
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 4)
+    .map(([category, amount]) => `${category}: $${Math.round(amount)}`);
+
+  return {
+    personalized: true,
+    summary: [
+      `Signed-in user plan: ${account.plan}.`,
+      `Monthly income: $${Math.round(income)}. Estimated monthly expenses: $${Math.round(totalExpenses)}. Leftover: $${Math.round(leftover)}.`,
+      `Credit card balance: $${Math.round(creditCardBalance)}. Emergency fund: $${Math.round(emergencyFund)} (${emergencyMonths.toFixed(1)} months).`,
+      `Debt ratio: ${(debtRatio * 100).toFixed(0)}%. Car cost ratio: ${(carRatio * 100).toFixed(0)}%.`,
+      `Home equity: $${Math.round(homeEquity)}. Car equity: $${Math.round(carEquity)}. Net worth estimate: $${Math.round(netWorth)}.`,
+      `Investments tracked in planner: $${Math.round(investmentTotal)}.`,
+      topCategories.length
+        ? `Recent spending categories: ${topCategories.join(", ")}.`
+        : "No recent transaction history is available.",
+    ].join(" "),
+  };
+}
+
+function extractResponseText(payload) {
+  if (payload.output_text) {
+    return payload.output_text.trim();
+  }
+
+  const parts = [];
+  (payload.output || []).forEach((item) => {
+    (item.content || []).forEach((content) => {
+      if (content.type === "output_text" && content.text) {
+        parts.push(content.text);
+      }
+    });
+  });
+
+  return parts.join("\n").trim();
+}
+
 async function plaidRequest(endpoint, payload) {
   const response = await fetch(`${getPlaidBaseUrl()}${endpoint}`, {
     method: "POST",
@@ -711,9 +950,13 @@ const server = http.createServer((request, response) => {
           createdAt: new Date().toISOString(),
         };
 
+        applyEmailVerificationState(account);
+
         accounts.push(account);
         writeJson(accountsFile, accounts);
         const session = createSession(account.id);
+
+        sendVerificationEmail(account).catch(() => null);
 
         if (isStripeApiConfigured()) {
           createSubscriptionCheckout(account, plan, request)
@@ -721,7 +964,9 @@ const server = http.createServer((request, response) => {
               sendJsonWithCookie(response, 200, {
                 account: publicAccount(readJson(accountsFile).find((entry) => entry.id === account.id)),
                 checkoutUrl: checkoutSession.url,
-                message: "Your 7-day free trial started. Complete checkout to secure billing after the trial.",
+                message: isEmailConfigured()
+                  ? "Your 7-day free trial started. Check your email for a verification code, then complete checkout to secure billing after the trial."
+                  : "Your 7-day free trial started. Complete checkout to secure billing after the trial.",
               }, `growr_session=${session.token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=2592000`);
             })
             .catch((error) => sendJson(response, 400, { error: error.message }));
@@ -733,8 +978,12 @@ const server = http.createServer((request, response) => {
           account: publicAccount(account),
           checkoutUrl,
           message: checkoutUrl
-            ? "Your 7-day free trial started, and billing checkout was prepared in a new tab."
-            : "Your 7-day free trial started. Stripe checkout is not configured yet, so the account was saved locally in demo mode.",
+            ? isEmailConfigured()
+              ? "Your 7-day free trial started, billing checkout was prepared, and a verification email was sent."
+              : "Your 7-day free trial started, and billing checkout was prepared in a new tab."
+            : isEmailConfigured()
+              ? "Your 7-day free trial started. A verification email was sent, and the account was saved locally in demo mode."
+              : "Your 7-day free trial started. Stripe checkout is not configured yet, so the account was saved locally in demo mode.",
         }, `growr_session=${session.token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=2592000`);
       } catch {
         sendJson(response, 400, { error: "Invalid signup payload." });
@@ -773,6 +1022,94 @@ const server = http.createServer((request, response) => {
       }
     });
 
+    return;
+  }
+
+  if (request.method === "POST" && request.url === "/api/account/request-password-reset") {
+    readRequestBody(request)
+      .then((body) => {
+        const payload = JSON.parse(body || "{}");
+        const email = String(payload.email || "").trim().toLowerCase();
+        const accounts = readJson(accountsFile);
+        const account = accounts.find((entry) => entry.email === email);
+
+        if (!account) {
+          sendJson(response, 200, {
+            message: "If that email exists, a reset code is on the way.",
+          });
+          return;
+        }
+
+        applyPasswordResetState(account);
+        writeJson(accountsFile, accounts);
+
+        sendPasswordResetEmail(account)
+          .then(() => {
+            sendJson(response, 200, {
+              message: "Reset code sent to your email.",
+            });
+          })
+          .catch(() => {
+            sendJson(response, 200, {
+              message: "Reset code created. Email delivery is not configured yet.",
+              debugCode: account.passwordResetCode,
+            });
+          });
+      })
+      .catch(() => {
+        sendJson(response, 400, { error: "Invalid password reset request." });
+      });
+    return;
+  }
+
+  if (request.method === "POST" && request.url === "/api/account/reset-password") {
+    readRequestBody(request)
+      .then((body) => {
+        const payload = JSON.parse(body || "{}");
+        const email = String(payload.email || "").trim().toLowerCase();
+        const code = String(payload.code || "").trim();
+        const password = String(payload.password || "").trim();
+        const accounts = readJson(accountsFile);
+        const account = accounts.find((entry) => entry.email === email);
+
+        if (!account) {
+          sendJson(response, 400, { error: "We could not find that account." });
+          return;
+        }
+
+        if (!code || !password) {
+          sendJson(response, 400, { error: "Email, reset code, and new password are required." });
+          return;
+        }
+
+        const expiresAt = account.passwordResetExpiresAt
+          ? new Date(account.passwordResetExpiresAt).getTime()
+          : 0;
+
+        if (!account.passwordResetCode || Date.now() > expiresAt) {
+          sendJson(response, 400, { error: "That reset code has expired. Request a new one." });
+          return;
+        }
+
+        if (account.passwordResetCode !== code) {
+          sendJson(response, 400, { error: "That reset code does not match." });
+          return;
+        }
+
+        const credentials = hashPassword(password);
+        account.salt = credentials.salt;
+        account.passwordHash = credentials.passwordHash;
+        delete account.passwordResetCode;
+        delete account.passwordResetExpiresAt;
+        writeJson(accountsFile, accounts);
+
+        sendJson(response, 200, {
+          message: "Password updated. You can log in now.",
+        });
+      })
+      .catch(() => {
+        sendJson(response, 400, { error: "Invalid password reset payload." });
+      });
     return;
   }
 
@@ -872,12 +1209,20 @@ const server = http.createServer((request, response) => {
         }
 
         account.fullName = fullName;
-        account.email = email;
+        if (account.email !== email) {
+          account.email = email;
+          applyEmailVerificationState(account);
+          sendVerificationEmail(account).catch(() => null);
+        }
         writeJson(accountsFile, accounts);
 
         sendJson(response, 200, {
           account: publicAccount(account),
-          message: "Account details updated.",
+          message: account.emailVerified
+            ? "Account details updated."
+            : isEmailConfigured()
+              ? "Account details updated. Check your email for a new verification code."
+              : "Account details updated. Email verification is waiting on email delivery setup.",
         });
       } catch {
         sendJson(response, 400, { error: "Invalid account payload." });
@@ -887,10 +1232,100 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  if (request.method === "POST" && request.url === "/api/account/send-verification") {
+    const session = getSessionAccount(request);
+    if (!session) {
+      sendJson(response, 401, { error: "Sign in before requesting verification." });
+      return;
+    }
+
+    const account = updateAccount(session.account.id, (entry) => {
+      applyEmailVerificationState(entry);
+    });
+
+    if (!account) {
+      sendJson(response, 404, { error: "Account not found." });
+      return;
+    }
+
+    sendVerificationEmail(account)
+      .then(() => {
+        sendJson(response, 200, {
+          account: publicAccount(account),
+          message: "Verification email sent.",
+        });
+      })
+      .catch(() => {
+        sendJson(response, 200, {
+          account: publicAccount(account),
+          message: "Verification code refreshed, but email delivery is not configured yet.",
+          debugCode: account.emailVerificationCode,
+        });
+      });
+    return;
+  }
+
+  if (request.method === "POST" && request.url === "/api/account/verify-email") {
+    const session = getSessionAccount(request);
+    if (!session) {
+      sendJson(response, 401, { error: "Sign in before verifying your email." });
+      return;
+    }
+
+    readRequestBody(request)
+      .then((body) => {
+        const payload = JSON.parse(body || "{}");
+        const code = String(payload.code || "").trim();
+        if (!code) {
+          sendJson(response, 400, { error: "Verification code is required." });
+          return;
+        }
+
+        const accounts = readJson(accountsFile);
+        const account = accounts.find((entry) => entry.id === session.account.id);
+        if (!account) {
+          sendJson(response, 404, { error: "Account not found." });
+          return;
+        }
+
+        const expiresAt = account.emailVerificationExpiresAt
+          ? new Date(account.emailVerificationExpiresAt).getTime()
+          : 0;
+
+        if (!account.emailVerificationCode || Date.now() > expiresAt) {
+          sendJson(response, 400, { error: "That verification code has expired. Send a new one." });
+          return;
+        }
+
+        if (account.emailVerificationCode !== code) {
+          sendJson(response, 400, { error: "That verification code does not match." });
+          return;
+        }
+
+        account.emailVerified = true;
+        delete account.emailVerificationCode;
+        delete account.emailVerificationExpiresAt;
+        writeJson(accountsFile, accounts);
+
+        sendJson(response, 200, {
+          account: publicAccount(account),
+          message: "Email verified.",
+        });
+      })
+      .catch(() => {
+        sendJson(response, 400, { error: "Invalid verification payload." });
+      });
+    return;
+  }
+
   if (request.method === "POST" && request.url === "/api/billing/portal") {
     const session = getSessionAccount(request);
     if (!session) {
       sendJson(response, 401, { error: "Sign in before managing billing." });
+      return;
+    }
+
+    if (!requireVerifiedEmail(session, response, "opening billing")) {
       return;
     }
 
@@ -1042,6 +1477,10 @@ const server = http.createServer((request, response) => {
       return;
     }
 
+    if (!requireVerifiedEmail(session, response, "linking bank accounts")) {
+      return;
+    }
+
     if (!isPlaidConfigured()) {
       sendJson(response, 400, {
         error: "Plaid is not configured yet. Add PLAID_CLIENT_ID, PLAID_SECRET, and PLAID_ENV to .env.",
@@ -1065,6 +1504,10 @@ const server = http.createServer((request, response) => {
     const session = getSessionAccount(request);
     if (!session) {
       sendJson(response, 401, { error: "Sign in before linking Plaid accounts." });
+      return;
+    }
+
+    if (!requireVerifiedEmail(session, response, "linking bank accounts")) {
       return;
     }
 
@@ -1117,6 +1560,10 @@ const server = http.createServer((request, response) => {
     const session = getSessionAccount(request);
     if (!session) {
       sendJson(response, 401, { error: "Sign in before importing transactions." });
+      return;
+    }
+
+    if (!requireVerifiedEmail(session, response, "importing Plaid transactions")) {
       return;
     }
 
@@ -1219,6 +1666,10 @@ const server = http.createServer((request, response) => {
       return;
     }
 
+    if (!requireVerifiedEmail(session, response, "loading linked account data")) {
+      return;
+    }
+
     if (!isPlaidConfigured()) {
       sendJson(response, 400, {
         error: "Plaid is not configured yet. Add PLAID_CLIENT_ID, PLAID_SECRET, and PLAID_ENV to .env.",
@@ -1249,6 +1700,70 @@ const server = http.createServer((request, response) => {
       .catch((error) => {
         sendJson(response, 400, { error: error.message });
       });
+    return;
+  }
+
+  if (request.method === "POST" && request.url === "/api/ai/coach") {
+    if (!isOpenAIConfigured()) {
+      sendJson(response, 400, {
+        error: "Ask Growr is not configured yet. Add OPENAI_API_KEY to enable AI answers.",
+      });
+      return;
+    }
+
+    readRequestBody(request)
+      .then(async (body) => {
+        const payload = JSON.parse(body || "{}");
+        const question = String(payload.question || "").trim();
+        const previousResponseId = String(payload.previousResponseId || "").trim();
+        const session = getSessionAccount(request);
+        const aiContext = buildAiFinancialContext(session?.account || null);
+
+        if (!question) {
+          sendJson(response, 400, { error: "A question is required." });
+          return;
+        }
+
+        if (question.length > 1200) {
+          sendJson(response, 400, { error: "Keep questions under 1,200 characters for now." });
+          return;
+        }
+
+        const aiResponse = await openAIResponsesRequest({
+          model: getOpenAIModel(),
+          instructions: [
+            "You are Growr, a friendly financial education coach inside a budgeting app.",
+            "Answer in plain English for everyday users.",
+            "You can explain 401(k), Roth IRA, Traditional IRA, HSA, brokerage, taxes, debt payoff, budgeting, and net worth concepts.",
+            "When user-specific context is provided, use it carefully and call out that you are giving educational guidance, not legal, tax, or investment advice.",
+            "Do not tell users to take extreme actions without explaining tradeoffs. Keep answers practical, supportive, and concise.",
+            "If a question touches taxes or regulations, explain the general rule and suggest confirming details with a tax professional because rules can vary.",
+          ].join(" "),
+          previous_response_id: previousResponseId || undefined,
+          input: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "input_text",
+                  text: `Context for this answer: ${aiContext.summary}\n\nUser question: ${question}`,
+                },
+              ],
+            },
+          ],
+        });
+
+        const answer = extractResponseText(aiResponse);
+        sendJson(response, 200, {
+          answer: answer || "I could not form a useful answer yet. Please try asking that a different way.",
+          responseId: aiResponse.id || null,
+          personalized: aiContext.personalized,
+        });
+      })
+      .catch((error) => {
+        sendJson(response, 400, { error: error.message || "Unable to answer that question." });
+      });
+
     return;
   }
 
