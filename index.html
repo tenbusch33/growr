@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
@@ -21,7 +21,7 @@
             <span class="brand-mark">G</span>
             <div>
               <p>Growr</p>
-              <span>Grow money with clarity.</span>
+              <span>Money clarity for real life.</span>
             </div>
           </div>
           <div class="topbar-actions">
@@ -30,31 +30,39 @@
               <button class="tab-btn" data-page-target="budget">Budget</button>
               <button class="tab-btn" data-page-target="networth">Net Worth</button>
               <button class="tab-btn" data-page-target="accounts">Connect Accounts</button>
-              <button class="tab-btn" data-page-target="account" id="account-nav-button">Log in</button>
+            </div>
+            <div class="topbar-auth">
+              <button type="button" class="nav-login-btn" data-auth-target="login" id="login-nav-button">Log in</button>
+              <button type="button" class="nav-signup-btn" data-auth-target="signup" id="signup-nav-button">Sign up</button>
+              <button type="button" class="nav-account-btn hidden" data-page-target="account" id="account-nav-button">Account</button>
             </div>
           </div>
         </nav>
 
+        <div class="hero-banner">
+          <p><strong>Growr Premium Trial:</strong> Start with a 7-day free trial, then unlock budgeting plus investing guidance in one place.</p>
+        </div>
+
         <section class="hero-content">
           <div class="hero-copy">
-            <p class="eyebrow">Budgeting + investment forecasting</p>
-            <h1>Growr shows you where your money goes and what do next.</h1>
+            <p class="eyebrow">Budgeting + investing, built for real life</p>
+            <h1>See where your money goes and know what to do next.</h1>
             <p class="hero-text">
-              Track income, debt, bills, and investments in one place. Get practical
-              suggestions like when to pause investing, attack high-interest debt,
-              or rebalance retirement accounts by age.
+              Growr brings together spending, debt, net worth, and long-term investing
+              so one clean dashboard can help you make smarter monthly decisions.
             </p>
             <div class="hero-cta-row">
-              <button class="primary-btn" data-page-target="snapshot">Start with Snapshot</button>
-              <button class="secondary-btn" data-page-target="budget">Open Budget</button>
+              <button class="primary-btn premium-cta" data-auth-target="signup">Start free trial</button>
+              <button class="secondary-btn" data-page-target="snapshot">See how it works</button>
             </div>
             <div class="hero-badges">
-              <span>Budget plan: $7.99/mo</span>
-              <span>Investing add-on: +$5/mo</span>
-              <span>7-day free trial</span>
+              <span>Budget Core from $7.99/mo</span>
+              <span>Investing add-on available</span>
+              <span>Live account linking</span>
             </div>
           </div>
           <div class="hero-card glass">
+            <p class="hero-card-label">Live financial snapshot</p>
             <div class="mini-stat">
               <span>Monthly leftover</span>
               <strong id="hero-leftover">$0</strong>
@@ -68,8 +76,8 @@
               <strong id="hero-growth">$0</strong>
             </div>
             <p>
-              Educational estimates only. This app can surface patterns and options,
-              but it does not replace a licensed financial professional.
+              Built to feel clear, fast, and practical. Growr surfaces patterns and next
+              steps without making your finances feel overwhelming.
             </p>
           </div>
         </section>

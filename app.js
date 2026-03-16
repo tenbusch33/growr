@@ -289,13 +289,34 @@ function setActivePage(page) {
   document.querySelectorAll(".app-page").forEach((section) => {
     section.classList.toggle("is-active", section.dataset.page === nextPage);
   });
-  document.querySelectorAll("[data-page-target]").forEach((button) => {
+  document.querySelectorAll(".tab-btn[data-page-target]").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.pageTarget === nextPage);
   });
   if (window.location.hash !== `#${nextPage}`) {
     window.history.replaceState({}, "", `#${nextPage}`);
   }
   renderHeroState();
+}
+
+function openAuthPanel(mode = "signup") {
+  setActivePage("snapshot");
+  const authSection = document.getElementById("auth");
+  if (!authSection) {
+    return;
+  }
+
+  toggleResetMode(false);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  authSection.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  if (mode === "login") {
+    setAuthMessage("Welcome back. Log in to pick up where you left off.");
+    document.getElementById("loginEmail").focus();
+    return;
+  }
+
+  setAuthMessage("Start your free trial to unlock your full Growr dashboard.");
+  document.getElementById("fullName").focus();
 }
 
 function handleCheckoutReturn() {
@@ -568,9 +589,13 @@ function renderAccountState() {
   const manageBillingButton = document.getElementById("manage-billing-button");
   const saveButton = document.getElementById("save-plan");
   const accountNavButton = document.getElementById("account-nav-button");
+  const loginNavButton = document.getElementById("login-nav-button");
+  const signupNavButton = document.getElementById("signup-nav-button");
 
   if (!state.user) {
-    accountNavButton.textContent = "Log in";
+    accountNavButton.classList.add("hidden");
+    loginNavButton.classList.remove("hidden");
+    signupNavButton.classList.remove("hidden");
     authForms.classList.remove("hidden");
     summary.classList.add("hidden");
     accountActions.classList.add("hidden");
@@ -588,7 +613,9 @@ function renderAccountState() {
     return;
   }
 
-  accountNavButton.textContent = "Account";
+  accountNavButton.classList.remove("hidden");
+  loginNavButton.classList.add("hidden");
+  signupNavButton.classList.add("hidden");
   authForms.classList.add("hidden");
   logoutButton.classList.remove("hidden");
   accountActions.classList.remove("hidden");
@@ -1887,6 +1914,12 @@ document.querySelectorAll("[data-page-target]").forEach((button) => {
   button.addEventListener("click", () => {
     setActivePage(button.dataset.pageTarget);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+});
+
+document.querySelectorAll("[data-auth-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    openAuthPanel(button.dataset.authTarget);
   });
 });
 
