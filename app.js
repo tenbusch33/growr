@@ -928,18 +928,16 @@ function populateAccountForm() {
 function getDefaultAiEmptyState() {
   const personalized = state.user
     ? "Ask about your own budget too, like whether to focus on debt, savings, or investing next."
-    : "Sign in if you want answers that also use your saved numbers.";
+    : "If you sign in, I can also use your saved numbers for more personal answers.";
 
   return `
-    <div class="ai-empty">
-      <p><strong>Start with a quick question.</strong></p>
-      <ul>
-        <li>What is a 401(k) and how is it taxed?</li>
-        <li>What is the difference between a Roth IRA and a Traditional IRA?</li>
-        <li>Should I pay off credit cards before increasing investing?</li>
-        <li>${personalized}</li>
-      </ul>
-    </div>
+    <article class="ai-message assistant ai-message-intro">
+      <div class="ai-message-header">
+        <strong>Growr</strong>
+        <span>Finance coach</span>
+      </div>
+      <p>Hi, I’m Growr. I’m here to answer money questions about budgeting, debt, subscriptions, taxes, retirement, investing, and accounts. ${personalized}</p>
+    </article>
   `;
 }
 
@@ -2687,6 +2685,13 @@ function handleAiSubmit(event) {
   submitAiQuestion(document.getElementById("ai-question").value);
 }
 
+function handleAiInputKeydown(event) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    submitAiQuestion(event.currentTarget.value);
+  }
+}
+
 function savePlanner(showMessage = false) {
   if (!state.user) {
     if (showMessage) {
@@ -4265,6 +4270,7 @@ document.getElementById("upgrade-button").addEventListener("click", handleUpgrad
 document.getElementById("account-upgrade-button").addEventListener("click", handleUpgrade);
 document.getElementById("transaction-form").addEventListener("submit", createTransaction);
 document.getElementById("ai-form").addEventListener("submit", handleAiSubmit);
+document.getElementById("ai-question").addEventListener("keydown", handleAiInputKeydown);
 document.getElementById("ai-reset-button").addEventListener("click", resetAiCoach);
 document.getElementById("ai-dismiss-button").addEventListener("click", () => setAiWidgetOpen(false));
 document.getElementById("ai-widget-launcher").addEventListener("click", () => setAiWidgetOpen(true));

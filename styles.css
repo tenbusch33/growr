@@ -2130,6 +2130,10 @@ select {
   background: linear-gradient(180deg, #f3f4f8, #ffffff);
 }
 
+.ai-message-intro {
+  max-width: min(540px, 100%);
+}
+
 .ai-message.typing {
   max-width: 220px;
 }
@@ -2193,24 +2197,6 @@ select {
     opacity: 1;
     transform: translateY(-2px);
   }
-}
-
-.ai-empty {
-  padding: 16px 18px;
-  border-radius: 20px;
-  border: 1px dashed var(--line);
-  background: linear-gradient(135deg, rgba(56, 103, 255, 0.04), rgba(255, 186, 120, 0.12));
-}
-
-.ai-empty p,
-.ai-empty ul {
-  margin: 0;
-}
-
-.ai-empty ul {
-  padding-left: 18px;
-  color: var(--subtle);
-  line-height: 1.55;
 }
 
 .ai-form {
