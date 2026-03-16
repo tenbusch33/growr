@@ -396,12 +396,9 @@ function updateIntegrationStatus(config) {
   const signupNote = document.getElementById("signup-note");
   const accountsNote = document.getElementById("accounts-note");
   const billingNote = document.getElementById("billing-note");
-  const aiNote = document.getElementById("ai-note");
-
   signupNote.classList.remove("hidden");
   accountsNote.classList.remove("hidden");
   billingNote.classList.remove("hidden");
-  aiNote.classList.remove("hidden");
 
   signupNote.textContent =
     config.stripeApiConfigured || (config.stripeBudgetConfigured && config.stripeBundleConfigured)
@@ -418,9 +415,6 @@ function updateIntegrationStatus(config) {
     ? "Billing portal is ready. Payment method updates and cancellation should happen there."
     : "Billing portal is not live yet, so payment-method changes and cancellation are still placeholder flows.";
 
-  aiNote.textContent = config.openaiConfigured
-    ? "Ask Growr is live. It can answer general money questions, and signed-in users can get answers shaped by their saved plan."
-    : "Ask Growr is waiting on an OpenAI API key. The chat UI is ready, but responses will stay offline until AI is connected.";
   syncAiAvailability();
 }
 
@@ -1081,13 +1075,6 @@ function renderAiMessages() {
         <article class="ai-message ${message.role}">
           <div class="ai-message-header">
             <strong>${message.role === "user" ? "You" : "Growr"}</strong>
-            <span>${
-              message.role === "assistant"
-                ? state.user
-                  ? "Educational guidance, shaped by your plan"
-                  : "Educational guidance"
-                : "Question"
-            }</span>
           </div>
           <p>${escapeHtml(message.text)}</p>
         </article>
