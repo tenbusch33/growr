@@ -263,6 +263,12 @@ function updateIntegrationStatus(config) {
 
 function setAuthMessage(text) {
   const message = document.getElementById("auth-message");
+  if (!text) {
+    message.textContent = "";
+    message.classList.add("hidden");
+    return;
+  }
+
   message.classList.remove("hidden");
   message.textContent = text;
 }
@@ -546,8 +552,10 @@ function renderAccountState() {
   const logoutButton = document.getElementById("logout-button");
   const manageBillingButton = document.getElementById("manage-billing-button");
   const saveButton = document.getElementById("save-plan");
+  const accountNavButton = document.getElementById("account-nav-button");
 
   if (!state.user) {
+    accountNavButton.textContent = "Log in";
     authForms.classList.remove("hidden");
     summary.classList.add("hidden");
     accountActions.classList.add("hidden");
@@ -565,6 +573,7 @@ function renderAccountState() {
     return;
   }
 
+  accountNavButton.textContent = "Account";
   authForms.classList.add("hidden");
   logoutButton.classList.remove("hidden");
   accountActions.classList.remove("hidden");
@@ -1420,7 +1429,7 @@ function handleLogout() {
         liabilities: [],
         investments: [],
       });
-      setAuthMessage("Logged out.");
+      setAuthMessage("");
       setPlaidMessage("Sign in before linking or loading account data.");
       applyFeatureGate();
       resetAiCoach();
