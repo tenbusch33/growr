@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Growr favicon">
+  <defs>
+    <linearGradient id="growrBg" x1="8" x2="56" y1="10" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2c221d" />
+      <stop offset="1" stop-color="#5e3a28" />
+    </linearGradient>
+    <linearGradient id="growrAccent" x1="16" x2="48" y1="18" y2="46" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffb88f" />
+      <stop offset="1" stop-color="#e66c34" />
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="url(#growrBg)" />
+  <rect x="14" y="34" width="8" height="14" rx="4" fill="url(#growrAccent)" />
+  <rect x="28" y="24" width="8" height="24" rx="4" fill="url(#growrAccent)" />
+  <rect x="42" y="16" width="8" height="32" rx="4" fill="url(#growrAccent)" />
+  <path
+    d="M16 29C20 29 24 27 28 24C32 21 35 18 40 18H48"
+    fill="none"
+    stroke="#ffe7d6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="3"
+  />
+  <circle cx="16" cy="29" r="3" fill="#ffe7d6" />
+  <circle cx="28" cy="24" r="3" fill="#ffe7d6" />
+  <circle cx="40" cy="18" r="3" fill="#ffe7d6" />
+</svg>

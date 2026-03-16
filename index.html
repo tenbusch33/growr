@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Growr | Budget + Investing</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -92,6 +93,20 @@
           </div>
         </section>
 
+      </header>
+
+      <main class="workspace-main">
+        <section class="app-page is-active home-page" data-page="home">
+        <section class="home-editorial-intro">
+          <p class="eyebrow">Everything in one app</p>
+          <h2>Everything you need, all in one app.</h2>
+          <p>
+            Connect your accounts and let Growr do the heavy lifting. Track spending,
+            catch subscriptions automatically, forecast retirement, and see your full financial
+            picture without bouncing between five different tools.
+          </p>
+        </section>
+
         <section class="hero-power-strip">
           <article class="glass power-tile">
             <span>Autopilot</span>
@@ -109,20 +124,6 @@
             <span>Connected data</span>
             <strong>Bring in live balances so Growr does more of the work for you.</strong>
           </article>
-        </section>
-
-      </header>
-
-      <main class="workspace-main">
-        <section class="app-page is-active home-page" data-page="home">
-        <section class="home-editorial-intro">
-          <p class="eyebrow">Everything in one app</p>
-          <h2>Everything you need, all in one app.</h2>
-          <p>
-            Connect your accounts and let Growr do the heavy lifting. Track spending,
-            catch subscriptions automatically, forecast retirement, and see your full financial
-            picture without bouncing between five different tools.
-          </p>
         </section>
 
         <section class="story-stack" id="how-it-works">
@@ -1612,6 +1613,42 @@
               <button type="button" class="primary-btn" id="account-save-button">Save account details</button>
               <button type="button" class="ghost-btn" id="account-billing-button">Manage billing</button>
               <button type="button" class="ghost-btn" id="account-logout-button">Log out</button>
+            </div>
+            <div id="account-plan-panel" class="account-plan-panel hidden">
+              <div class="section-heading compact">
+                <p class="eyebrow">Change subscription</p>
+                <h3>Switch your Growr plan</h3>
+              </div>
+              <p class="status-message" id="account-plan-status">Pick the plan that fits how you want to use Growr.</p>
+              <div class="account-plan-options" id="account-plan-options">
+                <label class="plan-option compact-plan-option">
+                  <input type="radio" name="accountPlan" value="budget" />
+                  <span class="plan-option-card">
+                    <strong>Budget Core</strong>
+                    <em>$6.99/mo or $67.10/year</em>
+                    <small>Budgeting, bills, debt analysis, and monthly recommendations.</small>
+                  </span>
+                </label>
+                <label class="plan-option compact-plan-option">
+                  <input type="radio" name="accountPlan" value="couples" />
+                  <span class="plan-option-card">
+                    <strong>Couples</strong>
+                    <em>$8.99/mo or $86.30/year</em>
+                    <small>Shared household view, recurring review together, and cleaner check-ins as a pair.</small>
+                  </span>
+                </label>
+                <label class="plan-option compact-plan-option">
+                  <input type="radio" name="accountPlan" value="bundle" />
+                  <span class="plan-option-card">
+                    <strong>Budget + Investing</strong>
+                    <em>$14.99/mo or $143.90/year</em>
+                    <small>Everything in Couples plus forecasts, retirement planning, and investing guidance.</small>
+                  </span>
+                </label>
+              </div>
+              <div class="auth-inline-actions">
+                <button type="button" class="primary-btn" id="account-change-plan-button">Change subscription</button>
+              </div>
             </div>
             <div id="account-upgrade-panel" class="account-upgrade-panel hidden">
               <div>

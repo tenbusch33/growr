@@ -602,7 +602,7 @@ function syncAiAvailability() {
 }
 
 function hasInvestmentAccess() {
-  return Boolean(state.user && state.user.plan === "bundle" && state.user.subscriptionActive !== false);
+  return Boolean(state.user && state.user.plan === "bundle");
 }
 
 function formatTrialMessage(user = state.user) {
@@ -612,6 +612,18 @@ function formatTrialMessage(user = state.user) {
 
   const daysRemaining = Math.max(Number(user.trialDaysRemaining || 0), 0);
   return daysRemaining <= 1 ? "Trial ends soon" : `${daysRemaining} trial days left`;
+}
+
+function getCurrentPlanKey(user = state.user) {
+  if (!user) {
+    return "budget";
+  }
+
+  if (user.plan === "bundle") {
+    return "bundle";
+  }
+
+  return user.couplesAddOn ? "couples" : "budget";
 }
 
 function populateAccountForm() {
@@ -635,6 +647,9 @@ function populateAccountForm() {
   const subscriptionLabel = document.getElementById("accountSubscriptionLabel");
   const emailStatusLabel = document.getElementById("accountEmailStatusLabel");
   const verificationNote = document.getElementById("account-verify-note");
+  const planPanel = document.getElementById("account-plan-panel");
+  const planStatus = document.getElementById("account-plan-status");
+  const planInputs = document.querySelectorAll('input[name="accountPlan"]');
   const upgradePanel = document.getElementById("account-upgrade-panel");
   const upgradeCopy = document.getElementById("account-upgrade-copy");
   const billingPanel = document.getElementById("account-billing-panel");
@@ -663,6 +678,12 @@ function populateAccountForm() {
     subscriptionLabel.textContent = "Unavailable";
     emailStatusLabel.textContent = "Unavailable";
     verificationNote.classList.add("hidden");
+    planPanel.classList.add("hidden");
+    planStatus.textContent = "Sign in to change your subscription.";
+    planInputs.forEach((input) => {
+      input.checked = input.value === "budget";
+      input.disabled = true;
+    });
     upgradePanel.classList.add("hidden");
     billingPanel.classList.add("hidden");
     setAccountStatus("Sign in to update your account details.");
@@ -676,6 +697,7 @@ function populateAccountForm() {
   metaGrid.classList.remove("hidden");
   verifyCard.classList.remove("hidden");
   primaryActions.classList.remove("hidden");
+  planPanel.classList.remove("hidden");
   billingPanel.classList.remove("hidden");
   nameInput.disabled = false;
   emailInput.disabled = false;
@@ -697,6 +719,16 @@ function populateAccountForm() {
     : "No active trial";
   subscriptionLabel.textContent = state.user.subscriptionActive === false ? "Pending" : "Active";
   emailStatusLabel.textContent = state.user.emailVerified ? "Verified" : "Needs verification";
+  const currentPlanKey = getCurrentPlanKey();
+  planInputs.forEach((input) => {
+    input.checked = input.value === currentPlanKey;
+    input.disabled = false;
+  });
+  planStatus.textContent = currentPlanKey === "bundle"
+    ? "Budget + Investing is active right now."
+    : currentPlanKey === "couples"
+      ? "Couples is active right now."
+      : "Budget Core is active right now.";
   verificationNote.classList.remove("hidden");
   if (state.user.emailVerified) {
     verificationForm.classList.add("hidden");
@@ -1977,6 +2009,7 @@ function renderLinkedSummary(summary) {
     creditCardDebt: summary.creditCardDebt || 0,
     loanDebt: summary.loanDebt || 0,
     investmentsTotal: summary.investmentsTotal || 0,
+    preferences: summary.preferences || { nicknames: {}, hiddenAccountIds: [] },
     accounts: summary.accounts || [],
     liabilities: summary.liabilities || [],
     investments: summary.investments || [],
@@ -1998,10 +2031,20 @@ function renderLinkedSummary(summary) {
           <div class="linked-item-row">
             ${renderIdentityBadge(account.name, "linked-avatar")}
             <div class="linked-item-copy">
-              <strong>${account.name}</strong>
+              <strong>${account.displayName || account.name}</strong>
               <p>${account.typeLabel}</p>
             </div>
             <strong class="linked-amount">${currency.format(account.currentBalance || 0)}</strong>
+          </div>
+          <div class="linked-item-actions">
+            <label class="linked-nickname">
+              <span>Nickname</span>
+              <input type="text" value="${escapeHtml(account.nickname || "")}" data-linked-nickname="${account.accountId}" placeholder="Example: Bills checking" />
+            </label>
+            <div class="linked-action-buttons">
+              <button type="button" class="ghost-btn" data-linked-save="${account.accountId}">Save nickname</button>
+              <button type="button" class="ghost-btn warn-btn" data-linked-hide="${account.accountId}">Remove from Growr</button>
+            </div>
           </div>
         </article>
       `
@@ -2034,9 +2077,9 @@ function renderLinkedSummary(summary) {
       (investment) => `
         <article class="linked-item">
           <div class="linked-item-row">
-            ${renderIdentityBadge(investment.accountName, "linked-avatar")}
+            ${renderIdentityBadge(investment.displayName || investment.accountName, "linked-avatar")}
             <div class="linked-item-copy">
-              <strong>${investment.accountName}</strong>
+              <strong>${investment.displayName || investment.accountName}</strong>
               <p>${investment.holdingsCount} holdings</p>
             </div>
             <strong class="linked-amount">${currency.format(investment.value || 0)}</strong>
@@ -2046,6 +2089,48 @@ function renderLinkedSummary(summary) {
     ),
     "No investment accounts linked yet."
   );
+
+  document.querySelectorAll("[data-linked-save]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const accountId = button.dataset.linkedSave;
+      const nickname =
+        document.querySelector(`[data-linked-nickname="${accountId}"]`)?.value.trim() || "";
+      updateLinkedAccountPreferences(accountId, { nickname, hidden: false });
+    });
+  });
+
+  document.querySelectorAll("[data-linked-hide]").forEach((button) => {
+    button.addEventListener("click", () => {
+      updateLinkedAccountPreferences(button.dataset.linkedHide, { hidden: true });
+    });
+  });
+}
+
+function updateLinkedAccountPreferences(accountId, { nickname = "", hidden = false } = {}) {
+  if (!state.user) {
+    setPlaidMessage("Sign in before organizing linked accounts.");
+    return;
+  }
+
+  setPlaidMessage(hidden ? "Removing account from Growr..." : "Saving account preferences...");
+
+  fetch("/api/plaid/account-preferences", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ accountId, nickname, hidden }),
+  })
+    .then(async (response) => {
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to update linked account.");
+      }
+
+      setPlaidMessage(payload.message || "Linked account updated.");
+      return loadLinkedSummary();
+    })
+    .catch((error) => {
+      setPlaidMessage(error.message);
+    });
 }
 
 function loadTransactions() {
@@ -3382,6 +3467,54 @@ function handleManageBilling() {
     });
 }
 
+function handleAccountPlanChange() {
+  if (!state.user) {
+    setAccountStatus("Sign in before changing your subscription.");
+    return;
+  }
+
+  const selectedPlan =
+    document.querySelector('input[name="accountPlan"]:checked')?.value || getCurrentPlanKey();
+  const currentPlan = getCurrentPlanKey();
+  const button = document.getElementById("account-change-plan-button");
+  const planStatus = document.getElementById("account-plan-status");
+
+  if (selectedPlan === currentPlan) {
+    planStatus.textContent = "That subscription is already active.";
+    return;
+  }
+
+  button.disabled = true;
+  planStatus.textContent = "Changing subscription...";
+
+  fetch("/api/account/change-plan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan: selectedPlan }),
+  })
+    .then(async (response) => {
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to change subscription.");
+      }
+
+      state.user = payload.account;
+      renderAccountState();
+      updateDashboard();
+      setAccountStatus(payload.message);
+      planStatus.textContent = payload.message;
+      if (payload.checkoutUrl) {
+        window.open(payload.checkoutUrl, "_blank", "noopener");
+      }
+    })
+    .catch((error) => {
+      planStatus.textContent = error.message;
+    })
+    .finally(() => {
+      button.disabled = false;
+    });
+}
+
 function handleAccountSave() {
   if (!state.user) {
     setAccountStatus("Sign in before updating your account.");
@@ -3808,6 +3941,7 @@ document.getElementById("request-reset-button").addEventListener("click", handle
 document.getElementById("logout-button").addEventListener("click", handleLogout);
 document.getElementById("manage-billing-button").addEventListener("click", handleManageBilling);
 document.getElementById("account-save-button").addEventListener("click", handleAccountSave);
+document.getElementById("account-change-plan-button").addEventListener("click", handleAccountPlanChange);
 document.getElementById("account-billing-button").addEventListener("click", handleManageBilling);
 document.getElementById("account-logout-button").addEventListener("click", handleLogout);
 document.getElementById("account-resend-verification-button").addEventListener("click", handleSendVerification);

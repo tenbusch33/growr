@@ -191,7 +191,7 @@ function publicAccount(account) {
 }
 
 function hasInvestmentAccess(account) {
-  return account.plan === "bundle" && account.subscriptionActive !== false;
+  return account.plan === "bundle";
 }
 
 function sanitizePlannerForAccount(payload, account) {
@@ -752,9 +752,21 @@ function getStoredPlaidItemForUser(userId) {
   return readJson(plaidItemsFile).find((item) => item.userId === userId) || null;
 }
 
+function getPlaidPreferences(item = {}) {
+  return {
+    nicknames: item.preferences?.nicknames || {},
+    hiddenAccountIds: Array.isArray(item.preferences?.hiddenAccountIds)
+      ? item.preferences.hiddenAccountIds
+      : [],
+  };
+}
+
 function savePlaidItem(item) {
   const items = readJson(plaidItemsFile).filter((entry) => entry.userId !== item.userId);
-  items.push(item);
+  items.push({
+    ...item,
+    preferences: getPlaidPreferences(item),
+  });
   writeJson(plaidItemsFile, items);
 }
 
@@ -1056,10 +1068,18 @@ function currencyAmount(value) {
   return typeof value === "number" ? value : 0;
 }
 
-function buildPlaidSummary(accountsData, liabilitiesData, holdingsData) {
-  const accounts = (accountsData.accounts || []).map((account) => ({
+function buildPlaidSummary(accountsData, liabilitiesData, holdingsData, preferences = {}) {
+  const nicknameMap = preferences.nicknames || {};
+  const hiddenAccountIds = new Set(preferences.hiddenAccountIds || []);
+
+  const accounts = (accountsData.accounts || [])
+    .filter((account) => !hiddenAccountIds.has(account.account_id))
+    .map((account) => ({
     accountId: account.account_id,
+    baseName: account.name,
+    nickname: nicknameMap[account.account_id] || "",
     name: account.name,
+    displayName: nicknameMap[account.account_id] || account.name,
     typeLabel: `${account.type}${account.subtype ? ` / ${account.subtype}` : ""}`,
     currentBalance: currencyAmount(account.balances?.current),
   }));
@@ -1071,17 +1091,20 @@ function buildPlaidSummary(accountsData, liabilitiesData, holdingsData) {
 
   const liabilities = [
     ...creditLiabilities.map((entry) => ({
-      name: accountsById.get(entry.account_id)?.name || "Credit account",
+      accountId: entry.account_id,
+      name: accountsById.get(entry.account_id)?.displayName || "Credit account",
       kind: "Credit card",
       amount: currencyAmount(entry.last_statement_balance),
     })),
     ...mortgageLiabilities.map((entry) => ({
-      name: accountsById.get(entry.account_id)?.name || "Mortgage account",
+      accountId: entry.account_id,
+      name: accountsById.get(entry.account_id)?.displayName || "Mortgage account",
       kind: "Mortgage",
       amount: currencyAmount(entry.outstanding_principal_balance),
     })),
     ...studentLiabilities.map((entry) => ({
-      name: accountsById.get(entry.account_id)?.name || "Student loan",
+      accountId: entry.account_id,
+      name: accountsById.get(entry.account_id)?.displayName || "Student loan",
       kind: "Student loan",
       amount: currencyAmount(entry.last_statement_balance),
     })),
@@ -1105,7 +1128,10 @@ function buildPlaidSummary(accountsData, liabilitiesData, holdingsData) {
 
       return {
         accountId: account.account_id,
+        baseName: account.name,
+        nickname: nicknameMap[account.account_id] || "",
         accountName: account.name,
+        displayName: nicknameMap[account.account_id] || account.name,
         value: aggregate.value,
         holdingsCount: aggregate.holdingsCount,
       };
@@ -1131,6 +1157,10 @@ function buildPlaidSummary(accountsData, liabilitiesData, holdingsData) {
     creditCardDebt,
     loanDebt,
     investmentsTotal,
+    preferences: {
+      nicknames: nicknameMap,
+      hiddenAccountIds: Array.from(hiddenAccountIds),
+    },
     accounts,
     liabilities,
     investments,
@@ -1447,6 +1477,58 @@ const server = http.createServer((request, response) => {
       message: checkoutUrl
         ? "Bundle upgrade prepared in checkout."
         : "Bundle access enabled in local demo mode.",
+    });
+    return;
+  }
+
+  if (request.method === "POST" && request.url === "/api/account/change-plan") {
+    const session = getSessionAccount(request);
+    if (!session) {
+      sendJson(response, 401, { error: "Sign in before changing your subscription." });
+      return;
+    }
+
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+
+    request.on("end", () => {
+      try {
+        const payload = JSON.parse(body || "{}");
+        const requestedPlan = ["budget", "couples", "bundle"].includes(payload.plan)
+          ? payload.plan
+          : null;
+
+        if (!requestedPlan) {
+          sendJson(response, 400, { error: "Choose Budget Core, Couples, or Budget + Investing." });
+          return;
+        }
+
+        const accounts = readJson(accountsFile);
+        const account = accounts.find((entry) => entry.id === session.account.id);
+        if (!account) {
+          sendJson(response, 404, { error: "Account not found." });
+          return;
+        }
+
+        account.plan = requestedPlan === "bundle" ? "bundle" : "budget";
+        account.couplesAddOn = requestedPlan === "couples" || requestedPlan === "bundle";
+        account.subscriptionActive = true;
+        writeJson(accountsFile, accounts);
+
+        sendJson(response, 200, {
+          account: publicAccount(account),
+          message:
+            requestedPlan === "bundle"
+              ? "Subscription changed to Budget + Investing."
+              : requestedPlan === "couples"
+                ? "Subscription changed to Couples."
+                : "Subscription changed to Budget Core.",
+        });
+      } catch {
+        sendJson(response, 400, { error: "Invalid change subscription payload." });
+      }
     });
     return;
   }
@@ -2058,6 +2140,66 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  if (request.method === "POST" && request.url === "/api/plaid/account-preferences") {
+    const session = getSessionAccount(request);
+    if (!session) {
+      sendJson(response, 401, { error: "Sign in before organizing linked accounts." });
+      return;
+    }
+
+    readRequestBody(request)
+      .then((body) => {
+        const payload = JSON.parse(body || "{}");
+        const accountId = String(payload.accountId || "").trim();
+        const nickname = String(payload.nickname || "").trim();
+        const hidden = Boolean(payload.hidden);
+
+        if (!accountId) {
+          sendJson(response, 400, { error: "accountId is required." });
+          return;
+        }
+
+        const plaidItem = getStoredPlaidItemForUser(session.account.id);
+        if (!plaidItem) {
+          sendJson(response, 404, { error: "No linked Plaid item found for this user." });
+          return;
+        }
+
+        const preferences = getPlaidPreferences(plaidItem);
+        const hiddenAccountIds = new Set(preferences.hiddenAccountIds || []);
+
+        if (nickname) {
+          preferences.nicknames[accountId] = nickname;
+        } else {
+          delete preferences.nicknames[accountId];
+        }
+
+        if (hidden) {
+          hiddenAccountIds.add(accountId);
+        } else {
+          hiddenAccountIds.delete(accountId);
+        }
+
+        savePlaidItem({
+          ...plaidItem,
+          preferences: {
+            nicknames: preferences.nicknames,
+            hiddenAccountIds: Array.from(hiddenAccountIds),
+          },
+        });
+
+        sendJson(response, 200, {
+          message: hidden
+            ? "Account removed from your Growr view."
+            : "Linked account preferences updated.",
+        });
+      })
+      .catch(() => {
+        sendJson(response, 400, { error: "Invalid linked account preferences payload." });
+      });
+    return;
+  }
+
   if (request.method === "GET" && request.url === "/api/plaid/summary") {
     const session = getSessionAccount(request);
     if (!session) {
@@ -2088,7 +2230,12 @@ const server = http.createServer((request, response) => {
       plaidRequest("/investments/holdings/get", { access_token: item.accessToken }),
     ])
       .then(([accountsData, liabilitiesData, holdingsData]) => {
-        const summary = buildPlaidSummary(accountsData, liabilitiesData, holdingsData);
+        const summary = buildPlaidSummary(
+          accountsData,
+          liabilitiesData,
+          holdingsData,
+          getPlaidPreferences(item)
+        );
         if (!hasInvestmentAccess(session.account)) {
           summary.investmentsTotal = 0;
           summary.investments = [];
