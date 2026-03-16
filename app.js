@@ -655,6 +655,16 @@ function formatBillingIntervalLabel(billingInterval = "monthly") {
   return billingInterval === "yearly" ? "Yearly billing" : "Monthly billing";
 }
 
+function toTitleCase(value = "") {
+  return String(value)
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 function getAccountPlanDisplay(planKey = "budget", billingInterval = "monthly") {
   const catalog = {
     budget: {
@@ -1441,11 +1451,19 @@ function renderMonthlyTrendChart(series) {
   const chart = document.getElementById("monthly-trend-chart");
   const label = document.getElementById("monthly-trend-label");
   const note = document.getElementById("monthly-trend-note");
+  const insights = document.getElementById("monthly-trend-insights");
 
   if (!series.length) {
     chart.innerHTML = "";
     label.textContent = "$0";
     note.textContent = "Import or add transactions to let Growr build a monthly trend.";
+    if (insights) {
+      insights.innerHTML = `
+        <span class="insight-chip">This month: $0</span>
+        <span class="insight-chip">Last month: $0</span>
+        <span class="insight-chip">Trend: Needs data</span>
+      `;
+    }
     return;
   }
 
@@ -1461,6 +1479,27 @@ function renderMonthlyTrendChart(series) {
   };
   const spendPoints = series.map((point, index) => toPoint(point.spend, index)).join(" ");
   const incomePoints = series.map((point, index) => toPoint(point.income, index)).join(" ");
+  const spendNodes = series.map((point, index) => {
+    const [x, y] = toPoint(point.spend, index).split(",").map(Number);
+    return { x, y };
+  });
+  const incomeNodes = series.map((point, index) => {
+    const [x, y] = toPoint(point.income, index).split(",").map(Number);
+    return { x, y };
+  });
+  const smoothPath = (nodes) => {
+    if (nodes.length === 1) {
+      return `M ${nodes[0].x} ${nodes[0].y}`;
+    }
+    return nodes.reduce((path, node, index) => {
+      if (index === 0) {
+        return `M ${node.x} ${node.y}`;
+      }
+      const previous = nodes[index - 1];
+      const midX = (previous.x + node.x) / 2;
+      return `${path} C ${midX} ${previous.y}, ${midX} ${node.y}, ${node.x} ${node.y}`;
+    }, "");
+  };
   const spendArea = [
     `${padding},${height - padding}`,
     ...series.map((point, index) => toPoint(point.spend, index)),
@@ -1511,8 +1550,8 @@ function renderMonthlyTrendChart(series) {
         `;
       })
       .join("")}
-    <polyline points="${incomePoints}" fill="none" stroke="url(#growrIncomeLine)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
-    <polyline points="${spendPoints}" fill="none" stroke="url(#growrSpendLine)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    <path d="${smoothPath(incomeNodes)}" fill="none" stroke="url(#growrIncomeLine)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="${smoothPath(spendNodes)}" fill="none" stroke="url(#growrSpendLine)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
     ${series
       .map((point, index) => {
         const incomePoint = toPoint(point.income, index).split(",");
@@ -1523,6 +1562,8 @@ function renderMonthlyTrendChart(series) {
         `;
       })
       .join("")}
+    ${incomeNodes.length ? `<circle cx="${incomeNodes[incomeNodes.length - 1].x}" cy="${incomeNodes[incomeNodes.length - 1].y}" r="6" fill="#3867ff" stroke="#ffffff" stroke-width="3"></circle>` : ""}
+    ${spendNodes.length ? `<circle cx="${spendNodes[spendNodes.length - 1].x}" cy="${spendNodes[spendNodes.length - 1].y}" r="6" fill="#ff5a36" stroke="#ffffff" stroke-width="3"></circle>` : ""}
   `;
 
   label.textContent = currency.format(latest.spend);
@@ -1531,6 +1572,13 @@ function renderMonthlyTrendChart(series) {
       ? `Spending is up ${currency.format(Math.abs(trendDelta))} versus ${previous.label}.`
       : `Spending is down ${currency.format(Math.abs(trendDelta))} versus ${previous.label}.`
     : "Growr will compare new months here as soon as more history comes in.";
+  if (insights) {
+    insights.innerHTML = `
+      <span class="insight-chip">This month: ${currency.format(latest.spend)}</span>
+      <span class="insight-chip">Last month: ${currency.format(previous ? previous.spend : 0)}</span>
+      <span class="insight-chip">Trend: ${previous ? (trendDelta > 0 ? "Spending is climbing" : trendDelta < 0 ? "Spending is easing" : "Holding steady") : "Needs more history"}</span>
+    `;
+  }
 }
 
 function renderProjectionLineChart({
@@ -1566,6 +1614,14 @@ function renderProjectionLineChart({
     return { ...point, x, y };
   });
   const polylinePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
+  const smoothPath = points.reduce((path, point, index) => {
+    if (index === 0) {
+      return `M ${point.x} ${point.y}`;
+    }
+    const previous = points[index - 1];
+    const midX = (previous.x + point.x) / 2;
+    return `${path} C ${midX} ${previous.y}, ${midX} ${point.y}, ${point.x} ${point.y}`;
+  }, "");
   const areaPoints = [
     `${points[0].x},${height - paddingY}`,
     ...points.map((point) => `${point.x},${point.y}`),
@@ -1587,11 +1643,11 @@ function renderProjectionLineChart({
       .join("")}
     <polygon points="${areaPoints}" fill="url(#${chartId}-fill)"></polygon>
     <line x1="${paddingX}" y1="${height - paddingY}" x2="${width - paddingX}" y2="${height - paddingY}" stroke="#d9e0ea" stroke-width="1.5"></line>
-    <polyline points="${polylinePoints}" fill="none" stroke="${lineColor}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    <path d="${smoothPath}" fill="none" stroke="${lineColor}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
     ${points
       .map(
         (point) => `
-          <circle cx="${point.x}" cy="${point.y}" r="5" fill="${lineColor}"></circle>
+          <circle cx="${point.x}" cy="${point.y}" r="${point === points[points.length - 1] ? 6 : 5}" fill="${lineColor}" ${point === points[points.length - 1] ? 'stroke="#ffffff" stroke-width="3"' : ""}></circle>
           <text x="${point.x}" y="${height - 4}" text-anchor="middle" fill="#7a8599" font-size="12">${point.label}</text>
         `
       )
@@ -1607,6 +1663,7 @@ function renderCategoryDonut(categorySpend) {
   const center = document.getElementById("category-donut-center");
   const label = document.getElementById("category-donut-label");
   const legend = document.getElementById("category-donut-legend");
+  const insights = document.getElementById("category-donut-insights");
   const entries = Object.entries(categorySpend)
     .filter(([, amount]) => amount > 0)
     .sort((left, right) => right[1] - left[1]);
@@ -1617,6 +1674,12 @@ function renderCategoryDonut(categorySpend) {
     center.textContent = "$0";
     label.textContent = "$0";
     legend.innerHTML = `<div class="linked-item empty-state"><strong>No category chart yet</strong><p>Add or import transactions to see this month take shape.</p></div>`;
+    if (insights) {
+      insights.innerHTML = `
+        <span class="insight-chip">Top category: Waiting on data</span>
+        <span class="insight-chip">Share: 0%</span>
+      `;
+    }
     return;
   }
 
@@ -1644,6 +1707,13 @@ function renderCategoryDonut(categorySpend) {
       `;
     })
     .join("");
+  if (insights) {
+    const [topKey, topAmount] = entries[0];
+    insights.innerHTML = `
+      <span class="insight-chip">Top category: ${toTitleCase(topKey)}</span>
+      <span class="insight-chip">Share: ${percent.format(topAmount / total)}</span>
+    `;
+  }
 }
 
 function renderAutomationHub() {
@@ -2665,6 +2735,11 @@ function renderCharts(data) {
   const cashflowNote = document.getElementById("cashflow-note");
   const expenseNote = document.getElementById("expense-note");
   const investNote = document.getElementById("invest-note");
+  const cashflowInsights = document.getElementById("cashflow-insights");
+  const expenseInsights = document.getElementById("expense-insights");
+  const investmentInsights = document.getElementById("investment-insights");
+  const networthInsights = document.getElementById("networth-trend-insights");
+  const retirementInsights = document.getElementById("retirement-runway-insights");
 
   const incomeBase = Math.max(data.income, 1);
   const cashSegments = [
@@ -2758,9 +2833,38 @@ function renderCharts(data) {
     .filter((segment) => segment.key !== "leftover")
     .sort((first, second) => second.amount - first.amount)[0];
   expenseNote.textContent = `${largestExpense.label} is currently the biggest monthly cost.`;
+  if (cashflowInsights) {
+    cashflowInsights.innerHTML = `
+      <span class="insight-chip">Fixed costs: ${currency.format(data.totalExpenses)}</span>
+      <span class="insight-chip">Biggest cost: ${largestExpense.label}</span>
+      <span class="insight-chip">Money left: ${currency.format(data.leftover)}</span>
+    `;
+  }
+  if (expenseInsights) {
+    const rankedExpenses = cashSegments
+      .filter((segment) => segment.key !== "leftover")
+      .sort((first, second) => second.amount - first.amount);
+    const secondExpense = rankedExpenses[1] || rankedExpenses[0];
+    expenseInsights.innerHTML = `
+      <span class="insight-chip">Largest category: ${rankedExpenses[0].label}</span>
+      <span class="insight-chip">Second largest: ${secondExpense.label}</span>
+    `;
+  }
   investNote.textContent = hasInvestmentAccess()
     ? `Projected total after ${data.years} years: ${currency.format(data.totalFuture)}.`
     : "Investment forecasting is available on the Bundle plan.";
+  if (investmentInsights) {
+    const biggestInvestment = investmentRows.slice().sort((a, b) => b.amount - a.amount)[0];
+    investmentInsights.innerHTML = hasInvestmentAccess()
+      ? `
+        <span class="insight-chip">Largest account: ${biggestInvestment.label}</span>
+        <span class="insight-chip">10-year total: ${currency.format(data.totalFuture)}</span>
+      `
+      : `
+        <span class="insight-chip">Largest account: Locked</span>
+        <span class="insight-chip">10-year total: Locked</span>
+      `;
+  }
 
   renderProjectionLineChart({
     chartId: "networth-trend-chart",
@@ -2774,6 +2878,12 @@ function renderCharts(data) {
         ? `Estimated net worth grows from ${currency.format(data.netWorthSeries[0].value)} to ${currency.format(data.netWorthSeries[data.netWorthSeries.length - 1].value)} across the projection path.`
         : "Growr will project net worth once it has enough inputs.",
   });
+  if (networthInsights) {
+    networthInsights.innerHTML = `
+      <span class="insight-chip">Starting point: ${currency.format(data.netWorthSeries[0]?.value || 0)}</span>
+      <span class="insight-chip">Projected path: ${currency.format(data.netWorthSeries[data.netWorthSeries.length - 1]?.value || 0)}</span>
+    `;
+  }
 
   if (hasInvestmentAccess()) {
     renderProjectionLineChart({
@@ -2785,9 +2895,16 @@ function renderCharts(data) {
       fillColor: "#8af0d7",
       noteText:
         data.retirementGap > 0
-      ? `Current pace may still leave about ${currency.format(data.retirementGap)} per month uncovered at retirement.`
+          ? `Current pace may still leave about ${currency.format(data.retirementGap)} per month uncovered at retirement.`
           : "Current saving pace is covering the retirement income target you entered.",
     });
+    if (retirementInsights) {
+      retirementInsights.innerHTML = `
+        <span class="insight-chip">Monthly goal: ${currency.format(data.retirementMonthlyGoal || 0)}</span>
+        <span class="insight-chip">Estimated support: ${currency.format(data.retirementMonthlySupport || 0)}</span>
+        <span class="insight-chip">Gap: ${currency.format(Math.max(data.retirementGap || 0, 0))}</span>
+      `;
+    }
     return;
   }
 
@@ -2795,6 +2912,13 @@ function renderCharts(data) {
   document.getElementById("retirement-runway-label").textContent = "Locked";
   document.getElementById("retirement-runway-note").textContent =
     "Upgrade to Bundle to compare your projected retirement path against the amount your monthly retirement income goal may need.";
+  if (retirementInsights) {
+    retirementInsights.innerHTML = `
+      <span class="insight-chip">Monthly goal: Locked</span>
+      <span class="insight-chip">Estimated support: Locked</span>
+      <span class="insight-chip">Gap: Locked</span>
+    `;
+  }
 }
 
 function renderHealth(snapshot) {
@@ -2826,6 +2950,14 @@ function renderHealth(snapshot) {
   } else {
     healthLabel.textContent = "High pressure";
     healthSummary.textContent = "Cash flow or debt load is putting the plan under stress. Stabilizing spending and reducing expensive debt should come first.";
+  }
+  const scoreInsights = document.getElementById("score-insights");
+  if (scoreInsights) {
+    scoreInsights.innerHTML = `
+      <span class="insight-chip">Money left this month: ${currency.format(snapshot.leftover)}</span>
+      <span class="insight-chip">Debt load: ${snapshot.debtRatio > 0.35 ? "High" : snapshot.debtRatio > 0.2 ? "Moderate" : "Balanced"}</span>
+      <span class="insight-chip">Emergency savings: ${snapshot.emergencyMonths >= 3 ? "Strong" : snapshot.emergencyMonths >= 1 ? "Building" : "Needs work"}</span>
+    `;
   }
 
   signalSavings.textContent =

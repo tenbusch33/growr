@@ -529,6 +529,11 @@
               <div class="score-copy">
                 <h3 id="health-label">Getting started</h3>
                 <p id="health-summary">Enter your numbers to see a clearer picture of stability, debt load, and savings progress.</p>
+                <div class="score-insights" id="score-insights">
+                  <span class="insight-chip">Money left this month: $0</span>
+                  <span class="insight-chip">Debt load: Balanced</span>
+                  <span class="insight-chip">Emergency savings: Needs work</span>
+                </div>
               </div>
             </div>
           </article>
@@ -606,6 +611,11 @@
                 <strong id="cashflow-percent">0%</strong>
               </div>
               <div class="stack-chart" id="cashflow-chart"></div>
+              <div class="chart-insight-row" id="cashflow-insights">
+                <span class="insight-chip">Fixed costs: $0</span>
+                <span class="insight-chip">Biggest cost: Housing</span>
+                <span class="insight-chip">Money left: $0</span>
+              </div>
               <p class="chart-note" id="cashflow-note">Shows how your paycheck gets divided each month.</p>
             </article>
             <article class="chart-card">
@@ -614,6 +624,10 @@
                 <strong id="expense-total">$0</strong>
               </div>
               <div class="legend-list" id="expense-legend"></div>
+              <div class="chart-insight-row" id="expense-insights">
+                <span class="insight-chip">Largest category: Waiting on data</span>
+                <span class="insight-chip">Second largest: Waiting on data</span>
+              </div>
               <p class="chart-note" id="expense-note">Largest categories should feel intentional, not accidental.</p>
             </article>
           </div>
@@ -786,6 +800,10 @@
                 <strong id="invest-growth-label">$0</strong>
               </div>
               <div class="bar-chart" id="investment-bars"></div>
+              <div class="chart-insight-row" id="investment-insights">
+                <span class="insight-chip">Largest account: Waiting on data</span>
+                <span class="insight-chip">10-year total: $0</span>
+              </div>
               <p class="chart-note" id="invest-note">Uses long-run average return assumptions for a directional estimate.</p>
             </article>
             <article class="chart-card gated-feature" data-feature="investing">
@@ -794,6 +812,11 @@
                 <strong id="retirement-runway-label">$0</strong>
               </div>
           <svg id="retirement-runway-chart" class="line-chart line-chart-tall" viewBox="0 0 420 240" preserveAspectRatio="none" aria-label="Retirement income check"></svg>
+          <div class="chart-insight-row" id="retirement-runway-insights">
+            <span class="insight-chip">Monthly goal: $0</span>
+            <span class="insight-chip">Estimated support: $0</span>
+            <span class="insight-chip">Gap: $0</span>
+          </div>
           <p class="chart-note" id="retirement-runway-note">See whether your current saving path is likely to cover the monthly retirement income target you entered.</p>
             </article>
           </div>
@@ -887,6 +910,11 @@
                 <strong id="monthly-trend-label">$0</strong>
               </div>
               <svg id="monthly-trend-chart" class="line-chart" viewBox="0 0 420 220" preserveAspectRatio="none" aria-label="Monthly spend trend"></svg>
+              <div class="chart-insight-row" id="monthly-trend-insights">
+                <span class="insight-chip">This month: $0</span>
+                <span class="insight-chip">Last month: $0</span>
+                <span class="insight-chip">Trend: Needs data</span>
+              </div>
               <p id="monthly-trend-note" class="chart-note">Growr compares the last few months to show whether spending is settling down or drifting up.</p>
             </article>
             <article class="chart-card">
@@ -899,6 +927,10 @@
                 <div id="category-donut-center" class="donut-center">$0</div>
               </div>
               <div id="category-donut-legend" class="legend-list"></div>
+              <div class="chart-insight-row" id="category-donut-insights">
+                <span class="insight-chip">Top category: Waiting on data</span>
+                <span class="insight-chip">Share: 0%</span>
+              </div>
             </article>
           </div>
         </section>
@@ -1187,6 +1219,10 @@
                 <strong id="networth-trend-label">$0</strong>
               </div>
               <svg id="networth-trend-chart" class="line-chart line-chart-tall" viewBox="0 0 420 240" preserveAspectRatio="none" aria-label="Net worth trend"></svg>
+              <div class="chart-insight-row" id="networth-trend-insights">
+                <span class="insight-chip">Starting point: $0</span>
+                <span class="insight-chip">Projected path: $0</span>
+              </div>
               <p class="chart-note" id="networth-trend-note">Watch your estimated net worth build as assets grow and debt shrinks.</p>
             </article>
           </div>
