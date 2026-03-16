@@ -34,6 +34,7 @@
               <button class="tab-btn" data-page-target="snapshot">Snapshot</button>
               <button class="tab-btn" data-page-target="budget">Budget</button>
               <button class="tab-btn" data-page-target="recurring">Recurring</button>
+              <button class="tab-btn" data-page-target="couples">Couples</button>
               <button class="tab-btn" data-page-target="investing">Investing</button>
               <button class="tab-btn" data-page-target="networth">Net Worth</button>
               <button class="tab-btn" data-page-target="accounts">Connect Accounts</button>
@@ -203,15 +204,33 @@
                 <div class="visual-device-top"></div>
                 <div class="visual-account-list">
                   <div class="account-row">
-                    <span>Checking</span>
+                    <div class="account-row-copy">
+                      <div class="account-row-brand bank-brand-chase">C</div>
+                      <div>
+                        <span>Chase Checking</span>
+                        <small>Everyday banking</small>
+                      </div>
+                    </div>
                     <strong>$4,830</strong>
                   </div>
                   <div class="account-row">
-                    <span>Credit card</span>
+                    <div class="account-row-copy">
+                      <div class="account-row-brand bank-brand-wells">WF</div>
+                      <div>
+                        <span>Wells Fargo Card</span>
+                        <small>Credit card</small>
+                      </div>
+                    </div>
                     <strong>$1,920</strong>
                   </div>
                   <div class="account-row">
-                    <span>Brokerage</span>
+                    <div class="account-row-copy">
+                      <div class="account-row-brand bank-brand-fidelity">F</div>
+                      <div>
+                        <span>Fidelity Brokerage</span>
+                        <small>Investing</small>
+                      </div>
+                    </div>
                     <strong>$12,400</strong>
                   </div>
                 </div>
@@ -439,69 +458,6 @@
             </div>
             <div id="snapshot-feed-list" class="snapshot-feed-list"></div>
           </article>
-        </section>
-        <section class="glass ai-coach-panel">
-          <div class="section-heading">
-            <p class="eyebrow">Ask Growr</p>
-            <h2>Ask money questions in plain English</h2>
-            <p class="page-intro-text">
-              Ask about 401(k)s, Roth IRA taxes, HSAs, debt payoff, or what Growr thinks you should focus on next.
-            </p>
-          </div>
-          <div class="ai-layout">
-            <div class="ai-main-column">
-              <div id="ai-note" class="helper-banner hidden"></div>
-              <div class="ai-starter-row">
-                <button type="button" class="prompt-chip" data-ai-question="What is a 401(k)?">What is a 401(k)?</button>
-                <button type="button" class="prompt-chip" data-ai-question="How are Roth IRA and Traditional IRA taxes different?">Roth vs Traditional IRA taxes</button>
-                <button type="button" class="prompt-chip" data-ai-question="Should I pay off my credit card before investing more?">Debt or investing first?</button>
-                <button type="button" class="prompt-chip" data-ai-question="What is an HSA and why do people use it?">What is an HSA?</button>
-              </div>
-              <div id="ai-thread" class="ai-thread"></div>
-              <form id="ai-form" class="ai-form">
-                <label class="ai-input-wrap" for="ai-question">
-                  <span>Ask Growr anything about budgeting, investing, or account types</span>
-                  <textarea id="ai-question" rows="3" placeholder="Example: How is a 401(k) taxed compared with a Roth IRA?"></textarea>
-                </label>
-                <div class="ai-actions">
-                  <button type="submit" class="primary-btn" id="ai-send-button">Ask Growr</button>
-                  <button type="button" class="ghost-btn" id="ai-reset-button">Clear chat</button>
-                </div>
-              </form>
-              <p id="ai-status" class="status-message">
-                Ask educational questions anytime. If you are signed in, Growr can also answer using your saved plan.
-              </p>
-            </div>
-            <aside class="ai-side-column">
-              <article class="ai-side-card ai-context-card">
-                <p class="eyebrow">Coach mode</p>
-                <h3 id="ai-highlight-mode">General money explainer</h3>
-                <p class="ai-side-copy">When your plan and accounts are connected, Growr can answer with more context and sharper next steps.</p>
-                <div class="ai-mini-metrics">
-                  <div class="ai-mini-metric">
-                    <span>Pressure point</span>
-                    <strong id="ai-highlight-pressure">Waiting on data</strong>
-                  </div>
-                  <div class="ai-mini-metric">
-                    <span>Recurring drag</span>
-                    <strong id="ai-highlight-recurring">$0</strong>
-                  </div>
-                  <div class="ai-mini-metric">
-                    <span>Retirement pace</span>
-                    <strong id="ai-highlight-retirement">Needs setup</strong>
-                  </div>
-                </div>
-              </article>
-              <article class="ai-side-card ai-guidance-card">
-                <p class="eyebrow">Best questions right now</p>
-                <div class="ai-side-chip-grid">
-                  <button type="button" class="prompt-chip prompt-chip-block" data-ai-question="What should I do first with my current budget?">What should I do first?</button>
-                  <button type="button" class="prompt-chip prompt-chip-block" data-ai-question="What is likely hurting my cash flow the most?">What is hurting my cash flow?</button>
-                  <button type="button" class="prompt-chip prompt-chip-block" data-ai-question="How much monthly retirement income does my plan look like it could support?">What could I live on in retirement?</button>
-                </div>
-              </article>
-            </aside>
-          </div>
         </section>
         <section id="planner" class="planner-grid">
           <div class="glass planner-panel">
@@ -1330,10 +1286,112 @@
 
         </section>
 
+        <section class="app-page" data-page="couples">
+        <section class="glass page-intro">
+          <div>
+            <p class="eyebrow">Couples</p>
+            <h2>Keep the household on the same page</h2>
+            <p class="page-intro-text">Shared money is easier when both people can see recurring bills, cash, and long-term progress in one calm place.</p>
+          </div>
+          <div class="page-intro-callouts">
+            <span>Household view</span>
+            <span>Shared check-ins</span>
+            <span>Couples add-on</span>
+          </div>
+        </section>
+        <section class="glass section-bridge">
+          <div>
+            <p class="eyebrow">Household clarity</p>
+            <h2 id="couples-shared-headline">Bring both sides of the money picture together.</h2>
+            <p class="page-intro-text" id="couples-shared-copy">Growr can combine shared planning, connected balances, and recurring bills into one simpler household view so weekly money check-ins stop feeling messy.</p>
+          </div>
+          <div class="bridge-points">
+            <span>Cash together</span>
+            <span>Recurring load</span>
+            <span>Monthly next moves</span>
+          </div>
+        </section>
+        <section class="couples-grid">
+          <article class="glass couples-overview-card">
+            <div class="section-heading compact">
+              <p class="eyebrow">Household view</p>
+              <h2>Shared money snapshot</h2>
+            </div>
+            <div id="couples-access-note" class="helper-banner hidden"></div>
+            <div class="live-summary-grid couples-summary-grid">
+              <article class="mini-stat">
+                <span>Household cash</span>
+                <strong id="couples-household-cash">$0</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Household net worth</span>
+                <strong id="couples-household-networth">$0</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Recurring monthly load</span>
+                <strong id="couples-household-recurring">$0</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Investing together</span>
+                <strong id="couples-household-investing">$0</strong>
+              </article>
+            </div>
+            <div class="couples-checkin-card">
+              <p class="eyebrow">Monthly check-in</p>
+              <h3>What deserves attention together</h3>
+              <div id="couples-review-list" class="couples-review-list"></div>
+            </div>
+          </article>
+          <article class="glass couples-overview-card">
+            <div class="section-heading compact">
+              <p class="eyebrow">How couples use it</p>
+              <h2>One place to review the household</h2>
+            </div>
+            <div class="couples-visual-shell">
+              <div class="couples-table-card">
+                <div class="couples-table-top">
+                  <div class="couple-avatar-stack">
+                    <span class="couple-avatar">A</span>
+                    <span class="couple-avatar">J</span>
+                  </div>
+                  <strong>Household review</strong>
+                </div>
+                <div class="couples-table-row">
+                  <span>Checking + savings</span>
+                  <strong id="couples-mock-cash">$0</strong>
+                </div>
+                <div class="couples-table-row">
+                  <span>Recurring bills</span>
+                  <strong id="couples-mock-bills">$0</strong>
+                </div>
+                <div class="couples-table-row">
+                  <span>Next move</span>
+                  <strong id="couples-mock-next">Review setup</strong>
+                </div>
+              </div>
+            </div>
+            <div class="recommendation-list">
+              <article class="recommendation-item good">
+                <h3>See the household at a glance</h3>
+                <p>Bring separate and joint accounts into one view so one person is not carrying the full money picture alone.</p>
+              </article>
+              <article class="recommendation-item">
+                <h3>Review recurring bills together</h3>
+                <p>Use the recurring hub to review subscriptions and bills together instead of piecing them together across cards and accounts.</p>
+              </article>
+              <article class="recommendation-item warn">
+                <h3>Partner invites next</h3>
+                <p>The couples add-on is in place now. Shared invites and partner-specific permissions are the next product step to make this fully collaborative.</p>
+              </article>
+            </div>
+          </article>
+        </section>
+        </section>
+
         <section class="app-page" data-page="auth">
         <section class="auth-destination">
           <article class="auth-showcase">
-            <button type="button" class="auth-brand-lockup brand-home-btn" data-page-target="snapshot" aria-label="Go to Growr home">
+            <button type="button" class="auth-brand-lockup brand-home-btn" data-page-target="home" aria-label="Go to Growr home">
               <span class="brand-mark">
                 <span class="brand-icon" aria-hidden="true">
                   <span class="brand-bar brand-bar-one"></span>
@@ -1359,7 +1417,7 @@
 
           <article class="auth-stage">
             <div class="auth-stage-top">
-              <button type="button" class="ghost-btn" data-page-target="snapshot">Back to home</button>
+              <button type="button" class="ghost-btn" data-page-target="home">Back to home</button>
             </div>
             <div class="integration-banner">
               <div class="integration-chip">
@@ -1679,12 +1737,116 @@
         </section>
         </section>
       </main>
+      <div class="ai-widget" id="ai-widget">
+        <button type="button" class="ai-widget-launcher" id="ai-widget-launcher" aria-expanded="false" aria-controls="ai-widget-panel">
+          <span class="ai-widget-launcher-dot"></span>
+          <span>Ask Growr</span>
+        </button>
+        <section class="glass ai-widget-panel hidden" id="ai-widget-panel">
+          <div class="ai-widget-panel-top">
+            <div>
+              <p class="eyebrow">Ask Growr</p>
+              <h2>Money help in plain English</h2>
+            </div>
+            <button type="button" class="ghost-btn ai-widget-close" id="ai-widget-close">Close</button>
+          </div>
+          <div class="ai-layout ai-layout-floating">
+            <div class="ai-main-column">
+              <div id="ai-note" class="helper-banner hidden"></div>
+              <div class="ai-starter-row">
+                <button type="button" class="prompt-chip" data-ai-question="What is a 401(k)?">What is a 401(k)?</button>
+                <button type="button" class="prompt-chip" data-ai-question="How are Roth IRA and Traditional IRA taxes different?">Roth vs Traditional IRA taxes</button>
+                <button type="button" class="prompt-chip" data-ai-question="Should I pay off my credit card before investing more?">Debt or investing first?</button>
+                <button type="button" class="prompt-chip" data-ai-question="What is an HSA and why do people use it?">What is an HSA?</button>
+              </div>
+              <div id="ai-thread" class="ai-thread"></div>
+              <form id="ai-form" class="ai-form">
+                <label class="ai-input-wrap" for="ai-question">
+                  <span>Ask Growr anything about budgeting, investing, or account types</span>
+                  <textarea id="ai-question" rows="3" placeholder="Example: How is a 401(k) taxed compared with a Roth IRA?"></textarea>
+                </label>
+                <div class="ai-actions">
+                  <button type="submit" class="primary-btn" id="ai-send-button">Ask Growr</button>
+                  <button type="button" class="ghost-btn" id="ai-reset-button">Clear chat</button>
+                </div>
+              </form>
+              <p id="ai-status" class="status-message">
+                Ask educational questions anytime. If you are signed in, Growr can also answer using your saved plan.
+              </p>
+            </div>
+            <aside class="ai-side-column">
+              <article class="ai-side-card ai-context-card">
+                <p class="eyebrow">Coach mode</p>
+                <h3 id="ai-highlight-mode">General money explainer</h3>
+                <p class="ai-side-copy">When your plan and accounts are connected, Growr can answer with more context and sharper next steps.</p>
+                <div class="ai-mini-metrics">
+                  <div class="ai-mini-metric">
+                    <span>Pressure point</span>
+                    <strong id="ai-highlight-pressure">Waiting on data</strong>
+                  </div>
+                  <div class="ai-mini-metric">
+                    <span>Recurring drag</span>
+                    <strong id="ai-highlight-recurring">$0</strong>
+                  </div>
+                  <div class="ai-mini-metric">
+                    <span>Retirement pace</span>
+                    <strong id="ai-highlight-retirement">Needs setup</strong>
+                  </div>
+                </div>
+              </article>
+              <article class="ai-side-card ai-guidance-card">
+                <p class="eyebrow">Best questions right now</p>
+                <div class="ai-side-chip-grid">
+                  <button type="button" class="prompt-chip prompt-chip-block" data-ai-question="What should I do first with my current budget?">What should I do first?</button>
+                  <button type="button" class="prompt-chip prompt-chip-block" data-ai-question="What is likely hurting my cash flow the most?">What is hurting my cash flow?</button>
+                  <button type="button" class="prompt-chip prompt-chip-block" data-ai-question="How much monthly retirement income does my plan look like it could support?">What could I live on in retirement?</button>
+                </div>
+              </article>
+            </aside>
+          </div>
+        </section>
+      </div>
       <footer class="site-footer">
-        <p>Growr is built to help everyday people budget, plan, and invest with more clarity.</p>
-        <div class="footer-links">
-          <button type="button" class="footer-link" data-page-target="privacy">Privacy Policy</button>
-          <button type="button" class="footer-link" data-page-target="terms">Terms of Use</button>
-          <span>Educational guidance only. Not personalized financial advice.</span>
+        <div class="footer-brand-column">
+          <button type="button" class="brand brand-home-btn footer-brand-btn" data-page-target="home" aria-label="Go to Growr home">
+            <span class="brand-mark">
+              <span class="brand-icon" aria-hidden="true">
+                <span class="brand-bar brand-bar-one"></span>
+                <span class="brand-bar brand-bar-two"></span>
+                <span class="brand-bar brand-bar-three"></span>
+                <span class="brand-trend"></span>
+              </span>
+              <span class="brand-word">Growr</span>
+            </span>
+          </button>
+          <p>Growr is built to help everyday people budget, plan, invest, and stay aligned with real life.</p>
+          <div class="footer-app-badges">
+            <span class="app-badge">iPhone app in progress</span>
+            <span class="app-badge app-badge-muted">Android planned</span>
+          </div>
+        </div>
+        <div class="footer-link-grid">
+          <div class="footer-link-column">
+            <strong>Product</strong>
+            <button type="button" class="footer-link" data-page-target="snapshot">Snapshot</button>
+            <button type="button" class="footer-link" data-page-target="budget">Budget</button>
+            <button type="button" class="footer-link" data-page-target="recurring">Recurring</button>
+            <button type="button" class="footer-link" data-page-target="couples">Couples</button>
+          </div>
+          <div class="footer-link-column">
+            <strong>Planning</strong>
+            <button type="button" class="footer-link" data-page-target="investing">Investing</button>
+            <button type="button" class="footer-link" data-page-target="networth">Net Worth</button>
+            <button type="button" class="footer-link" data-page-target="accounts">Connect Accounts</button>
+            <button type="button" class="footer-link" data-page-target="account">Account</button>
+          </div>
+          <div class="footer-link-column">
+            <strong>Legal</strong>
+            <button type="button" class="footer-link" data-page-target="privacy">Privacy Policy</button>
+            <button type="button" class="footer-link" data-page-target="terms">Terms of Use</button>
+            <span>Educational guidance only.</span>
+            <span>Not personalized financial advice.</span>
+          </div>
         </div>
       </footer>
     </div>

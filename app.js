@@ -554,6 +554,17 @@ function setAiStatus(text) {
   document.getElementById("ai-status").textContent = text;
 }
 
+function setAiWidgetOpen(open) {
+  const panel = document.getElementById("ai-widget-panel");
+  const launcher = document.getElementById("ai-widget-launcher");
+  if (!panel || !launcher) {
+    return;
+  }
+
+  panel.classList.toggle("hidden", !open);
+  launcher.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
 function setVerificationStatus(text) {
   document.getElementById("account-verify-status").textContent = text;
 }
@@ -754,6 +765,86 @@ function renderAiCoachHighlights({
   } else {
     retirement.textContent = "On track";
   }
+}
+
+function renderCouplesExperience({
+  householdCash = 0,
+  householdNetWorth = 0,
+  recurringLoad = 0,
+  householdInvesting = 0,
+  nextMove = "Review setup",
+} = {}) {
+  const accessNote = document.getElementById("couples-access-note");
+  const headline = document.getElementById("couples-shared-headline");
+  const copy = document.getElementById("couples-shared-copy");
+  const reviewList = document.getElementById("couples-review-list");
+
+  if (!accessNote || !headline || !copy || !reviewList) {
+    return;
+  }
+
+  const hasUser = Boolean(state.user);
+  const hasCouples = Boolean(state.user?.couplesAddOn);
+
+  document.getElementById("couples-household-cash").textContent = currency.format(householdCash);
+  document.getElementById("couples-household-networth").textContent = currency.format(householdNetWorth);
+  document.getElementById("couples-household-recurring").textContent = currency.format(recurringLoad);
+  document.getElementById("couples-household-investing").textContent = currency.format(householdInvesting);
+  document.getElementById("couples-mock-cash").textContent = currency.format(householdCash);
+  document.getElementById("couples-mock-bills").textContent = currency.format(recurringLoad);
+  document.getElementById("couples-mock-next").textContent = nextMove;
+
+  if (!hasUser) {
+    accessNote.classList.remove("hidden");
+    accessNote.textContent = "Sign in to turn on shared household planning and see how Growr would summarize your money as a couple.";
+    headline.textContent = "Bring both sides of the money picture together.";
+    copy.textContent = "The couples add-on gives one household view for recurring bills, cash, and next moves without losing each person's separate accounts.";
+  } else if (!hasCouples) {
+    accessNote.classList.remove("hidden");
+    accessNote.textContent = "Add Couples for $1.99/month to unlock a shared household view, recurring review together, and faster monthly money check-ins.";
+    headline.textContent = "Your plan is ready to expand into a household view.";
+    copy.textContent = "Growr can already estimate your household picture from the current plan. Turn on Couples to make the shared version part of your account.";
+  } else {
+    accessNote.classList.remove("hidden");
+    accessNote.textContent = "Couples add-on is active. Shared invites and partner permissions are the next step, but your household view is already on.";
+    headline.textContent = "The household view is active and ready for money check-ins.";
+    copy.textContent = "Use this page to keep shared bills, cash, and long-term progress in one simpler household picture.";
+  }
+
+  const reviewItems = [
+    {
+      title: recurringLoad > 0 ? "Review recurring bills together" : "Connect recurring data",
+      body: recurringLoad > 0
+        ? `${currency.format(recurringLoad)} is currently being treated as the repeating monthly household load, which makes it the easiest first check-in topic.`
+        : "Connect accounts and refresh data so Growr can separate subscriptions, bills, and paychecks automatically for the household.",
+    },
+    {
+      title: householdCash > 0 ? "Decide what shared cash should do next" : "Build visible household cash",
+      body: householdCash > 0
+        ? `${currency.format(householdCash)} is showing up as available household cash. Decide together how much stays liquid versus moving toward goals or debt payoff.`
+        : "Once cash accounts are connected or entered, Growr can give the household a clearer monthly buffer view.",
+    },
+    {
+      title: householdNetWorth > 0 ? "Track progress as a team" : "Start the long-term household picture",
+      body: householdNetWorth > 0
+        ? `${currency.format(householdNetWorth)} is the current combined net worth picture Growr can see. That gives both people one shared scoreboard to review over time.`
+        : "Add home, car, debt, and investment details so the couples view shows a fuller long-term picture, not just month-to-month spending.",
+    },
+  ];
+
+  reviewList.innerHTML = reviewItems
+    .map(
+      (item, index) => `
+        <article class="couples-review-item">
+          <div class="couples-review-badge">${index + 1}</div>
+          <div>
+            <h4>${item.title}</h4>
+            <p>${item.body}</p>
+          </div>
+        </article>
+      `
+    )
+    .join("");
 }
 
 function renderAiMessages() {
@@ -3045,6 +3136,22 @@ function updateDashboard() {
   renderSnapshotFeed({
     leftover,
   });
+  renderCouplesExperience({
+    householdCash: cashAssets + Number(state.linkedSummary.cashTotal || 0),
+    householdNetWorth: netWorth,
+    recurringLoad:
+      state.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0) +
+      state.recurringBills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0),
+    householdInvesting: currentInvestmentAssets + Number(state.linkedSummary.investmentsTotal || 0),
+    nextMove:
+      leftover < 0
+        ? "Trim recurring drag"
+        : debtRatio > 0.28
+          ? "Review debt together"
+          : emergencyMonths < 2
+            ? "Rebuild cushion"
+            : "Put the monthly margin to work",
+  });
 
   renderCharts({
     income,
@@ -3666,9 +3773,12 @@ document.getElementById("account-upgrade-button").addEventListener("click", hand
 document.getElementById("transaction-form").addEventListener("submit", createTransaction);
 document.getElementById("ai-form").addEventListener("submit", handleAiSubmit);
 document.getElementById("ai-reset-button").addEventListener("click", resetAiCoach);
+document.getElementById("ai-widget-launcher").addEventListener("click", () => setAiWidgetOpen(true));
+document.getElementById("ai-widget-close").addEventListener("click", () => setAiWidgetOpen(false));
 bindTransactionFilters();
 document.querySelectorAll("[data-ai-question]").forEach((button) => {
   button.addEventListener("click", () => {
+    setAiWidgetOpen(true);
     submitAiQuestion(button.dataset.aiQuestion);
   });
 });
@@ -3701,6 +3811,7 @@ renderTransactions();
 renderCategoryProgress();
 applyFeatureGate();
 renderAiMessages();
+setAiWidgetOpen(false);
 syncAiAvailability();
 setAuthView(state.authMode);
 setActivePage(window.location.hash.replace("#", "") || "home");
