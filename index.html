@@ -350,6 +350,9 @@
             </div>
             <form id="investment-form" class="planner-form">
               <label>Age<input type="number" id="age" value="32" min="18" max="80" /></label>
+              <label>Retirement age<input type="number" id="retirementAge" value="67" min="40" max="85" /></label>
+              <label>Monthly income needed in retirement<input type="number" id="retirementMonthlyGoal" value="6500" min="0" /></label>
+              <label>Other monthly retirement income (Social Security / pension)<input type="number" id="retirementIncomeOther" value="2200" min="0" /></label>
               <label>401(k) balance<input type="number" id="k401Balance" value="28000" min="0" /></label>
               <label>401(k) monthly contribution<input type="number" id="k401Contribution" value="500" min="0" /></label>
               <label>Roth IRA balance<input type="number" id="rothBalance" value="12000" min="0" /></label>
@@ -466,6 +469,50 @@
               <div class="metric-card metric-card-wide">
                 <span>Total projected</span>
                 <strong id="totalFuture">$0</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="results-grid">
+          <article class="glass results-panel gated-feature" data-feature="investing">
+            <div class="section-heading compact">
+              <p class="eyebrow">Retirement view</p>
+              <h2>What retirement may look like</h2>
+            </div>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <span>Target retirement age</span>
+                <strong id="retirementAgeDisplay">67</strong>
+              </div>
+              <div class="metric-card">
+                <span>Years until retirement</span>
+                <strong id="retirementYearsLeft">0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Monthly amount you want</span>
+                <strong id="retirementMonthlyNeed">$0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Needed nest egg</span>
+                <strong id="retirementNestEgg">$0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Projected portfolio at retirement</span>
+                <strong id="retirementProjectedPortfolio">$0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Estimated monthly portfolio income</span>
+                <strong id="retirementPortfolioIncome">$0</strong>
+              </div>
+              <div class="metric-card">
+                <span>Total monthly income you may live on</span>
+                <strong id="retirementTotalIncome">$0</strong>
+              </div>
+              <div class="metric-card metric-card-wide">
+                <span>Monthly gap to target</span>
+                <strong id="retirementGap">$0</strong>
+                <p id="retirementNote" class="metric-note">Uses a simple 4% withdrawal rule for an educational estimate.</p>
               </div>
             </div>
           </article>

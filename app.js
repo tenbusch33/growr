@@ -41,6 +41,9 @@ const state = {
 
 const budgetDefaults = {
   age: 32,
+  retirementAge: 67,
+  retirementMonthlyGoal: 6500,
+  retirementIncomeOther: 2200,
   k401Balance: 28000,
   k401Contribution: 500,
   rothBalance: 12000,
@@ -577,6 +580,9 @@ function getPlannerPayload() {
     otherAssets: getValue("otherAssets"),
     otherLiabilities: getValue("otherLiabilities"),
     age: getValue("age"),
+    retirementAge: getValue("retirementAge"),
+    retirementMonthlyGoal: getValue("retirementMonthlyGoal"),
+    retirementIncomeOther: getValue("retirementIncomeOther"),
     k401Balance: getValue("k401Balance"),
     k401Contribution: getValue("k401Contribution"),
     rothBalance: getValue("rothBalance"),
@@ -1169,6 +1175,9 @@ function getInvestmentInputs() {
 
   return {
     age: getValue("age"),
+    retirementAge: getValue("retirementAge"),
+    retirementMonthlyGoal: getValue("retirementMonthlyGoal"),
+    retirementIncomeOther: getValue("retirementIncomeOther"),
     k401Balance: getValue("k401Balance"),
     k401Contribution: getValue("k401Contribution"),
     rothBalance: getValue("rothBalance"),
@@ -1470,6 +1479,9 @@ function updateDashboard() {
   const otherLiabilities = getValue("otherLiabilities");
   const investmentInputs = getInvestmentInputs();
   const years = investmentInputs.forecastYears;
+  const retirementYears = Math.max(investmentInputs.retirementAge - investmentInputs.age, 0);
+  const retirementMonthlyGoal = investmentInputs.retirementMonthlyGoal;
+  const retirementIncomeOther = investmentInputs.retirementIncomeOther;
 
   const totalExpenses =
     housing + essentials + creditCardPayment + otherDebt + carPayment + carCosts;
@@ -1515,8 +1527,66 @@ function updateDashboard() {
     returns.brokerage,
     years
   );
+  const retirementK401Future = futureValue(
+    investmentInputs.k401Balance,
+    investmentInputs.k401Contribution,
+    returns.k401,
+    retirementYears
+  );
+  const retirementRothFuture = futureValue(
+    investmentInputs.rothBalance,
+    investmentInputs.rothContribution,
+    returns.roth,
+    retirementYears
+  );
+  const retirementTraditionalIraFuture = futureValue(
+    investmentInputs.traditionalIraBalance,
+    investmentInputs.traditionalIraContribution,
+    returns.traditionalIra,
+    retirementYears
+  );
+  const retirementHsaFuture = futureValue(
+    investmentInputs.hsaBalance,
+    investmentInputs.hsaContribution,
+    returns.hsa,
+    retirementYears
+  );
+  const retirementCollege529Future = futureValue(
+    investmentInputs.college529Balance,
+    investmentInputs.college529Contribution,
+    returns.college529,
+    retirementYears
+  );
+  const retirementBrokerageFuture = futureValue(
+    investmentInputs.brokerageBalance,
+    investmentInputs.brokerageContribution,
+    returns.brokerage,
+    retirementYears
+  );
   const totalFuture = hasInvestmentAccess()
     ? k401Future + rothFuture + traditionalIraFuture + hsaFuture + college529Future + brokerageFuture
+    : 0;
+  const retirementProjectedPortfolio = hasInvestmentAccess()
+    ? retirementK401Future +
+      retirementRothFuture +
+      retirementTraditionalIraFuture +
+      retirementHsaFuture +
+      retirementCollege529Future +
+      retirementBrokerageFuture
+    : 0;
+  const retirementMonthlyNeedFromPortfolio = Math.max(
+    retirementMonthlyGoal - retirementIncomeOther,
+    0
+  );
+  const retirementNestEgg = retirementMonthlyNeedFromPortfolio * 12 * 25;
+  const retirementPortfolioIncome = hasInvestmentAccess()
+    ? (retirementProjectedPortfolio * 0.04) / 12
+    : 0;
+  const retirementTotalIncome = hasInvestmentAccess()
+    ? retirementPortfolioIncome + retirementIncomeOther
+    : 0;
+  const retirementGap = hasInvestmentAccess()
+    ? retirementMonthlyGoal - retirementTotalIncome
     : 0;
   const currentInvestmentAssets = hasInvestmentAccess()
     ? investmentInputs.k401Balance +
@@ -1554,6 +1624,35 @@ function updateDashboard() {
   document.getElementById("hero-growth").textContent = hasInvestmentAccess() ? currency.format(totalFuture) : "Upgrade";
   document.getElementById("hero-debt-pressure").textContent =
     debtRatio > 0.35 ? "High" : debtRatio > 0.2 ? "Moderate" : "Balanced";
+  document.getElementById("retirementAgeDisplay").textContent = hasInvestmentAccess()
+    ? `${investmentInputs.retirementAge}`
+    : "Locked";
+  document.getElementById("retirementYearsLeft").textContent = hasInvestmentAccess()
+    ? `${retirementYears.toFixed(0)}`
+    : "Locked";
+  document.getElementById("retirementMonthlyNeed").textContent = hasInvestmentAccess()
+    ? currency.format(retirementMonthlyGoal)
+    : "Locked";
+  document.getElementById("retirementNestEgg").textContent = hasInvestmentAccess()
+    ? currency.format(retirementNestEgg)
+    : "Locked";
+  document.getElementById("retirementProjectedPortfolio").textContent = hasInvestmentAccess()
+    ? currency.format(retirementProjectedPortfolio)
+    : "Locked";
+  document.getElementById("retirementPortfolioIncome").textContent = hasInvestmentAccess()
+    ? currency.format(retirementPortfolioIncome)
+    : "Locked";
+  document.getElementById("retirementTotalIncome").textContent = hasInvestmentAccess()
+    ? currency.format(retirementTotalIncome)
+    : "Locked";
+  document.getElementById("retirementGap").textContent = hasInvestmentAccess()
+    ? (retirementGap > 0 ? currency.format(retirementGap) : "On track")
+    : "Locked";
+  document.getElementById("retirementNote").textContent = hasInvestmentAccess()
+    ? retirementGap > 0
+      ? `You may still be about ${currency.format(retirementGap)} per month short of your target. Uses a simple 4% withdrawal rule for an educational estimate.`
+      : `At this pace, your projected retirement income covers your target with about ${currency.format(Math.abs(retirementGap))} per month of cushion. Uses a simple 4% withdrawal rule for an educational estimate.`
+    : "Upgrade to compare your retirement target against what your portfolio may actually support each month.";
   document.getElementById("homeEquity").textContent = currency.format(homeEquity);
   document.getElementById("carEquity").textContent = currency.format(carEquity);
   document.getElementById("totalAssets").textContent = currency.format(totalAssets);

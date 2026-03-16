@@ -197,6 +197,9 @@ function sanitizePlannerForAccount(payload, account) {
   const sanitized = { ...payload };
   if (!hasInvestmentAccess(account)) {
     delete sanitized.age;
+    delete sanitized.retirementAge;
+    delete sanitized.retirementMonthlyGoal;
+    delete sanitized.retirementIncomeOther;
     delete sanitized.k401Balance;
     delete sanitized.k401Contribution;
     delete sanitized.rothBalance;
@@ -669,6 +672,12 @@ function buildAiFinancialContext(account) {
   const carEquity = carValue - carLoanBalance;
   const netWorth = homeValue + carValue + cashAssets + otherAssets + investmentTotal
     - mortgageBalance - carLoanBalance - otherLiabilities - creditCardBalance;
+  const retirementAge = Number(planner.retirementAge || 0);
+  const currentAge = Number(planner.age || 0);
+  const retirementMonthlyGoal = Number(planner.retirementMonthlyGoal || 0);
+  const retirementIncomeOther = Number(planner.retirementIncomeOther || 0);
+  const retirementNeedFromPortfolio = Math.max(retirementMonthlyGoal - retirementIncomeOther, 0);
+  const retirementNestEgg = retirementNeedFromPortfolio * 12 * 25;
 
   const categoryTotals = transactions.reduce((totals, entry) => {
     const key = entry.category || "other";
@@ -690,6 +699,9 @@ function buildAiFinancialContext(account) {
       `Debt ratio: ${(debtRatio * 100).toFixed(0)}%. Car cost ratio: ${(carRatio * 100).toFixed(0)}%.`,
       `Home equity: $${Math.round(homeEquity)}. Car equity: $${Math.round(carEquity)}. Net worth estimate: $${Math.round(netWorth)}.`,
       `Investments tracked in planner: $${Math.round(investmentTotal)}.`,
+      retirementAge
+        ? `Retirement target age: ${Math.round(retirementAge)}. Desired monthly retirement income: $${Math.round(retirementMonthlyGoal)}. Other guaranteed retirement income: $${Math.round(retirementIncomeOther)}. Approximate nest egg needed for the remaining income target: $${Math.round(retirementNestEgg)}.`
+        : `No retirement target is saved yet. Current age on file: ${Math.round(currentAge) || "unknown"}.`,
       topCategories.length
         ? `Recent spending categories: ${topCategories.join(", ")}.`
         : "No recent transaction history is available.",

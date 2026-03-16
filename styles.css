@@ -810,6 +810,13 @@ select {
   font-family: "Sora", sans-serif;
 }
 
+.metric-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
 .hero-card p,
 .info-card p,
 .price-card li,
