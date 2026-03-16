@@ -721,6 +721,7 @@ function refreshAccountPlanPreview() {
     document.querySelector('input[name="accountPlan"]:checked')?.value || getCurrentPlanKey();
   const selectedBillingInterval =
     document.querySelector('input[name="accountBillingInterval"]:checked')?.value || state.user?.billingInterval || "monthly";
+  const currentDisplay = getAccountPlanDisplay(getCurrentPlanKey(), state.user?.billingInterval || "monthly");
 
   if (!status || !note) {
     return;
@@ -728,7 +729,7 @@ function refreshAccountPlanPreview() {
 
   const display = getAccountPlanDisplay(selectedPlan, selectedBillingInterval);
   const intervalPhrase = selectedBillingInterval === "yearly" ? "yearly billing" : "monthly billing";
-  status.textContent = `${display.label} is selected on ${intervalPhrase}.`;
+  status.textContent = `${display.label} is selected on ${intervalPhrase}. Current plan: ${currentDisplay.label} on ${formatBillingIntervalLabel(state.user?.billingInterval || "monthly").toLowerCase()}.`;
   note.textContent = selectedBillingInterval === "yearly"
     ? `${display.label} renews at ${display.priceLabel}. Yearly billing keeps the 20% savings in place.`
     : `${display.label} renews at ${display.priceLabel}. Switch to yearly if you want the lower annual price.`;

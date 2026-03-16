@@ -440,6 +440,16 @@ async function createPortalSession(account, request) {
   ]);
 }
 
+async function cancelStripeSubscriptionAtPeriodEnd(account) {
+  if (!account.stripeSubscriptionId) {
+    throw new Error("No Stripe subscription found for this account.");
+  }
+
+  return stripeFormRequest(`/v1/subscriptions/${account.stripeSubscriptionId}`, [
+    ["cancel_at_period_end", "true"],
+  ]);
+}
+
 function verifyStripeWebhook(rawBody, signatureHeader) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET || "";
   if (!secret || !signatureHeader) {
@@ -1717,6 +1727,38 @@ const server = http.createServer((request, response) => {
             account: publicAccount(account),
             message: "You kept Growr and got one extra 7-day free extension.",
           });
+          return;
+        }
+
+        if (
+          action === "cancel" &&
+          isStripeApiConfigured() &&
+          account.stripeCustomerId &&
+          account.stripeSubscriptionId
+        ) {
+          cancelStripeSubscriptionAtPeriodEnd(account)
+            .then(() => {
+              account.subscriptionStatus = "canceling";
+              account.subscriptionActive = true;
+              addBillingHistoryEntry(account, {
+                type: "cancellation",
+                status: "scheduled",
+                title: "Cancellation scheduled",
+                detail: "Growr will stay active until the current billing period ends, then it will cancel in Stripe.",
+                amount: 0,
+                billingInterval: account.billingInterval || "monthly",
+              });
+              writeJson(accountsFile, accounts);
+              sendJson(response, 200, {
+                account: publicAccount(account),
+                message: "Your Growr subscription will cancel at the end of the current billing period.",
+              });
+            })
+            .catch((error) => {
+              sendJson(response, 400, {
+                error: error.message || "Unable to cancel the Stripe subscription right now.",
+              });
+            });
           return;
         }
 
