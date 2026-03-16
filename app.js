@@ -656,6 +656,20 @@ function formatBillingIntervalLabel(billingInterval = "monthly") {
   return billingInterval === "yearly" ? "Yearly billing" : "Monthly billing";
 }
 
+async function readJsonResponse(response, fallbackMessage) {
+  const text = await response.text();
+
+  if (!text) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(fallbackMessage);
+  }
+}
+
 function toTitleCase(value = "") {
   return String(value)
     .replace(/([a-z])([A-Z])/g, "$1 $2")
@@ -3791,7 +3805,10 @@ function handleAccountPlanChange() {
     body: JSON.stringify({ plan: selectedPlan, billingInterval: selectedBillingInterval }),
   })
     .then(async (response) => {
-      const payload = await response.json();
+      const payload = await readJsonResponse(
+        response,
+        "Growr could not update the subscription right now. Refresh the page and try again."
+      );
       if (!response.ok) {
         throw new Error(payload.error || "Unable to change subscription.");
       }
