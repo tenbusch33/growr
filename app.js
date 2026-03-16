@@ -655,6 +655,51 @@ function formatBillingIntervalLabel(billingInterval = "monthly") {
   return billingInterval === "yearly" ? "Yearly billing" : "Monthly billing";
 }
 
+function getAccountPlanDisplay(planKey = "budget", billingInterval = "monthly") {
+  const catalog = {
+    budget: {
+      label: "Budget Core",
+      monthly: "$6.99/month",
+      yearly: "$67.10/year",
+    },
+    couples: {
+      label: "Couples",
+      monthly: "$8.99/month",
+      yearly: "$86.30/year",
+    },
+    bundle: {
+      label: "Budget + Investing",
+      monthly: "$14.99/month",
+      yearly: "$143.90/year",
+    },
+  };
+  const entry = catalog[planKey] || catalog.budget;
+  return {
+    label: entry.label,
+    priceLabel: billingInterval === "yearly" ? entry.yearly : entry.monthly,
+  };
+}
+
+function refreshAccountPlanPreview() {
+  const status = document.getElementById("account-plan-status");
+  const note = document.getElementById("account-plan-interval-note");
+  const selectedPlan =
+    document.querySelector('input[name="accountPlan"]:checked')?.value || getCurrentPlanKey();
+  const selectedBillingInterval =
+    document.querySelector('input[name="accountBillingInterval"]:checked')?.value || state.user?.billingInterval || "monthly";
+
+  if (!status || !note) {
+    return;
+  }
+
+  const display = getAccountPlanDisplay(selectedPlan, selectedBillingInterval);
+  const intervalPhrase = selectedBillingInterval === "yearly" ? "yearly billing" : "monthly billing";
+  status.textContent = `${display.label} is selected on ${intervalPhrase}.`;
+  note.textContent = selectedBillingInterval === "yearly"
+    ? `${display.label} renews at ${display.priceLabel}. Yearly billing keeps the 20% savings in place.`
+    : `${display.label} renews at ${display.priceLabel}. Switch to yearly if you want the lower annual price.`;
+}
+
 function renderBillingStatements(user = state.user) {
   const panel = document.getElementById("account-statements-panel");
   const status = document.getElementById("account-statements-status");
@@ -729,6 +774,7 @@ function populateAccountForm() {
   const planStatus = document.getElementById("account-plan-status");
   const planInputs = document.querySelectorAll('input[name="accountPlan"]');
   const billingIntervalInputs = document.querySelectorAll('input[name="accountBillingInterval"]');
+  const billingIntervalNote = document.getElementById("account-plan-interval-note");
   const upgradePanel = document.getElementById("account-upgrade-panel");
   const upgradeCopy = document.getElementById("account-upgrade-copy");
   const billingPanel = document.getElementById("account-billing-panel");
@@ -761,6 +807,7 @@ function populateAccountForm() {
     verificationNote.classList.add("hidden");
     planPanel.classList.add("hidden");
     planStatus.textContent = "Sign in to change your subscription.";
+    billingIntervalNote.textContent = "Choose monthly or yearly billing for the plan you want.";
     planInputs.forEach((input) => {
       input.checked = input.value === "budget";
       input.disabled = true;
@@ -817,13 +864,7 @@ function populateAccountForm() {
     input.checked = input.value === (state.user.billingInterval || "monthly");
     input.disabled = false;
   });
-  const currentBillingInterval = state.user.billingInterval || "monthly";
-  const billingIntervalText = currentBillingInterval === "yearly" ? "yearly" : "monthly";
-  planStatus.textContent = currentPlanKey === "bundle"
-    ? `Budget + Investing is active on ${billingIntervalText} billing.`
-    : currentPlanKey === "couples"
-      ? `Couples is active on ${billingIntervalText} billing.`
-      : `Budget Core is active on ${billingIntervalText} billing.`;
+  refreshAccountPlanPreview();
   verificationNote.classList.remove("hidden");
   if (state.user.emailVerified) {
     verificationForm.classList.add("hidden");
@@ -3583,7 +3624,7 @@ function handleAccountPlanChange() {
   const planStatus = document.getElementById("account-plan-status");
 
   if (selectedPlan === currentPlan && selectedBillingInterval === currentBillingInterval) {
-    planStatus.textContent = "That subscription is already active.";
+    planStatus.textContent = "That subscription and billing cadence are already active.";
     return;
   }
 
@@ -4049,6 +4090,9 @@ document.getElementById("account-billing-button").addEventListener("click", hand
 document.getElementById("account-logout-button").addEventListener("click", handleLogout);
 document.getElementById("account-resend-verification-button").addEventListener("click", handleSendVerification);
 document.getElementById("account-verify-button").addEventListener("click", handleVerifyEmail);
+document.querySelectorAll('input[name="accountPlan"], input[name="accountBillingInterval"]').forEach((input) => {
+  input.addEventListener("change", refreshAccountPlanPreview);
+});
 document.getElementById("connect-accounts").addEventListener("click", connectPlaidAccounts);
 document.getElementById("import-transactions").addEventListener("click", () => {
   syncConnectedWorkspace({ autoFill: false });

@@ -2695,6 +2695,13 @@ select {
   opacity: 0.52;
 }
 
+.billing-interval-note {
+  margin: -6px 0 4px;
+  color: var(--subtle);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
 .compact-plan-option .plan-option-card em {
   color: #d86a2f;
 }
