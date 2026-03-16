@@ -59,7 +59,7 @@
             </p>
             <div class="hero-cta-row">
               <button class="primary-btn premium-cta" data-auth-target="signup">Start free trial</button>
-              <button class="secondary-btn" data-page-target="snapshot">See how it works</button>
+              <button class="secondary-btn" data-scroll="#how-it-works">See how it works</button>
             </div>
             <div class="hero-badges">
               <span>Budget Core from $7.99/mo</span>
@@ -88,6 +88,25 @@
           </div>
         </section>
 
+        <section class="hero-power-strip">
+          <article class="glass power-tile">
+            <span>Autopilot</span>
+            <strong>Detect bills, subscriptions, and paychecks automatically.</strong>
+          </article>
+          <article class="glass power-tile">
+            <span>AI coach</span>
+            <strong>Ask plain-English money questions and get plan-aware answers.</strong>
+          </article>
+          <article class="glass power-tile">
+            <span>Future planning</span>
+            <strong>See retirement income, investing paths, and net worth direction.</strong>
+          </article>
+          <article class="glass power-tile">
+            <span>Connected data</span>
+            <strong>Bring in live balances so Growr does more of the work for you.</strong>
+          </article>
+        </section>
+
       </header>
 
       <main class="workspace-main">
@@ -103,6 +122,28 @@
             <span>Live recommendations</span>
             <span>Built for quick decisions</span>
           </div>
+        </section>
+        <section class="monarch-strip">
+          <article class="glass monarch-tile">
+            <span>Cash on hand</span>
+            <strong id="snapshot-household-cash">$0</strong>
+            <p>Cash and savings ready now</p>
+          </article>
+          <article class="glass monarch-tile">
+            <span>Net worth</span>
+            <strong id="snapshot-household-networth">$0</strong>
+            <p>Assets minus liabilities</p>
+          </article>
+          <article class="glass monarch-tile">
+            <span>Recurring load</span>
+            <strong id="snapshot-household-recurring">$0</strong>
+            <p>Bills and subscriptions each month</p>
+          </article>
+          <article class="glass monarch-tile">
+            <span>Investments</span>
+            <strong id="snapshot-household-investing">$0</strong>
+            <p>Long-term money in motion</p>
+          </article>
         </section>
         <section class="snapshot-command-center">
           <article class="glass command-card command-card-primary">
@@ -309,27 +350,60 @@
               Ask about 401(k)s, Roth IRA taxes, HSAs, debt payoff, or what Growr thinks you should focus on next.
             </p>
           </div>
-          <div id="ai-note" class="helper-banner hidden"></div>
-          <div class="ai-starter-row">
-            <button type="button" class="prompt-chip" data-ai-question="What is a 401(k)?">What is a 401(k)?</button>
-            <button type="button" class="prompt-chip" data-ai-question="How are Roth IRA and Traditional IRA taxes different?">Roth vs Traditional IRA taxes</button>
-            <button type="button" class="prompt-chip" data-ai-question="Should I pay off my credit card before investing more?">Debt or investing first?</button>
-            <button type="button" class="prompt-chip" data-ai-question="What is an HSA and why do people use it?">What is an HSA?</button>
-          </div>
-          <div id="ai-thread" class="ai-thread"></div>
-          <form id="ai-form" class="ai-form">
-            <label class="ai-input-wrap" for="ai-question">
-              <span>Ask Growr anything about budgeting, investing, or account types</span>
-              <textarea id="ai-question" rows="3" placeholder="Example: How is a 401(k) taxed compared with a Roth IRA?"></textarea>
-            </label>
-            <div class="ai-actions">
-              <button type="submit" class="primary-btn" id="ai-send-button">Ask Growr</button>
-              <button type="button" class="ghost-btn" id="ai-reset-button">Clear chat</button>
+          <div class="ai-layout">
+            <div class="ai-main-column">
+              <div id="ai-note" class="helper-banner hidden"></div>
+              <div class="ai-starter-row">
+                <button type="button" class="prompt-chip" data-ai-question="What is a 401(k)?">What is a 401(k)?</button>
+                <button type="button" class="prompt-chip" data-ai-question="How are Roth IRA and Traditional IRA taxes different?">Roth vs Traditional IRA taxes</button>
+                <button type="button" class="prompt-chip" data-ai-question="Should I pay off my credit card before investing more?">Debt or investing first?</button>
+                <button type="button" class="prompt-chip" data-ai-question="What is an HSA and why do people use it?">What is an HSA?</button>
+              </div>
+              <div id="ai-thread" class="ai-thread"></div>
+              <form id="ai-form" class="ai-form">
+                <label class="ai-input-wrap" for="ai-question">
+                  <span>Ask Growr anything about budgeting, investing, or account types</span>
+                  <textarea id="ai-question" rows="3" placeholder="Example: How is a 401(k) taxed compared with a Roth IRA?"></textarea>
+                </label>
+                <div class="ai-actions">
+                  <button type="submit" class="primary-btn" id="ai-send-button">Ask Growr</button>
+                  <button type="button" class="ghost-btn" id="ai-reset-button">Clear chat</button>
+                </div>
+              </form>
+              <p id="ai-status" class="status-message">
+                Ask educational questions anytime. If you are signed in, Growr can also answer using your saved plan.
+              </p>
             </div>
-          </form>
-          <p id="ai-status" class="status-message">
-            Ask educational questions anytime. If you are signed in, Growr can also answer using your saved plan.
-          </p>
+            <aside class="ai-side-column">
+              <article class="ai-side-card ai-context-card">
+                <p class="eyebrow">Coach mode</p>
+                <h3 id="ai-highlight-mode">General money explainer</h3>
+                <p class="ai-side-copy">When your plan and accounts are connected, Growr can answer with more context and sharper next steps.</p>
+                <div class="ai-mini-metrics">
+                  <div class="ai-mini-metric">
+                    <span>Pressure point</span>
+                    <strong id="ai-highlight-pressure">Waiting on data</strong>
+                  </div>
+                  <div class="ai-mini-metric">
+                    <span>Recurring drag</span>
+                    <strong id="ai-highlight-recurring">$0</strong>
+                  </div>
+                  <div class="ai-mini-metric">
+                    <span>Retirement pace</span>
+                    <strong id="ai-highlight-retirement">Needs setup</strong>
+                  </div>
+                </div>
+              </article>
+              <article class="ai-side-card ai-guidance-card">
+                <p class="eyebrow">Best questions right now</p>
+                <div class="ai-side-chip-grid">
+                  <button type="button" class="prompt-chip prompt-chip-block" data-ai-question="What should I do first with my current budget?">What should I do first?</button>
+                  <button type="button" class="prompt-chip prompt-chip-block" data-ai-question="What is likely hurting my cash flow the most?">What is hurting my cash flow?</button>
+                  <button type="button" class="prompt-chip prompt-chip-block" data-ai-question="How much monthly retirement income does my plan look like it could support?">What could I live on in retirement?</button>
+                </div>
+              </article>
+            </aside>
+          </div>
         </section>
         <section id="how-it-works" class="info-grid">
           <article class="glass info-card">
@@ -1140,13 +1214,13 @@
         <section class="glass section-bridge">
           <div>
             <p class="eyebrow">Connected finance</p>
-            <h2>Bring your balances, debt, and transactions into one clearer system.</h2>
-            <p class="page-intro-text">Growr can use linked accounts to reduce manual input, improve recommendations, and draft a more complete financial picture automatically.</p>
+            <h2>Turn on Growr autopilot with linked accounts.</h2>
+            <p class="page-intro-text">Growr can use linked accounts to reduce manual input, detect recurring patterns, and draft a more complete financial picture automatically.</p>
           </div>
           <div class="bridge-points">
             <span>Balances</span>
             <span>Liabilities</span>
-            <span>Imported transactions</span>
+            <span>Recurring detection</span>
           </div>
         </section>
         <section class="glass accounts-panel">
@@ -1276,7 +1350,10 @@
                   </label>
                   <label>
                     Password
-                    <input type="password" id="password" placeholder="Create a password" required />
+                    <span class="password-field">
+                      <input type="password" id="password" placeholder="Create a password" required />
+                      <button type="button" class="password-toggle" data-password-target="password" aria-label="Show password">Show</button>
+                    </span>
                   </label>
                   <fieldset class="plan-picker">
                     <legend>Plan</legend>
@@ -1310,7 +1387,10 @@
                   </label>
                   <label>
                     Login password
-                    <input type="password" id="loginPassword" placeholder="Enter your password" required />
+                    <span class="password-field">
+                      <input type="password" id="loginPassword" placeholder="Enter your password" required />
+                      <button type="button" class="password-toggle" data-password-target="loginPassword" aria-label="Show password">Show</button>
+                    </span>
                   </label>
                   <div class="auth-inline-actions">
                     <button type="submit" class="secondary-btn" id="login-button">Log in</button>
@@ -1328,7 +1408,10 @@
                   </label>
                   <label>
                     New password
-                    <input type="password" id="resetPassword" placeholder="Create a new password" />
+                    <span class="password-field">
+                      <input type="password" id="resetPassword" placeholder="Create a new password" />
+                      <button type="button" class="password-toggle" data-password-target="resetPassword" aria-label="Show password">Show</button>
+                    </span>
                   </label>
                   <div class="auth-inline-actions">
                     <button type="button" class="secondary-btn" id="request-reset-button">Send reset code</button>

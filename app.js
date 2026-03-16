@@ -24,6 +24,15 @@ const state = {
   authMode: "signup",
   plaidHandler: null,
   user: null,
+  linkedSummary: {
+    cashTotal: 0,
+    creditCardDebt: 0,
+    loanDebt: 0,
+    investmentsTotal: 0,
+    accounts: [],
+    liabilities: [],
+    investments: [],
+  },
   saveTimer: null,
   ai: {
     previousResponseId: null,
@@ -243,6 +252,52 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function formatMerchantName(value) {
+  const raw = String(value || "").trim();
+  if (!raw) {
+    return "Unknown merchant";
+  }
+
+  const cleaned = raw
+    .replace(/\b(POS|DEBIT|DBT|PURCHASE|CARD|ACH|CHECKCARD|CHECK CARD|PAYMENT TO|SQ\s*\*)\b/gi, " ")
+    .replace(/\b\d{3,}\b/g, " ")
+    .replace(/[#*]+/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  const words = (cleaned || raw)
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 4)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
+
+  return words.join(" ");
+}
+
+function getMerchantBadge(value) {
+  const words = formatMerchantName(value).split(" ").filter(Boolean);
+  if (!words.length) {
+    return "?";
+  }
+  if (words.length === 1) {
+    return words[0].slice(0, 2).toUpperCase();
+  }
+  return `${words[0][0]}${words[1][0]}`.toUpperCase();
+}
+
+function formatTransactionDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value || "Unknown date";
+  }
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function updateIntegrationStatus(config) {
@@ -548,6 +603,51 @@ function getDefaultAiEmptyState() {
   `;
 }
 
+function renderAiCoachHighlights({
+  debtRatio = 0,
+  leftover = 0,
+  recurringTotal = 0,
+  retirementGap = null,
+  hasInvestmentAccess: investmentAccess = false,
+} = {}) {
+  const mode = document.getElementById("ai-highlight-mode");
+  const pressure = document.getElementById("ai-highlight-pressure");
+  const recurring = document.getElementById("ai-highlight-recurring");
+  const retirement = document.getElementById("ai-highlight-retirement");
+
+  if (!mode || !pressure || !recurring || !retirement) {
+    return;
+  }
+
+  mode.textContent = state.user
+    ? state.config?.openaiConfigured
+      ? "Plan-aware money coach"
+      : "Coach UI ready"
+    : "General money explainer";
+
+  if (leftover < 0) {
+    pressure.textContent = "Monthly shortfall";
+  } else if (debtRatio > 0.35) {
+    pressure.textContent = "Debt is heavy";
+  } else if (debtRatio > 0.2) {
+    pressure.textContent = "Debt needs watching";
+  } else {
+    pressure.textContent = "Fairly stable";
+  }
+
+  recurring.textContent = recurringTotal > 0 ? currency.format(recurringTotal) : "Needs linked data";
+
+  if (!investmentAccess) {
+    retirement.textContent = "Bundle feature";
+  } else if (retirementGap === null || Number.isNaN(retirementGap)) {
+    retirement.textContent = "Needs setup";
+  } else if (retirementGap > 0) {
+    retirement.textContent = `${currency.format(retirementGap)} short`;
+  } else {
+    retirement.textContent = "On track";
+  }
+}
+
 function renderAiMessages() {
   const thread = document.getElementById("ai-thread");
   if (!state.ai.messages.length) {
@@ -561,7 +661,13 @@ function renderAiMessages() {
         <article class="ai-message ${message.role}">
           <div class="ai-message-header">
             <strong>${message.role === "user" ? "You" : "Growr"}</strong>
-            <span>${message.role === "assistant" ? "Educational guidance" : "Question"}</span>
+            <span>${
+              message.role === "assistant"
+                ? state.user
+                  ? "Educational guidance, shaped by your plan"
+                  : "Educational guidance"
+                : "Question"
+            }</span>
           </div>
           <p>${escapeHtml(message.text)}</p>
         </article>
@@ -950,12 +1056,30 @@ function renderMonthlyTrendChart(series) {
   };
   const spendPoints = series.map((point, index) => toPoint(point.spend, index)).join(" ");
   const incomePoints = series.map((point, index) => toPoint(point.income, index)).join(" ");
+  const spendArea = [
+    `${padding},${height - padding}`,
+    ...series.map((point, index) => toPoint(point.spend, index)),
+    `${padding + stepX * (series.length - 1)},${height - padding}`,
+  ].join(" ");
+  const incomeArea = [
+    `${padding},${height - padding}`,
+    ...series.map((point, index) => toPoint(point.income, index)),
+    `${padding + stepX * (series.length - 1)},${height - padding}`,
+  ].join(" ");
   const latest = series[series.length - 1];
   const previous = series[series.length - 2];
   const trendDelta = previous ? latest.spend - previous.spend : 0;
 
   chart.innerHTML = `
     <defs>
+      <linearGradient id="growrSpendFill" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#ff5a36" stop-opacity="0.24"></stop>
+        <stop offset="100%" stop-color="#ff5a36" stop-opacity="0"></stop>
+      </linearGradient>
+      <linearGradient id="growrIncomeFill" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#3867ff" stop-opacity="0.22"></stop>
+        <stop offset="100%" stop-color="#3867ff" stop-opacity="0"></stop>
+      </linearGradient>
       <linearGradient id="growrSpendLine" x1="0%" y1="0%" x2="100%" y2="0%">
         <stop offset="0%" stop-color="#ff5a36"></stop>
         <stop offset="100%" stop-color="#ff8b70"></stop>
@@ -965,7 +1089,15 @@ function renderMonthlyTrendChart(series) {
         <stop offset="100%" stop-color="#6c8cff"></stop>
       </linearGradient>
     </defs>
+    ${[0.25, 0.5, 0.75]
+      .map((ratio) => {
+        const y = height - padding - ratio * (height - padding * 2);
+        return `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="#eef2f8" stroke-width="1"></line>`;
+      })
+      .join("")}
     <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#d9e0ea" stroke-width="1.5"></line>
+    <polygon points="${incomeArea}" fill="url(#growrIncomeFill)"></polygon>
+    <polygon points="${spendArea}" fill="url(#growrSpendFill)"></polygon>
     ${series
       .map((point, index) => {
         const x = padding + stepX * index;
@@ -1036,7 +1168,19 @@ function renderProjectionLineChart({
   ].join(" ");
 
   chart.innerHTML = `
-    <polygon points="${areaPoints}" fill="${fillColor}" opacity="0.28"></polygon>
+    <defs>
+      <linearGradient id="${chartId}-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="${fillColor}" stop-opacity="0.36"></stop>
+        <stop offset="100%" stop-color="${fillColor}" stop-opacity="0"></stop>
+      </linearGradient>
+    </defs>
+    ${[0.25, 0.5, 0.75]
+      .map((ratio) => {
+        const y = height - paddingY - ratio * (height - paddingY * 2);
+        return `<line x1="${paddingX}" y1="${y}" x2="${width - paddingX}" y2="${y}" stroke="#eef2f8" stroke-width="1"></line>`;
+      })
+      .join("")}
+    <polygon points="${areaPoints}" fill="url(#${chartId}-fill)"></polygon>
     <line x1="${paddingX}" y1="${height - paddingY}" x2="${width - paddingX}" y2="${height - paddingY}" stroke="#d9e0ea" stroke-width="1.5"></line>
     <polyline points="${polylinePoints}" fill="none" stroke="${lineColor}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
     ${points
@@ -1156,7 +1300,7 @@ function renderTransactionMonthGroups(transactions) {
         <article class="month-chip">
           <span>${label}</span>
           <strong>${currency.format(spend)}</strong>
-          <p>${currency.format(income)} in deposits</p>
+          <p>${currency.format(income)} in deposits · ${currency.format(income - spend)} net</p>
         </article>
       `;
     })
@@ -1220,18 +1364,29 @@ function renderTransactions() {
           <div class="transaction-month-stack">
             ${transactions
               .map((transaction) => {
-                const merchantLabel = String(transaction.merchant || "?").trim().slice(0, 1).toUpperCase();
+                const merchantName = formatMerchantName(transaction.merchant);
+                const merchantLabel = getMerchantBadge(transaction.merchant);
                 const sourceLabel = transaction.source === "plaid" ? "Connected" : "Manual";
+                const recurringLabel =
+                  transaction.subscriptionStatus === "subscribed"
+                    ? "Subscription"
+                    : transaction.subscriptionStatus === "ignored"
+                      ? "One-time"
+                      : "Auto review";
                 return `
                   <article class="transaction-item premium-transaction-item">
                     <div class="transaction-main-row">
                       <div class="transaction-avatar">${merchantLabel}</div>
                       <div class="transaction-main-copy">
                         <div class="transaction-top">
-                          <h3>${transaction.merchant}</h3>
-                          <strong>${currency.format(transaction.amount)}</strong>
+                          <h3>${merchantName}</h3>
+                          <strong class="${Number(transaction.amount || 0) < 0 ? "money-in" : "money-out"}">${currency.format(transaction.amount)}</strong>
                         </div>
-                        <p>${transaction.category} | ${sourceLabel} | ${transaction.date}</p>
+                        <p>${transaction.category} · ${sourceLabel} · ${formatTransactionDate(transaction.date)}</p>
+                        <div class="transaction-badge-row">
+                          <span class="transaction-badge">${recurringLabel}</span>
+                          <span class="transaction-badge transaction-badge-muted">${sourceLabel}</span>
+                        </div>
                       </div>
                     </div>
                     <div class="transaction-review-row">
@@ -1319,7 +1474,7 @@ function renderSubscriptions() {
         <article class="subscription-item">
           <div class="subscription-top">
             <div>
-              <h3>${item.merchant}</h3>
+              <h3>${formatMerchantName(item.merchant)}</h3>
               <p>${item.nextReviewHint} · ${item.status === "confirmed" ? "confirmed by you" : "detected by Growr"}</p>
             </div>
             <strong>${currency.format(item.monthlyEstimate || item.amount || 0)}</strong>
@@ -1377,7 +1532,7 @@ function renderBills() {
         <article class="subscription-item">
           <div class="subscription-top">
             <div>
-              <h3>${item.merchant}</h3>
+              <h3>${formatMerchantName(item.merchant)}</h3>
               <p>${item.nextReviewHint} · likely ${item.category}</p>
             </div>
             <strong>${currency.format(item.monthlyEstimate || item.amount || 0)}</strong>
@@ -1426,7 +1581,7 @@ function renderRecurringIncome() {
   document.getElementById("paycheck-total").textContent = currency.format(monthlyIncome);
   document.getElementById("paycheck-count").textContent = String(state.recurringIncome.length);
   document.getElementById("paycheck-next").textContent = nextIncome
-    ? `${nextIncome.merchant} · ${formatDaysUntil(nextDaysUntil)}`
+    ? `${formatMerchantName(nextIncome.merchant)} · ${formatDaysUntil(nextDaysUntil)}`
     : "Need linked deposits";
   document.getElementById("paycheck-rhythm-label").textContent = nextIncome
     ? formatDaysUntil(nextDaysUntil)
@@ -1454,7 +1609,7 @@ function renderRecurringIncome() {
         <article class="subscription-item">
           <div class="subscription-top">
             <div>
-              <h3>${item.merchant}</h3>
+              <h3>${formatMerchantName(item.merchant)}</h3>
               <p>${item.transactionsCount || 0} matching deposits · every ${Math.round(
                 Number(item.averageIntervalDays || 14)
               )} days</p>
@@ -1571,6 +1726,15 @@ function bindTransactionFilters() {
 }
 
 function renderLinkedSummary(summary) {
+  state.linkedSummary = {
+    cashTotal: summary.cashTotal || 0,
+    creditCardDebt: summary.creditCardDebt || 0,
+    loanDebt: summary.loanDebt || 0,
+    investmentsTotal: summary.investmentsTotal || 0,
+    accounts: summary.accounts || [],
+    liabilities: summary.liabilities || [],
+    investments: summary.investments || [],
+  };
   document.getElementById("live-cash").textContent = currency.format(summary.cashTotal || 0);
   document.getElementById("live-credit-debt").textContent = currency.format(
     summary.creditCardDebt || 0
@@ -2361,6 +2525,23 @@ function renderSnapshotFeed(summary) {
     .join("");
 }
 
+function renderHouseholdOverview(summary) {
+  const recurringTotal =
+    state.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0) +
+    state.recurringBills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0);
+  const cashTotal = state.linkedSummary.cashTotal || summary.cashAssets || 0;
+  const investingTotal = hasInvestmentAccess()
+    ? Math.max(state.linkedSummary.investmentsTotal || 0, summary.currentInvestmentAssets || 0)
+    : 0;
+
+  document.getElementById("snapshot-household-cash").textContent = currency.format(cashTotal);
+  document.getElementById("snapshot-household-networth").textContent = currency.format(summary.netWorth || 0);
+  document.getElementById("snapshot-household-recurring").textContent = currency.format(recurringTotal);
+  document.getElementById("snapshot-household-investing").textContent = hasInvestmentAccess()
+    ? currency.format(investingTotal)
+    : "Locked";
+}
+
 function updateDashboard() {
   const income = getValue("income");
   const housing = getValue("housing");
@@ -2677,6 +2858,20 @@ function updateDashboard() {
     debtRatio,
     cashAssets,
     retirementGap,
+    hasInvestmentAccess: hasInvestmentAccess(),
+  });
+  renderHouseholdOverview({
+    cashAssets,
+    currentInvestmentAssets,
+    netWorth,
+  });
+  renderAiCoachHighlights({
+    debtRatio,
+    leftover,
+    recurringTotal:
+      state.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0) +
+      state.recurringBills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0),
+    retirementGap: hasInvestmentAccess() ? retirementGap : null,
     hasInvestmentAccess: hasInvestmentAccess(),
   });
   renderSnapshotFeed({
@@ -3249,6 +3444,7 @@ document.querySelectorAll("[data-scroll]").forEach((button) => {
   button.addEventListener("click", () => {
     const target = document.querySelector(button.dataset.scroll);
     if (target) {
+      setActivePage("snapshot");
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   });
@@ -3300,6 +3496,20 @@ bindTransactionFilters();
 document.querySelectorAll("[data-ai-question]").forEach((button) => {
   button.addEventListener("click", () => {
     submitAiQuestion(button.dataset.aiQuestion);
+  });
+});
+
+document.querySelectorAll("[data-password-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const input = document.getElementById(button.dataset.passwordTarget);
+    if (!input) {
+      return;
+    }
+
+    const isHidden = input.type === "password";
+    input.type = isHidden ? "text" : "password";
+    button.textContent = isHidden ? "Hide" : "Show";
+    button.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
   });
 });
 
