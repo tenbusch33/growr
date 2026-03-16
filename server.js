@@ -195,11 +195,11 @@ function publicAccount(account) {
 function getPlanPricing(plan, couplesAddOn = false, billingInterval = "monthly") {
   const planKey = plan === "bundle" ? "bundle" : couplesAddOn ? "couples" : "budget";
   const catalog = {
-    budget: {
-      label: "Budget Core",
-      monthly: 6.99,
-      yearly: 67.1,
-    },
+      budget: {
+        label: "Budget Core",
+        monthly: 5.99,
+        yearly: 57.5,
+      },
     couples: {
       label: "Couples",
       monthly: 8.99,

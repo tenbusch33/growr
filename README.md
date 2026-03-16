@@ -64,7 +64,7 @@ Without a persistent disk, local JSON data like accounts, sessions, planners, an
 - `DATA_DIR`: optional override for where Growr stores JSON app data
 - `SUPABASE_URL`: used to indicate auth is connected
 - `SUPABASE_ANON_KEY`: used to indicate auth is connected
-- `STRIPE_CHECKOUT_BUDGET_URL`: hosted checkout or payment link for the `$6.99` plan
+- `STRIPE_CHECKOUT_BUDGET_URL`: hosted checkout or payment link for the `$5.99` plan
 - `STRIPE_CHECKOUT_BUNDLE_URL`: hosted checkout or payment link for the `$14.99` bundle
 - `STRIPE_SECRET_KEY`: Stripe secret key for Checkout, customer portal, and subscription management
 - `STRIPE_WEBHOOK_SECRET`: Stripe webhook signing secret
@@ -94,8 +94,8 @@ Without a persistent disk, local JSON data like accounts, sessions, planners, an
 Create two recurring monthly products in Stripe:
 
 1. `Growr Budget Core`
-   - monthly recurring price: `$6.99`
-   - optional annual price at about 20% off: `$67.10`
+- monthly recurring price: `$5.99`
+- optional annual price at about 20% off: `$57.50`
 - Couples package: `$8.99/month` or `$86.30/year`
 2. `Growr Budget + Investing`
    - monthly recurring price: `$14.99`

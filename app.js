@@ -659,8 +659,8 @@ function getAccountPlanDisplay(planKey = "budget", billingInterval = "monthly") 
   const catalog = {
     budget: {
       label: "Budget Core",
-      monthly: "$6.99/month",
-      yearly: "$67.10/year",
+      monthly: "$5.99/month",
+      yearly: "$57.50/year",
     },
     couples: {
       label: "Couples",
