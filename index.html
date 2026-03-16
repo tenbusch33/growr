@@ -46,7 +46,7 @@
         <section class="hero-content">
           <div class="hero-copy">
             <p class="eyebrow">Budgeting + investing, built for real life</p>
-            <h1>See where your money goes and know what to do next.</h1>
+            <h1>Know your money. Grow your future.</h1>
             <p class="hero-text">
               Growr brings together spending, debt, net worth, and long-term investing
               so one clean dashboard can help you make smarter monthly decisions.
@@ -537,6 +537,18 @@
             <span>Progress by category</span>
           </div>
         </section>
+        <section class="glass section-bridge">
+          <div>
+            <p class="eyebrow">Review-first budgeting</p>
+            <h2>Let Growr organize the month, then make quick corrections.</h2>
+            <p class="page-intro-text">Import transactions, review recurring charges, confirm bills, and only edit the pieces that actually need your attention.</p>
+          </div>
+          <div class="bridge-points">
+            <span>Auto-fill support</span>
+            <span>Recurring detection</span>
+            <span>Fast category cleanup</span>
+          </div>
+        </section>
         <section class="budget-coach-grid">
           <article class="glass coach-card">
             <p class="eyebrow">Budget coach</p>
@@ -692,6 +704,18 @@
             <span>Investments added automatically</span>
           </div>
         </section>
+        <section class="glass section-bridge">
+          <div>
+            <p class="eyebrow">Balance sheet view</p>
+            <h2>See the real story behind your assets, debt, and equity.</h2>
+            <p class="page-intro-text">Instead of raw balances alone, Growr turns your home, car, cash, and investment data into a cleaner net worth picture.</p>
+          </div>
+          <div class="bridge-points">
+            <span>Home equity</span>
+            <span>Vehicle equity</span>
+            <span>Liquid assets</span>
+          </div>
+        </section>
         <section class="planner-grid">
           <div class="glass planner-panel">
             <div class="section-heading compact">
@@ -778,6 +802,18 @@
             <span>Transaction import support</span>
           </div>
         </section>
+        <section class="glass section-bridge">
+          <div>
+            <p class="eyebrow">Connected finance</p>
+            <h2>Bring your balances, debt, and transactions into one clearer system.</h2>
+            <p class="page-intro-text">Growr can use linked accounts to reduce manual input, improve recommendations, and draft a more complete financial picture automatically.</p>
+          </div>
+          <div class="bridge-points">
+            <span>Balances</span>
+            <span>Liabilities</span>
+            <span>Imported transactions</span>
+          </div>
+        </section>
         <section class="glass accounts-panel">
           <div class="section-heading">
             <p class="eyebrow">Connect accounts</p>
@@ -817,6 +853,18 @@
             <article class="mini-stat gated-feature" data-feature="investing">
               <span>Investments linked</span>
               <strong id="live-investments">$0</strong>
+            </article>
+          </div>
+          <div class="accounts-health-strip">
+            <article class="coach-card compact-card">
+              <p class="eyebrow">Why this matters</p>
+              <h3>Linked data sharpens recommendations</h3>
+              <p>Once balances and transactions are connected, Growr can detect recurring bills, flag subscription drag, and draft your plan faster.</p>
+            </article>
+            <article class="coach-card compact-card">
+              <p class="eyebrow">Best workflow</p>
+              <h3>Connect first, then review</h3>
+              <p>Import your account data, check what Growr found, and correct only the small details instead of building everything by hand.</p>
             </article>
           </div>
           <div class="linked-columns">
@@ -891,13 +939,25 @@
                     Password
                     <input type="password" id="password" placeholder="Create a password" required />
                   </label>
-                  <label>
-                    Plan
-                    <select id="plan">
-                      <option value="budget">Budget Core - $7.99 after trial</option>
-                      <option value="bundle">Budget + Investing - $12.99 after trial</option>
-                    </select>
-                  </label>
+                  <fieldset class="plan-picker">
+                    <legend>Plan</legend>
+                    <label class="plan-option">
+                      <input type="radio" name="plan" value="budget" checked />
+                      <span class="plan-option-card">
+                        <strong>Budget Core</strong>
+                        <em>$7.99/mo after trial</em>
+                        <small>Budgeting, bills, debt analysis, and monthly recommendations.</small>
+                      </span>
+                    </label>
+                    <label class="plan-option">
+                      <input type="radio" name="plan" value="bundle" />
+                      <span class="plan-option-card">
+                        <strong>Budget + Investing</strong>
+                        <em>$12.99/mo after trial</em>
+                        <small>Everything in Budget Core plus forecasts and retirement guidance.</small>
+                      </span>
+                    </label>
+                  </fieldset>
                   <button type="submit" class="primary-btn" id="signup-button">Start free trial</button>
                 </form>
                 <p class="auth-switch-line">Already have an account? <button type="button" class="text-link-btn" data-auth-target="login">Log in</button></p>

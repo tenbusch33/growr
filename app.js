@@ -1623,7 +1623,8 @@ function handleSignup(event) {
   const fullName = document.getElementById("fullName").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-  const plan = document.getElementById("plan").value;
+  const plan =
+    document.querySelector('input[name="plan"]:checked')?.value || "budget";
   const button = document.getElementById("signup-button");
 
   button.disabled = true;
