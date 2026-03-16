@@ -392,6 +392,13 @@ function setBillStatus(text) {
   document.getElementById("bill-status").textContent = text;
 }
 
+function setPaycheckStatus(text) {
+  const element = document.getElementById("paycheck-status");
+  if (element) {
+    element.textContent = text;
+  }
+}
+
 function setAccountStatus(text) {
   document.getElementById("account-status").textContent = text;
 }
@@ -1292,6 +1299,9 @@ function renderSubscriptions() {
   document.getElementById("subscription-review-label").textContent = state.subscriptions.length
     ? "Ready to review"
     : "Needs data";
+  document.getElementById("subscription-action-label").textContent = state.subscriptions.length
+    ? "Trim the extras"
+    : "Review list";
 
   if (!state.subscriptions.length) {
     container.innerHTML = `
@@ -1347,6 +1357,9 @@ function renderBills() {
   document.getElementById("bill-review-label").textContent = state.recurringBills.length
     ? "Auto-fill ready"
     : "Needs data";
+  document.getElementById("bill-impact-label").textContent = state.recurringBills.length
+    ? "Feeds planner"
+    : "Waiting on data";
 
   if (!state.recurringBills.length) {
     container.innerHTML = `
@@ -1370,6 +1383,155 @@ function renderBills() {
             <strong>${currency.format(item.monthlyEstimate || item.amount || 0)}</strong>
           </div>
           <p class="subscription-meta">Latest charge ${currency.format(item.amount || 0)} · ${item.transactionsCount} matching charges</p>
+        </article>
+      `
+    )
+    .join("");
+}
+
+function formatDaysUntil(days) {
+  if (days === null || Number.isNaN(days)) {
+    return "Needs pattern";
+  }
+
+  if (days <= 0) {
+    return "Very soon";
+  }
+
+  if (days === 1) {
+    return "In 1 day";
+  }
+
+  return `In ${days} days`;
+}
+
+function renderRecurringIncome() {
+  const container = document.getElementById("paycheck-list");
+  const monthlyIncome = state.recurringIncome.reduce(
+    (sum, item) => sum + Number(item.estimatedMonthlyIncome || 0),
+    0
+  );
+  const nextIncome = state.recurringIncome
+    .slice()
+    .sort((left, right) => {
+      const leftTime = left.nextExpectedDate ? new Date(left.nextExpectedDate).getTime() : Number.MAX_SAFE_INTEGER;
+      const rightTime = right.nextExpectedDate ? new Date(right.nextExpectedDate).getTime() : Number.MAX_SAFE_INTEGER;
+      return leftTime - rightTime;
+    })[0];
+
+  const nextDaysUntil = nextIncome?.nextExpectedDate
+    ? Math.round((new Date(nextIncome.nextExpectedDate) - new Date()) / (1000 * 60 * 60 * 24))
+    : null;
+
+  document.getElementById("paycheck-total").textContent = currency.format(monthlyIncome);
+  document.getElementById("paycheck-count").textContent = String(state.recurringIncome.length);
+  document.getElementById("paycheck-next").textContent = nextIncome
+    ? `${nextIncome.merchant} · ${formatDaysUntil(nextDaysUntil)}`
+    : "Need linked deposits";
+  document.getElementById("paycheck-rhythm-label").textContent = nextIncome
+    ? formatDaysUntil(nextDaysUntil)
+    : "Need linked deposits";
+  document.getElementById("paycheck-use-label").textContent = state.recurringIncome.length
+    ? "Supports auto-fill"
+    : "Waiting on data";
+
+  if (!state.recurringIncome.length) {
+    container.innerHTML = `
+      <div class="linked-item empty-state">
+        <strong>No recurring paychecks found yet</strong>
+        <p>Growr looks for payroll-style deposits and repeating income patterns after enough linked transaction history is available.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = state.recurringIncome
+    .map((item) => {
+      const daysUntil = item.nextExpectedDate
+        ? Math.round((new Date(item.nextExpectedDate) - new Date()) / (1000 * 60 * 60 * 24))
+        : null;
+      return `
+        <article class="subscription-item">
+          <div class="subscription-top">
+            <div>
+              <h3>${item.merchant}</h3>
+              <p>${item.transactionsCount || 0} matching deposits · every ${Math.round(
+                Number(item.averageIntervalDays || 14)
+              )} days</p>
+            </div>
+            <strong>${currency.format(item.estimatedMonthlyIncome || item.averageAmount || 0)}</strong>
+          </div>
+          <p class="subscription-meta">Average deposit ${currency.format(
+            item.averageAmount || 0
+          )} · next likely ${item.nextExpectedDate ? new Date(item.nextExpectedDate).toLocaleDateString() : "unknown"} · ${formatDaysUntil(daysUntil)}</p>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderRecurringInsights() {
+  const container = document.getElementById("recurring-insights");
+  if (!container) {
+    return;
+  }
+
+  const subscriptionTotal = state.subscriptions.reduce(
+    (sum, item) => sum + Number(item.monthlyEstimate || 0),
+    0
+  );
+  const billTotal = state.recurringBills.reduce(
+    (sum, item) => sum + Number(item.monthlyEstimate || 0),
+    0
+  );
+  const incomeTotal = state.recurringIncome.reduce(
+    (sum, item) => sum + Number(item.estimatedMonthlyIncome || 0),
+    0
+  );
+
+  const insights = [];
+
+  if (subscriptionTotal > 0) {
+    insights.push({
+      label: "Subscription drag",
+      body:
+        subscriptionTotal >= 100
+          ? `${currency.format(subscriptionTotal)} per month is tied up in recurring subscriptions. That is worth reviewing for easy savings.`
+          : `${currency.format(subscriptionTotal)} per month is tied up in recurring subscriptions.`,
+    });
+  }
+
+  if (billTotal > 0) {
+    insights.push({
+      label: "Fixed monthly load",
+      body: `${currency.format(billTotal)} per month looks like recurring bills Growr can use to keep your plan more accurate.`,
+    });
+  }
+
+  if (incomeTotal > 0) {
+    insights.push({
+      label: "Recurring income",
+      body: `Growr sees about ${currency.format(incomeTotal)} per month in repeating deposits, which helps auto-fill your income baseline.`,
+    });
+  }
+
+  if (!insights.length) {
+    container.innerHTML = `
+      <article class="automation-highlight-card recurring-insight-card">
+        <span>Need linked history</span>
+        <strong>Connect accounts to unlock the recurring hub</strong>
+      </article>
+    `;
+    return;
+  }
+
+  container.innerHTML = insights
+    .slice(0, 3)
+    .map(
+      (item) => `
+        <article class="automation-highlight-card recurring-insight-card">
+          <span>${item.label}</span>
+          <strong>${item.body}</strong>
         </article>
       `
     )
@@ -1470,16 +1632,20 @@ function loadTransactions() {
     renderTransactions();
     renderSubscriptions();
     renderBills();
+    renderRecurringIncome();
+    renderRecurringInsights();
     renderCategoryProgress();
     setTransactionStatus("Sign in to save and load transactions.");
     setSubscriptionStatus("Sign in to review recurring charges and subscriptions.");
     setBillStatus("Sign in to review recurring bills.");
+    setPaycheckStatus("Sign in to review recurring income.");
     return Promise.resolve();
   }
 
   setTransactionStatus("Loading transactions...");
   setSubscriptionStatus("Scanning for recurring charges...");
   setBillStatus("Scanning for recurring bills...");
+  setPaycheckStatus("Scanning for recurring income...");
   return Promise.all([
     fetch("/api/transactions"),
     fetch("/api/transactions/subscriptions"),
@@ -1501,6 +1667,8 @@ function loadTransactions() {
       renderTransactions();
       renderSubscriptions();
       renderBills();
+      renderRecurringIncome();
+      renderRecurringInsights();
       renderCategoryProgress();
       setTransactionStatus("Transactions loaded.");
       setSubscriptionStatus(
@@ -1513,11 +1681,17 @@ function loadTransactions() {
           ? "Recurring bills are ready to help prefill your planner."
           : "No recurring bills found yet."
       );
+      setPaycheckStatus(
+        state.recurringIncome.length
+          ? "Growr found repeating deposits that can help auto-fill your income."
+          : "No recurring paychecks found yet."
+      );
     })
     .catch((error) => {
       setTransactionStatus(error.message);
       setSubscriptionStatus(error.message);
       setBillStatus(error.message);
+      setPaycheckStatus(error.message);
     });
 }
 
@@ -2476,6 +2650,8 @@ function handleLogout() {
       renderCategoryProgress();
       renderSubscriptions();
       renderBills();
+      renderRecurringIncome();
+      renderRecurringInsights();
       renderLinkedSummary({
         cashTotal: 0,
         creditCardDebt: 0,

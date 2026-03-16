@@ -1852,6 +1852,38 @@ select {
   margin: 24px 0;
 }
 
+.recurring-hub {
+  margin: 24px 0;
+  padding: 28px;
+}
+
+.recurring-summary-grid,
+.recurring-grid,
+.recurring-insights {
+  display: grid;
+  gap: 20px;
+}
+
+.recurring-summary-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.recurring-insights {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 20px;
+}
+
+.recurring-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 24px 0;
+}
+
+.recurring-insight-card strong {
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
 .automation-hub {
   margin: 24px 0;
   padding: 28px;
@@ -2669,6 +2701,9 @@ select {
   .dashboard-strip,
   .quickstart-grid,
   .subscription-grid,
+  .recurring-summary-grid,
+  .recurring-grid,
+  .recurring-insights,
   .budgeting-grid,
   .budget-coach-grid,
   .results-grid,
