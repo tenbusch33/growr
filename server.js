@@ -916,6 +916,89 @@ function detectSubscriptionsFromTransactions(transactions) {
   };
 }
 
+function detectRecurringIncomeFromTransactions(transactions) {
+  const incomeKeywords = [
+    "payroll",
+    "salary",
+    "direct deposit",
+    "adp",
+    "gusto",
+    "paychex",
+    "intuit",
+    "workday",
+    "rippling",
+    "wages",
+  ];
+
+  const candidateGroups = new Map();
+
+  transactions
+    .filter((entry) => Number(entry.amount) < 0)
+    .forEach((entry) => {
+      const merchantKey = normalizeMerchantName(entry.merchant);
+      if (!merchantKey) {
+        return;
+      }
+
+      if (!candidateGroups.has(merchantKey)) {
+        candidateGroups.set(merchantKey, []);
+      }
+      candidateGroups.get(merchantKey).push(entry);
+    });
+
+  return Array.from(candidateGroups.entries())
+    .map(([merchantKey, entries]) => {
+      const sorted = entries
+        .slice()
+        .sort((left, right) => new Date(left.date) - new Date(right.date));
+      if (sorted.length < 2) {
+        return null;
+      }
+
+      const intervals = [];
+      for (let index = 1; index < sorted.length; index += 1) {
+        const diff = Math.round(
+          (new Date(sorted[index].date) - new Date(sorted[index - 1].date)) / (1000 * 60 * 60 * 24)
+        );
+        if (diff > 0) {
+          intervals.push(diff);
+        }
+      }
+
+      const amounts = sorted.map((entry) => Math.abs(Number(entry.amount) || 0));
+      const avgAmount = average(amounts);
+      const avgInterval = average(intervals);
+      const amountVariation = avgAmount
+        ? (Math.max(...amounts, 0) - Math.min(...amounts, Math.max(...amounts, 0))) / avgAmount
+        : 0;
+      const keywordMatch = incomeKeywords.some((keyword) => merchantKey.includes(keyword));
+      const cadenceMatch = avgInterval >= 10 && avgInterval <= 35 && amountVariation <= 0.35;
+
+      if (!keywordMatch && !cadenceMatch) {
+        return null;
+      }
+
+      const latest = sorted[sorted.length - 1];
+      const estimatedMonthly = avgInterval ? avgAmount * (30 / avgInterval) : avgAmount;
+      const nextExpectedDate = avgInterval
+        ? new Date(new Date(latest.date).getTime() + Math.round(avgInterval) * 24 * 60 * 60 * 1000)
+        : null;
+
+      return {
+        merchant: latest.merchant || merchantKey,
+        averageAmount: avgAmount,
+        averageIntervalDays: avgInterval || 30,
+        estimatedMonthlyIncome: estimatedMonthly,
+        transactionsCount: sorted.length,
+        lastDate: latest.date,
+        nextExpectedDate: nextExpectedDate ? nextExpectedDate.toISOString().slice(0, 10) : null,
+        nextReviewHint: avgInterval ? `About every ${Math.round(avgInterval)} days` : "Recurring deposit detected",
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => right.estimatedMonthlyIncome - left.estimatedMonthlyIncome);
+}
+
 function buildPlannerAutofill(account, plaidSummary = null) {
   const planner = readJson(plannerFile).find((entry) => entry.userId === account.id)?.data || {};
   const transactions = readJson(transactionsFile).filter((entry) => entry.userId === account.id);
@@ -934,10 +1017,13 @@ function buildPlannerAutofill(account, plaidSummary = null) {
 
   const deposits = recent.filter((entry) => Number(entry.amount || 0) < 0);
   const inferredIncome = Math.abs(deposits.reduce((sum, entry) => sum + Number(entry.amount || 0), 0)) / 2;
+  const recurringIncome = detectRecurringIncomeFromTransactions(recent)[0] || null;
 
   const autofill = {
     ...planner,
-    income: Math.round(inferredIncome || Number(planner.income || 0)),
+    income: Math.round(
+      recurringIncome?.estimatedMonthlyIncome || inferredIncome || Number(planner.income || 0)
+    ),
     housing: Math.round((categoryTotals.housing || 0) / 2 || Number(planner.housing || 0)),
     essentials: Math.round((categoryTotals.essentials || 0) / 2 || Number(planner.essentials || 0)),
     creditCard: Math.round((categoryTotals.debt || 0) / 2 || Number(planner.creditCard || 0)),
@@ -960,6 +1046,7 @@ function buildPlannerAutofill(account, plaidSummary = null) {
       transactionsReviewed: recent.length,
       usedLinkedAccounts: Boolean(plaidSummary),
       depositsFound: deposits.length,
+      recurringIncomeDetected: Boolean(recurringIncome),
     },
   };
 }
@@ -1570,11 +1657,13 @@ const server = http.createServer((request, response) => {
       .filter((entry) => entry.userId === session.account.id)
       .sort((first, second) => new Date(second.date) - new Date(first.date));
     const recurring = detectSubscriptionsFromTransactions(transactions);
+    const recurringIncome = detectRecurringIncomeFromTransactions(transactions);
     const total = recurring.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0);
     const billsTotal = recurring.bills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0);
     sendJson(response, 200, {
       subscriptions: recurring.subscriptions,
       bills: recurring.bills,
+      recurringIncome,
       totalMonthlyEstimate: total,
       billsMonthlyEstimate: billsTotal,
       count: recurring.subscriptions.length,

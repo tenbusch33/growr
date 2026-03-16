@@ -32,6 +32,7 @@ const state = {
   transactions: [],
   subscriptions: [],
   recurringBills: [],
+  recurringIncome: [],
   transactionFilters: {
     category: "all",
     source: "all",
@@ -854,7 +855,19 @@ function buildMonthlyAutomationData() {
       return groups;
     }, {});
 
-  const recurringIncomeCandidates = Object.entries(depositGroups)
+  const recurringIncomeCandidates = state.recurringIncome.length
+    ? state.recurringIncome.map((entry) => ({
+        merchant: entry.merchant,
+        averageInterval: entry.averageIntervalDays || 30,
+        averageAmount: entry.averageAmount || 0,
+        nextDate: entry.nextExpectedDate ? new Date(entry.nextExpectedDate) : null,
+        daysUntil: entry.nextExpectedDate
+          ? Math.round((new Date(entry.nextExpectedDate) - now) / (1000 * 60 * 60 * 24))
+          : null,
+        count: entry.transactionsCount || 0,
+        estimatedMonthlyIncome: entry.estimatedMonthlyIncome || 0,
+      }))
+    : Object.entries(depositGroups)
     .map(([merchantKey, entries]) => {
       const sorted = entries
         .slice()
@@ -889,6 +902,7 @@ function buildMonthlyAutomationData() {
         nextDate,
         daysUntil,
         count: sorted.length,
+        estimatedMonthlyIncome: averageAmount * (30 / Math.max(averageInterval || 30, 1)),
       };
     })
     .filter(Boolean)
@@ -1452,6 +1466,7 @@ function loadTransactions() {
     state.transactions = [];
     state.subscriptions = [];
     state.recurringBills = [];
+    state.recurringIncome = [];
     renderTransactions();
     renderSubscriptions();
     renderBills();
@@ -1482,6 +1497,7 @@ function loadTransactions() {
       state.transactions = payload.transactions || [];
       state.subscriptions = subscriptionPayload.subscriptions || [];
       state.recurringBills = subscriptionPayload.bills || [];
+      state.recurringIncome = subscriptionPayload.recurringIncome || [];
       renderTransactions();
       renderSubscriptions();
       renderBills();
@@ -1502,6 +1518,40 @@ function loadTransactions() {
       setTransactionStatus(error.message);
       setSubscriptionStatus(error.message);
       setBillStatus(error.message);
+    });
+}
+
+function syncConnectedWorkspace({ autoFill = false } = {}) {
+  setPlaidMessage(autoFill
+    ? "Connected. Pulling balances, transactions, and smart defaults..."
+    : "Refreshing connected account data...");
+
+  return loadLinkedSummary()
+    .then(() => importPlaidTransactions({ silent: true }))
+    .then(() => {
+      if (!autoFill) {
+        return null;
+      }
+      return fetch("/api/planner/autofill", { method: "POST" })
+        .then(async (response) => {
+          const payload = await response.json();
+          if (!response.ok) {
+            throw new Error(payload.error || "Unable to auto-fill planner.");
+          }
+          applyPlannerPayload(payload.planner || {});
+          setPlannerStatus(payload.message || "Planner auto-filled from connected data.");
+        })
+        .catch(() => null);
+    })
+    .then(() => {
+      setPlaidMessage(
+        autoFill
+          ? "Accounts connected. Growr refreshed balances, pulled transactions, and updated your workspace."
+          : "Connected account data refreshed."
+      );
+    })
+    .catch((error) => {
+      setPlaidMessage(error.message);
     });
 }
 
@@ -2723,7 +2773,7 @@ function exchangePublicToken(publicToken, metadata) {
     })
     .then((payload) => {
       setPlaidMessage(payload.message);
-      return loadLinkedSummary();
+      return syncConnectedWorkspace({ autoFill: true });
     })
     .catch((error) => {
       setPlaidMessage(error.message);
@@ -2783,19 +2833,23 @@ function connectPlaidAccounts() {
     });
 }
 
-function importPlaidTransactions() {
+function importPlaidTransactions(options = {}) {
+  const { silent = false } = options;
   if (!state.user) {
     setPlaidMessage("Sign in before refreshing connected data.");
-    return;
+    return Promise.resolve();
   }
 
   if (!isEmailVerified()) {
     setPlaidMessage("Verify your email in Account before refreshing connected data.");
-    return;
+    return Promise.resolve();
   }
 
-  setPlaidMessage("Refreshing connected account data...");
-  fetch("/api/plaid/import-transactions", {
+  if (!silent) {
+    setPlaidMessage("Refreshing connected account data...");
+  }
+
+  return fetch("/api/plaid/import-transactions", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
   })
@@ -2805,11 +2859,16 @@ function importPlaidTransactions() {
         throw new Error(payload.error || "Unable to import Plaid transactions.");
       }
 
-      setPlaidMessage(payload.message);
-      return loadTransactions();
+      if (!silent) {
+        setPlaidMessage(payload.message);
+      }
+      return loadTransactions().then(() => payload);
     })
     .catch((error) => {
-      setPlaidMessage(error.message);
+      if (!silent) {
+        setPlaidMessage(error.message);
+      }
+      throw error;
     });
 }
 
@@ -2907,7 +2966,9 @@ document.getElementById("account-logout-button").addEventListener("click", handl
 document.getElementById("account-resend-verification-button").addEventListener("click", handleSendVerification);
 document.getElementById("account-verify-button").addEventListener("click", handleVerifyEmail);
 document.getElementById("connect-accounts").addEventListener("click", connectPlaidAccounts);
-document.getElementById("import-transactions").addEventListener("click", importPlaidTransactions);
+document.getElementById("import-transactions").addEventListener("click", () => {
+  syncConnectedWorkspace({ autoFill: false });
+});
 document.getElementById("save-plan").addEventListener("click", () => savePlanner(true));
 document.getElementById("autofill-plan").addEventListener("click", autofillPlannerFromConnectedData);
 document.getElementById("upgrade-button").addEventListener("click", handleUpgrade);

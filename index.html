@@ -32,6 +32,7 @@
             <div class="page-tabs topbar-tabs">
               <button class="tab-btn is-active" data-page-target="snapshot">Snapshot</button>
               <button class="tab-btn" data-page-target="budget">Budget</button>
+              <button class="tab-btn" data-page-target="investing">Investing</button>
               <button class="tab-btn" data-page-target="networth">Net Worth</button>
               <button class="tab-btn" data-page-target="accounts">Connect Accounts</button>
             </div>
@@ -253,7 +254,7 @@
                 Compare your 401(k), Roth IRA, HSA, brokerage, and more with contribution-based
                 projections that make future tradeoffs easier to understand.
               </p>
-              <button type="button" class="secondary-btn" data-page-target="budget">See investing tools</button>
+              <button type="button" class="secondary-btn" data-page-target="investing">See investing tools</button>
             </div>
           </article>
 
@@ -406,31 +407,6 @@
             </form>
           </div>
 
-          <div class="glass planner-panel gated-feature" data-feature="investing">
-            <div class="section-heading compact">
-              <p class="eyebrow">Investing add-on</p>
-              <h2>Project your future balances</h2>
-            </div>
-            <form id="investment-form" class="planner-form">
-              <label>Age<input type="number" id="age" value="32" min="18" max="80" /></label>
-              <label>Retirement age<input type="number" id="retirementAge" value="67" min="40" max="85" /></label>
-              <label>Monthly income needed in retirement<input type="number" id="retirementMonthlyGoal" value="6500" min="0" /></label>
-              <label>Other monthly retirement income (Social Security / pension)<input type="number" id="retirementIncomeOther" value="2200" min="0" /></label>
-              <label>401(k) balance<input type="number" id="k401Balance" value="28000" min="0" /></label>
-              <label>401(k) monthly contribution<input type="number" id="k401Contribution" value="500" min="0" /></label>
-              <label>Roth IRA balance<input type="number" id="rothBalance" value="12000" min="0" /></label>
-              <label>Roth IRA monthly contribution<input type="number" id="rothContribution" value="250" min="0" /></label>
-              <label>Traditional IRA balance<input type="number" id="traditionalIraBalance" value="6000" min="0" /></label>
-              <label>Traditional IRA monthly contribution<input type="number" id="traditionalIraContribution" value="150" min="0" /></label>
-              <label>HSA balance<input type="number" id="hsaBalance" value="3500" min="0" /></label>
-              <label>HSA monthly contribution<input type="number" id="hsaContribution" value="120" min="0" /></label>
-              <label>529 balance<input type="number" id="college529Balance" value="4000" min="0" /></label>
-              <label>529 monthly contribution<input type="number" id="college529Contribution" value="100" min="0" /></label>
-              <label>Brokerage balance<input type="number" id="brokerageBalance" value="8000" min="0" /></label>
-              <label>Brokerage monthly contribution<input type="number" id="brokerageContribution" value="300" min="0" /></label>
-              <label>Forecast years<input type="number" id="forecastYears" value="10" min="1" max="40" /></label>
-            </form>
-          </div>
         </section>
 
         <section class="dashboard-strip">
@@ -473,6 +449,17 @@
           </article>
         </section>
 
+        <section class="glass section-bridge snapshot-investing-bridge">
+          <div>
+            <p class="eyebrow">Future planning</p>
+            <h2>Want the retirement and investing side? It lives on its own page now.</h2>
+            <p class="page-intro-text">Snapshot stays focused on this month. Open Investing for retirement income planning, account forecasts, and age-based allocation guidance.</p>
+          </div>
+          <div class="bridge-actions">
+            <button type="button" class="primary-btn" data-page-target="investing">Open Investing</button>
+          </div>
+        </section>
+
         <section class="results-grid">
           <article class="glass results-panel">
             <div class="section-heading compact">
@@ -499,6 +486,108 @@
             </div>
           </article>
 
+        </section>
+
+        <section class="glass charts-panel">
+          <div class="section-heading">
+            <p class="eyebrow">Visuals</p>
+            <h2>See the shape of your money</h2>
+          </div>
+          <div class="charts-grid">
+            <article class="chart-card">
+              <div class="chart-card-top">
+                <h3>Monthly cash flow</h3>
+                <strong id="cashflow-percent">0%</strong>
+              </div>
+              <div class="stack-chart" id="cashflow-chart"></div>
+              <p class="chart-note" id="cashflow-note">Shows how your paycheck gets divided each month.</p>
+            </article>
+            <article class="chart-card">
+              <div class="chart-card-top">
+                <h3>Expense mix</h3>
+                <strong id="expense-total">$0</strong>
+              </div>
+              <div class="legend-list" id="expense-legend"></div>
+              <p class="chart-note" id="expense-note">Largest categories should feel intentional, not accidental.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="guidance-grid">
+          <article class="glass recommendations-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Recommendations</p>
+              <h2>Suggested next steps</h2>
+            </div>
+            <div id="recommendations" class="recommendation-list"></div>
+          </article>
+        </section>
+
+        </section>
+
+        <section class="app-page" data-page="investing">
+        <section class="glass page-intro">
+          <div>
+            <p class="eyebrow">Investing</p>
+            <h2>Plan retirement income and forecast your future balances</h2>
+            <p class="page-intro-text">Use this page for account projections, retirement income planning, and age-based allocation guidance without cluttering your monthly Snapshot.</p>
+          </div>
+          <div class="page-intro-callouts">
+            <span>401(k), IRA, HSA, 529, brokerage</span>
+            <span>Retirement income target</span>
+            <span>Forecasts in one place</span>
+          </div>
+        </section>
+        <section class="glass section-bridge">
+          <div>
+            <p class="eyebrow">Future view</p>
+            <h2>See what today’s contributions may actually turn into later.</h2>
+            <p class="page-intro-text">Growr estimates future balances and what your portfolio may support each month in retirement, so the long-term plan feels easier to read.</p>
+          </div>
+          <div class="bridge-points">
+            <span>Monthly retirement target</span>
+            <span>Projected account balances</span>
+            <span>Allocation guidance</span>
+          </div>
+        </section>
+
+        <section class="planner-grid">
+          <div class="glass planner-panel gated-feature" data-feature="investing">
+            <div class="section-heading compact">
+              <p class="eyebrow">Investing add-on</p>
+              <h2>Project your future balances</h2>
+            </div>
+            <form id="investment-form" class="planner-form">
+              <label>Age<input type="number" id="age" value="32" min="18" max="80" /></label>
+              <label>Retirement age<input type="number" id="retirementAge" value="67" min="40" max="85" /></label>
+              <label>Monthly income needed in retirement<input type="number" id="retirementMonthlyGoal" value="6500" min="0" /></label>
+              <label>Other monthly retirement income (Social Security / pension)<input type="number" id="retirementIncomeOther" value="2200" min="0" /></label>
+              <label>401(k) balance<input type="number" id="k401Balance" value="28000" min="0" /></label>
+              <label>401(k) monthly contribution<input type="number" id="k401Contribution" value="500" min="0" /></label>
+              <label>Roth IRA balance<input type="number" id="rothBalance" value="12000" min="0" /></label>
+              <label>Roth IRA monthly contribution<input type="number" id="rothContribution" value="250" min="0" /></label>
+              <label>Traditional IRA balance<input type="number" id="traditionalIraBalance" value="6000" min="0" /></label>
+              <label>Traditional IRA monthly contribution<input type="number" id="traditionalIraContribution" value="150" min="0" /></label>
+              <label>HSA balance<input type="number" id="hsaBalance" value="3500" min="0" /></label>
+              <label>HSA monthly contribution<input type="number" id="hsaContribution" value="120" min="0" /></label>
+              <label>529 balance<input type="number" id="college529Balance" value="4000" min="0" /></label>
+              <label>529 monthly contribution<input type="number" id="college529Contribution" value="100" min="0" /></label>
+              <label>Brokerage balance<input type="number" id="brokerageBalance" value="8000" min="0" /></label>
+              <label>Brokerage monthly contribution<input type="number" id="brokerageContribution" value="300" min="0" /></label>
+              <label>Forecast years<input type="number" id="forecastYears" value="10" min="1" max="40" /></label>
+            </form>
+          </div>
+
+          <div class="glass recommendations-panel gated-feature" data-feature="investing">
+            <div class="section-heading compact">
+              <p class="eyebrow">401(k) guidance</p>
+              <h2>Allocation idea by age</h2>
+            </div>
+            <div id="allocation" class="allocation-card"></div>
+          </div>
+        </section>
+
+        <section class="results-grid">
           <article class="glass results-panel gated-feature" data-feature="investing">
             <div class="section-heading compact">
               <p class="eyebrow">Future values</p>
@@ -535,9 +624,7 @@
               </div>
             </div>
           </article>
-        </section>
 
-        <section class="results-grid">
           <article class="glass results-panel gated-feature" data-feature="investing">
             <div class="section-heading compact">
               <p class="eyebrow">Retirement view</p>
@@ -583,26 +670,10 @@
 
         <section class="glass charts-panel">
           <div class="section-heading">
-            <p class="eyebrow">Visuals</p>
-            <h2>See the shape of your money</h2>
+            <p class="eyebrow">Forecast visuals</p>
+            <h2>See the long-term shape of your investing plan</h2>
           </div>
           <div class="charts-grid">
-            <article class="chart-card">
-              <div class="chart-card-top">
-                <h3>Monthly cash flow</h3>
-                <strong id="cashflow-percent">0%</strong>
-              </div>
-              <div class="stack-chart" id="cashflow-chart"></div>
-              <p class="chart-note" id="cashflow-note">Shows how your paycheck gets divided each month.</p>
-            </article>
-            <article class="chart-card">
-              <div class="chart-card-top">
-                <h3>Expense mix</h3>
-                <strong id="expense-total">$0</strong>
-              </div>
-              <div class="legend-list" id="expense-legend"></div>
-              <p class="chart-note" id="expense-note">Largest categories should feel intentional, not accidental.</p>
-            </article>
             <article class="chart-card gated-feature" data-feature="investing">
               <div class="chart-card-top">
                 <h3>Investment forecast</h3>
@@ -610,16 +681,6 @@
               </div>
               <div class="bar-chart" id="investment-bars"></div>
               <p class="chart-note" id="invest-note">Uses long-run average return assumptions for a directional estimate.</p>
-            </article>
-          </div>
-          <div class="charts-grid charts-grid-secondary">
-            <article class="chart-card">
-              <div class="chart-card-top">
-                <h3>Net worth trend</h3>
-                <strong id="networth-trend-label">$0</strong>
-              </div>
-              <svg id="networth-trend-chart" class="line-chart line-chart-tall" viewBox="0 0 420 240" preserveAspectRatio="none" aria-label="Net worth trend"></svg>
-              <p class="chart-note" id="networth-trend-note">Watch your estimated net worth build as assets grow and debt shrinks.</p>
             </article>
             <article class="chart-card gated-feature" data-feature="investing">
               <div class="chart-card-top">
@@ -631,25 +692,6 @@
             </article>
           </div>
         </section>
-
-        <section class="guidance-grid">
-          <article class="glass recommendations-panel">
-            <div class="section-heading compact">
-              <p class="eyebrow">Recommendations</p>
-              <h2>Suggested next steps</h2>
-            </div>
-            <div id="recommendations" class="recommendation-list"></div>
-          </article>
-
-          <article class="glass recommendations-panel gated-feature" data-feature="investing">
-            <div class="section-heading compact">
-              <p class="eyebrow">401(k) guidance</p>
-              <h2>Allocation idea by age</h2>
-            </div>
-            <div id="allocation" class="allocation-card"></div>
-          </article>
-        </section>
-
         </section>
 
         <section class="app-page" data-page="budget">
@@ -973,6 +1015,23 @@
                 <p class="category-meta">Cash, planner investment balances, and other assets less other liabilities.</p>
               </article>
             </div>
+          </div>
+        </section>
+
+        <section class="glass charts-panel">
+          <div class="section-heading">
+            <p class="eyebrow">Net worth trend</p>
+            <h2>Watch your balance sheet build over time</h2>
+          </div>
+          <div class="charts-grid">
+            <article class="chart-card">
+              <div class="chart-card-top">
+                <h3>Net worth trend</h3>
+                <strong id="networth-trend-label">$0</strong>
+              </div>
+              <svg id="networth-trend-chart" class="line-chart line-chart-tall" viewBox="0 0 420 240" preserveAspectRatio="none" aria-label="Net worth trend"></svg>
+              <p class="chart-note" id="networth-trend-note">Watch your estimated net worth build as assets grow and debt shrinks.</p>
+            </article>
           </div>
         </section>
 

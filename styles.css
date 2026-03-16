@@ -474,6 +474,17 @@ select {
   font-weight: 700;
 }
 
+.bridge-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 220px;
+}
+
+.snapshot-investing-bridge {
+  margin: 0 0 24px;
+}
+
 .quickstart-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -2761,6 +2772,11 @@ select {
     justify-content: flex-start;
     padding-top: 8px;
     border-top: 1px solid var(--line);
+  }
+
+  .bridge-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .bridge-points {
