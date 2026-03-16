@@ -975,6 +975,63 @@ function renderMonthlyTrendChart(series) {
     : "Growr will compare new months here as soon as more history comes in.";
 }
 
+function renderProjectionLineChart({
+  chartId,
+  labelId,
+  noteId,
+  series,
+  lineColor,
+  fillColor,
+  labelFormatter = currency.format,
+  noteText = "",
+}) {
+  const chart = document.getElementById(chartId);
+  const label = document.getElementById(labelId);
+  const note = document.getElementById(noteId);
+
+  if (!series.length) {
+    chart.innerHTML = "";
+    label.textContent = "$0";
+    note.textContent = noteText || "Add more data to see this projection.";
+    return;
+  }
+
+  const width = 420;
+  const height = 240;
+  const paddingX = 22;
+  const paddingY = 22;
+  const maxValue = Math.max(...series.map((point) => point.value), 1);
+  const stepX = series.length > 1 ? (width - paddingX * 2) / (series.length - 1) : 0;
+  const points = series.map((point, index) => {
+    const x = paddingX + stepX * index;
+    const y = height - paddingY - (point.value / maxValue) * (height - paddingY * 2);
+    return { ...point, x, y };
+  });
+  const polylinePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
+  const areaPoints = [
+    `${points[0].x},${height - paddingY}`,
+    ...points.map((point) => `${point.x},${point.y}`),
+    `${points[points.length - 1].x},${height - paddingY}`,
+  ].join(" ");
+
+  chart.innerHTML = `
+    <polygon points="${areaPoints}" fill="${fillColor}" opacity="0.28"></polygon>
+    <line x1="${paddingX}" y1="${height - paddingY}" x2="${width - paddingX}" y2="${height - paddingY}" stroke="#d9e0ea" stroke-width="1.5"></line>
+    <polyline points="${polylinePoints}" fill="none" stroke="${lineColor}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    ${points
+      .map(
+        (point) => `
+          <circle cx="${point.x}" cy="${point.y}" r="5" fill="${lineColor}"></circle>
+          <text x="${point.x}" y="${height - 4}" text-anchor="middle" fill="#7a8599" font-size="12">${point.label}</text>
+        `
+      )
+      .join("")}
+  `;
+
+  label.textContent = labelFormatter(series[series.length - 1].value);
+  note.textContent = noteText;
+}
+
 function renderCategoryDonut(categorySpend) {
   const chart = document.getElementById("category-donut-chart");
   const center = document.getElementById("category-donut-center");
@@ -1803,6 +1860,40 @@ function renderCharts(data) {
   investNote.textContent = hasInvestmentAccess()
     ? `Projected total after ${data.years} years: ${currency.format(data.totalFuture)}.`
     : "Investment forecasting is available on the Bundle plan.";
+
+  renderProjectionLineChart({
+    chartId: "networth-trend-chart",
+    labelId: "networth-trend-label",
+    noteId: "networth-trend-note",
+    series: data.netWorthSeries,
+    lineColor: "#3867ff",
+    fillColor: "#8cb0ff",
+    noteText:
+      data.netWorthSeries.length > 1
+        ? `Estimated net worth grows from ${currency.format(data.netWorthSeries[0].value)} to ${currency.format(data.netWorthSeries[data.netWorthSeries.length - 1].value)} across the projection path.`
+        : "Growr will project net worth once it has enough inputs.",
+  });
+
+  if (hasInvestmentAccess()) {
+    renderProjectionLineChart({
+      chartId: "retirement-runway-chart",
+      labelId: "retirement-runway-label",
+      noteId: "retirement-runway-note",
+      series: data.retirementSeries,
+      lineColor: "#00b894",
+      fillColor: "#8af0d7",
+      noteText:
+        data.retirementGap > 0
+          ? `Current pace may still leave about ${currency.format(data.retirementGap)} per month uncovered at retirement.`
+          : "Current pace is covering the retirement income target you entered.",
+    });
+    return;
+  }
+
+  document.getElementById("retirement-runway-chart").innerHTML = "";
+  document.getElementById("retirement-runway-label").textContent = "Locked";
+  document.getElementById("retirement-runway-note").textContent =
+    "Upgrade to Bundle to compare your projected retirement path against the nest egg your target income needs.";
 }
 
 function renderHealth(snapshot) {
@@ -2046,6 +2137,81 @@ function updateDashboard() {
   const totalLiabilities =
     mortgageBalance + carLoanBalance + creditCardBalance + otherDebt + otherLiabilities;
   const netWorth = totalAssets - totalLiabilities;
+  const projectionMarks = Array.from(new Set([0, 2, 5, years].filter((value) => value <= years))).sort(
+    (left, right) => left - right
+  );
+  const netWorthSeries = projectionMarks.map((mark) => {
+    const projectedInvestments = hasInvestmentAccess()
+      ? futureValue(investmentInputs.k401Balance, investmentInputs.k401Contribution, returns.k401, mark) +
+        futureValue(investmentInputs.rothBalance, investmentInputs.rothContribution, returns.roth, mark) +
+        futureValue(
+          investmentInputs.traditionalIraBalance,
+          investmentInputs.traditionalIraContribution,
+          returns.traditionalIra,
+          mark
+        ) +
+        futureValue(investmentInputs.hsaBalance, investmentInputs.hsaContribution, returns.hsa, mark) +
+        futureValue(
+          investmentInputs.college529Balance,
+          investmentInputs.college529Contribution,
+          returns.college529,
+          mark
+        ) +
+        futureValue(
+          investmentInputs.brokerageBalance,
+          investmentInputs.brokerageContribution,
+          returns.brokerage,
+          mark
+        )
+      : 0;
+    const projectedEmergency = emergencyFund + Math.max(leftover, 0) * 12 * mark * 0.28;
+    const projectedDebtDrop = Math.min(
+      creditCardBalance + otherDebt,
+      (creditCardPayment + otherDebt) * 12 * mark * 0.4
+    );
+    return {
+      label: mark === 0 ? "Now" : `${mark}Y`,
+      value: Math.max(
+        0,
+        homeEquity + carEquity + otherAssets + projectedEmergency + projectedInvestments -
+          otherLiabilities - Math.max(creditCardBalance + otherDebt - projectedDebtDrop, 0)
+      ),
+    };
+  });
+  const retirementMarks = Array.from(
+    new Set([0, Math.max(Math.round(retirementYears / 3), 1), Math.max(Math.round((retirementYears * 2) / 3), 1), retirementYears])
+  )
+    .filter((value) => value <= retirementYears)
+    .sort((left, right) => left - right);
+  const retirementSeries = retirementMarks.map((mark) => {
+    const portfolioAtMark = hasInvestmentAccess()
+      ? futureValue(investmentInputs.k401Balance, investmentInputs.k401Contribution, returns.k401, mark) +
+        futureValue(investmentInputs.rothBalance, investmentInputs.rothContribution, returns.roth, mark) +
+        futureValue(
+          investmentInputs.traditionalIraBalance,
+          investmentInputs.traditionalIraContribution,
+          returns.traditionalIra,
+          mark
+        ) +
+        futureValue(investmentInputs.hsaBalance, investmentInputs.hsaContribution, returns.hsa, mark) +
+        futureValue(
+          investmentInputs.college529Balance,
+          investmentInputs.college529Contribution,
+          returns.college529,
+          mark
+        ) +
+        futureValue(
+          investmentInputs.brokerageBalance,
+          investmentInputs.brokerageContribution,
+          returns.brokerage,
+          mark
+        )
+      : 0;
+    return {
+      label: mark === 0 ? "Now" : `${mark}Y`,
+      value: portfolioAtMark,
+    };
+  });
 
   document.getElementById("leftover").textContent = currency.format(leftover);
   document.getElementById("debtRatio").textContent = percent.format(debtRatio);
@@ -2166,6 +2332,9 @@ function updateDashboard() {
     brokerageFuture,
     totalFuture,
     years,
+    netWorthSeries,
+    retirementSeries,
+    retirementGap,
   });
 }
 

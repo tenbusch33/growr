@@ -1907,6 +1907,10 @@ select {
   margin-top: 8px;
 }
 
+.line-chart-tall {
+  height: 240px;
+}
+
 .donut-wrap {
   position: relative;
   width: min(250px, 100%);
@@ -2280,6 +2284,11 @@ select {
   display: grid;
   grid-template-columns: 1.08fr 0.95fr 1.22fr;
   gap: 22px;
+}
+
+.charts-grid-secondary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 22px;
 }
 
 .chart-card {
@@ -2666,6 +2675,7 @@ select {
   .automation-visual-grid,
   .transaction-month-groups,
   .charts-grid,
+  .charts-grid-secondary,
   .auth-form,
   .ai-actions,
   .transaction-form,
