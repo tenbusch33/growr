@@ -457,6 +457,9 @@ function setActivePage(page) {
   if (window.location.hash !== `#${nextPage}`) {
     window.history.replaceState({}, "", `#${nextPage}`);
   }
+  if (window.matchMedia("(max-width: 960px)").matches) {
+    setAiWidgetOpen(false);
+  }
   renderHeroState();
 }
 
@@ -493,6 +496,9 @@ function setAuthView(mode = "signup") {
 function openAuthPanel(mode = "signup") {
   setAuthView(mode);
   setActivePage("auth");
+  if (window.matchMedia("(max-width: 960px)").matches) {
+    setAiWidgetOpen(false);
+  }
   window.scrollTo({ top: 0, behavior: "smooth" });
 
   if (mode === "login") {
