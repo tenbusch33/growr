@@ -608,6 +608,26 @@ select {
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
 }
 
+.feed-item.is-danger {
+  border-color: rgba(223, 61, 90, 0.2);
+  background: linear-gradient(180deg, rgba(255, 246, 248, 0.98), rgba(255, 252, 253, 0.98));
+}
+
+.feed-item.is-warn {
+  border-color: rgba(255, 90, 54, 0.18);
+  background: linear-gradient(180deg, rgba(255, 249, 246, 0.98), rgba(255, 252, 250, 0.98));
+}
+
+.feed-item.is-good {
+  border-color: rgba(0, 184, 148, 0.18);
+  background: linear-gradient(180deg, rgba(244, 255, 251, 0.98), rgba(249, 255, 252, 0.98));
+}
+
+.feed-item.is-soft {
+  border-color: rgba(56, 103, 255, 0.14);
+  background: linear-gradient(180deg, rgba(247, 250, 255, 0.98), rgba(251, 253, 255, 0.98));
+}
+
 .feed-kicker {
   display: inline-block;
   margin-bottom: 8px;

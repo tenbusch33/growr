@@ -276,6 +276,19 @@ function formatMerchantName(value) {
   return words.join(" ");
 }
 
+function formatCategoryLabel(value) {
+  const labels = {
+    housing: "Housing",
+    essentials: "Essentials",
+    debt: "Debt",
+    car: "Car",
+    fun: "Fun",
+    other: "Other",
+  };
+
+  return labels[value] || "Other";
+}
+
 function getMerchantBadge(value) {
   const words = formatMerchantName(value).split(" ").filter(Boolean);
   if (!words.length) {
@@ -1328,7 +1341,7 @@ function renderTransactions() {
     container.innerHTML = `
       <div class="transaction-item empty-state">
         <strong>No transactions yet</strong>
-        <p>Add one manually or import from Plaid to start building your monthly view.</p>
+        <p>Add one manually or refresh connected data to start building your monthly view.</p>
       </div>
     `;
     updateTransactionSummary(filteredTransactions);
@@ -1367,6 +1380,7 @@ function renderTransactions() {
                 const merchantName = formatMerchantName(transaction.merchant);
                 const merchantLabel = getMerchantBadge(transaction.merchant);
                 const sourceLabel = transaction.source === "plaid" ? "Connected" : "Manual";
+                const categoryLabel = formatCategoryLabel(transaction.category);
                 const recurringLabel =
                   transaction.subscriptionStatus === "subscribed"
                     ? "Subscription"
@@ -1382,10 +1396,11 @@ function renderTransactions() {
                           <h3>${merchantName}</h3>
                           <strong class="${Number(transaction.amount || 0) < 0 ? "money-in" : "money-out"}">${currency.format(transaction.amount)}</strong>
                         </div>
-                        <p>${transaction.category} · ${sourceLabel} · ${formatTransactionDate(transaction.date)}</p>
+                        <p>${categoryLabel} · ${sourceLabel} · ${formatTransactionDate(transaction.date)}</p>
                         <div class="transaction-badge-row">
                           <span class="transaction-badge">${recurringLabel}</span>
                           <span class="transaction-badge transaction-badge-muted">${sourceLabel}</span>
+                          <span class="transaction-badge transaction-badge-muted">${categoryLabel}</span>
                         </div>
                       </div>
                     </div>
@@ -1462,7 +1477,7 @@ function renderSubscriptions() {
     container.innerHTML = `
       <div class="linked-item empty-state">
         <strong>No likely subscriptions yet</strong>
-        <p>Import transactions from Plaid and Growr will look for recurring merchants automatically.</p>
+        <p>Refresh connected data and Growr will start looking for recurring merchants automatically.</p>
       </div>
     `;
     return;
@@ -1533,7 +1548,7 @@ function renderBills() {
           <div class="subscription-top">
             <div>
               <h3>${formatMerchantName(item.merchant)}</h3>
-              <p>${item.nextReviewHint} · likely ${item.category}</p>
+              <p>${item.nextReviewHint} · likely ${formatCategoryLabel(item.category)}</p>
             </div>
             <strong>${currency.format(item.monthlyEstimate || item.amount || 0)}</strong>
           </div>
@@ -2408,6 +2423,7 @@ function renderSnapshotFeed(summary) {
     (left, right) => Number(right.monthlyEstimate || right.amount || 0) - Number(left.monthlyEstimate || left.amount || 0)
   )[0];
   const nextBill = state.recurringBills[0];
+  const linkedCount = state.linkedSummary?.accounts?.length || 0;
   const nextIncome = state.recurringIncome
     .slice()
     .sort((left, right) => {
@@ -2415,17 +2431,16 @@ function renderSnapshotFeed(summary) {
       const rightTime = right.nextExpectedDate ? new Date(right.nextExpectedDate).getTime() : Number.MAX_SAFE_INTEGER;
       return leftTime - rightTime;
     })[0];
+  const nextIncomeDays = nextIncome?.nextExpectedDate
+    ? Math.round((new Date(nextIncome.nextExpectedDate) - new Date()) / (1000 * 60 * 60 * 24))
+    : null;
 
   recurringDrag.textContent = currency.format(automation.recurringTotal || 0);
   nextPayday.textContent = nextIncome
-    ? `${nextIncome.merchant} · ${formatDaysUntil(
-        nextIncome.nextExpectedDate
-          ? Math.round((new Date(nextIncome.nextExpectedDate) - new Date()) / (1000 * 60 * 60 * 24))
-          : null
-      )}`
+    ? `${formatMerchantName(nextIncome.merchant)} · ${formatDaysUntil(nextIncomeDays)}`
     : "Need deposits";
   topCategory.textContent = topCategoryEntry
-    ? `${topCategoryEntry[0]} · ${currency.format(topCategoryEntry[1])}`
+    ? `${formatCategoryLabel(topCategoryEntry[0])} · ${currency.format(topCategoryEntry[1])}`
     : "Waiting on data";
 
   if (latestMonth && priorMonth) {
@@ -2456,39 +2471,55 @@ function renderSnapshotFeed(summary) {
 
   const feedItems = [];
 
+  if (linkedCount > 0) {
+    feedItems.push({
+      label: "Autopilot",
+      title: `Growr is tracking ${linkedCount} linked account${linkedCount === 1 ? "" : "s"}`,
+      body:
+        automation.recurringTotal > 0
+          ? `Recurring bills and subscriptions already total about ${currency.format(automation.recurringTotal)} per month.`
+          : "Balances are connected. More transaction history will unlock better recurring detection and sharper guidance.",
+      tone: "good",
+    });
+  }
+
   if (topCategoryEntry) {
     feedItems.push({
       label: "Biggest pressure point",
-      title: `${topCategoryEntry[0]} is leading the month`,
-      body: `${currency.format(topCategoryEntry[1])} has gone to ${topCategoryEntry[0]} so far.`,
+      title: `${formatCategoryLabel(topCategoryEntry[0])} is leading the month`,
+      body: `${currency.format(topCategoryEntry[1])} has gone to ${formatCategoryLabel(topCategoryEntry[0]).toLowerCase()} so far.`,
+      tone: topCategoryEntry[1] > Math.max(summary.leftover, 0) ? "warn" : "",
     });
   }
 
   if (biggestRecurring) {
     feedItems.push({
       label: "Recurring drag",
-      title: `${biggestRecurring.merchant} is one of the heaviest repeating charges`,
+      title: `${formatMerchantName(biggestRecurring.merchant)} is one of the heaviest repeating charges`,
       body: `${currency.format(biggestRecurring.monthlyEstimate || biggestRecurring.amount || 0)} per month is currently being treated as recurring.`,
+      tone: Number(biggestRecurring.monthlyEstimate || biggestRecurring.amount || 0) >= 100 ? "warn" : "",
     });
   }
 
   if (nextBill) {
     feedItems.push({
       label: "Due next",
-      title: `${nextBill.merchant} looks like a recurring bill`,
+      title: `${formatMerchantName(nextBill.merchant)} looks like a recurring bill`,
       body: nextBill.nextReviewHint
         ? `${nextBill.nextReviewHint}. Growr is using it as an essential recurring payment.`
         : "Growr marked it as a recurring essential payment.",
+      tone: "soft",
     });
   }
 
   if (nextIncome) {
     feedItems.push({
       label: "Income rhythm",
-      title: `${nextIncome.merchant} looks like your next recurring deposit`,
+      title: `${formatMerchantName(nextIncome.merchant)} looks like your next recurring deposit`,
       body: nextIncome.nextExpectedDate
         ? `Likely around ${new Date(nextIncome.nextExpectedDate).toLocaleDateString()}. Growr can use this to auto-fill your income baseline.`
         : nextIncome.nextReviewHint || "Growr sees a repeating paycheck pattern here.",
+      tone: "good",
     });
   }
 
@@ -2497,6 +2528,14 @@ function renderSnapshotFeed(summary) {
       label: "Urgent",
       title: "This month is currently running short",
       body: `${currency.format(Math.abs(summary.leftover))} short after core monthly costs means trimming recurring spend and checking the biggest category first will matter most.`,
+      tone: "danger",
+    });
+  } else if (summary.leftover > 0 && automation.recurringTotal > 0) {
+    feedItems.push({
+      label: "What to do first",
+      title: "Protect the margin you still have",
+      body: `You still have ${currency.format(summary.leftover)} left, but recurring charges are already taking ${currency.format(automation.recurringTotal)} per month. That is the cleanest place to review first.`,
+      tone: "good",
     });
   }
 
@@ -2505,7 +2544,7 @@ function renderSnapshotFeed(summary) {
       <article class="feed-item">
         <span class="feed-kicker">Start here</span>
         <strong>Add transactions or connect accounts</strong>
-        <p>Once Growr has a little history, Snapshot will explain what changed, what repeats, and what comes next.</p>
+        <p>Once Growr has a little history, Snapshot will explain what changed, what repeats, what is due next, and what deserves attention first.</p>
       </article>
     `;
     return;
@@ -2515,7 +2554,7 @@ function renderSnapshotFeed(summary) {
     .slice(0, 4)
     .map(
       (item) => `
-        <article class="feed-item">
+        <article class="feed-item ${item.tone ? `is-${item.tone}` : ""}">
           <span class="feed-kicker">${item.label}</span>
           <strong>${item.title}</strong>
           <p>${item.body}</p>
@@ -3533,3 +3572,4 @@ setActivePage(window.location.hash.replace("#", "") || "snapshot");
 loadConfig();
 handleCheckoutReturn();
 document.getElementById("txDate").value = new Date().toISOString().slice(0, 10);
+
