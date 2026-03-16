@@ -1529,6 +1529,143 @@ select {
   margin-bottom: 24px;
 }
 
+.snapshot-command-center {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.command-card {
+  padding: 28px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+}
+
+.command-card-primary {
+  background:
+    radial-gradient(circle at top left, rgba(215, 255, 47, 0.2), transparent 28%),
+    linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+}
+
+.command-card-top,
+.next-move-item,
+.transaction-main-row,
+.transaction-month-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.command-card-top,
+.transaction-main-row,
+.transaction-month-header {
+  align-items: flex-start;
+}
+
+.command-badge {
+  align-self: flex-start;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: rgba(56, 103, 255, 0.1);
+  color: #3867ff;
+}
+
+.command-badge.good {
+  background: rgba(0, 184, 148, 0.12);
+  color: #00846b;
+}
+
+.command-badge.warn {
+  background: rgba(255, 211, 61, 0.18);
+  color: #8c6800;
+}
+
+.command-badge.danger {
+  background: rgba(255, 90, 54, 0.14);
+  color: #b93718;
+}
+
+.command-metric-grid,
+.next-move-list {
+  display: grid;
+  gap: 14px;
+}
+
+.command-metric-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.command-metric {
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.command-metric span,
+.next-move-item p,
+.command-copy,
+.transaction-month-header span {
+  color: var(--subtle);
+}
+
+.command-metric span,
+.command-copy,
+.next-move-item p,
+.transaction-month-header span,
+.transaction-month-header strong {
+  margin: 0;
+}
+
+.command-metric strong {
+  display: block;
+  margin-top: 8px;
+  font-family: "Sora", sans-serif;
+  font-size: 1.5rem;
+}
+
+.command-copy {
+  margin-top: 18px;
+  line-height: 1.65;
+}
+
+.next-move-list {
+  margin-top: 18px;
+}
+
+.next-move-item {
+  align-items: flex-start;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+
+.next-move-item:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.next-move-item span {
+  min-width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #0f1116;
+  color: #fff;
+  font-weight: 800;
+}
+
+.next-move-item strong {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
 .score-panel {
   padding: 28px;
   background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
@@ -1814,6 +1951,21 @@ select {
   font-size: 1.25rem;
 }
 
+.transaction-month-section {
+  display: grid;
+  gap: 12px;
+}
+
+.transaction-month-header {
+  padding: 0 4px;
+  align-items: center;
+}
+
+.transaction-month-stack {
+  display: grid;
+  gap: 12px;
+}
+
 .budget-coach-grid,
 .account-meta-grid {
   display: grid;
@@ -1867,6 +2019,10 @@ select {
   gap: 12px;
 }
 
+.transaction-list {
+  gap: 18px;
+}
+
 .transaction-dashboard,
 .transaction-summary-grid,
 .transaction-filters {
@@ -1897,6 +2053,29 @@ select {
   border: 1px solid var(--line);
   border-radius: 22px;
   background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+}
+
+.premium-transaction-item {
+  padding: 18px 20px;
+}
+
+.transaction-avatar {
+  min-width: 48px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(56, 103, 255, 0.14), rgba(20, 184, 255, 0.18));
+  color: #1e3a8a;
+  font-family: "Sora", sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.transaction-main-copy {
+  flex: 1;
+  min-width: 0;
 }
 
 .subscription-item {
@@ -2466,6 +2645,7 @@ select {
   .info-grid,
   .pricing-grid,
   .planner-grid,
+  .snapshot-command-center,
   .dashboard-strip,
   .quickstart-grid,
   .subscription-grid,
@@ -2480,6 +2660,11 @@ select {
   .live-summary-grid,
   .transaction-summary-grid,
   .transaction-filters,
+  .command-metric-grid,
+  .automation-summary-grid,
+  .automation-highlight-row,
+  .automation-visual-grid,
+  .transaction-month-groups,
   .charts-grid,
   .auth-form,
   .ai-actions,

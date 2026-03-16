@@ -1115,43 +1115,80 @@ function renderTransactions() {
     return;
   }
 
-  container.innerHTML = filteredTransactions
-    .map(
-      (transaction) => `
-        <article class="transaction-item">
-          <div class="transaction-top">
-            <h3>${transaction.merchant}</h3>
-            <strong>${currency.format(transaction.amount)}</strong>
+  const groupedTransactions = filteredTransactions.reduce((groups, transaction) => {
+    const date = new Date(transaction.date);
+    const monthLabel = Number.isNaN(date.getTime())
+      ? "Unknown month"
+      : date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    if (!groups[monthLabel]) {
+      groups[monthLabel] = [];
+    }
+    groups[monthLabel].push(transaction);
+    return groups;
+  }, {});
+
+  container.innerHTML = Object.entries(groupedTransactions)
+    .map(([monthLabel, transactions]) => {
+      const monthTotal = transactions.reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+      return `
+        <section class="transaction-month-section">
+          <div class="transaction-month-header">
+            <div>
+              <span>${monthLabel}</span>
+              <strong>${transactions.length} transactions</strong>
+            </div>
+            <strong>${currency.format(monthTotal)}</strong>
           </div>
-          <p>${transaction.category} | ${transaction.source || "manual"} | ${transaction.date}</p>
-          <div class="transaction-review-row">
-            <label>
-              Category
-              <select data-transaction-category="${transaction.id}">
-                <option value="housing" ${transaction.category === "housing" ? "selected" : ""}>Housing</option>
-                <option value="essentials" ${transaction.category === "essentials" ? "selected" : ""}>Essentials</option>
-                <option value="debt" ${transaction.category === "debt" ? "selected" : ""}>Debt</option>
-                <option value="car" ${transaction.category === "car" ? "selected" : ""}>Car</option>
-                <option value="fun" ${transaction.category === "fun" ? "selected" : ""}>Fun</option>
-                <option value="other" ${transaction.category === "other" ? "selected" : ""}>Other</option>
-              </select>
-            </label>
-            <label>
-              Recurring
-              <select data-transaction-subscription="${transaction.id}">
-                <option value="auto" ${(!transaction.subscriptionStatus || transaction.subscriptionStatus === "auto") ? "selected" : ""}>Auto</option>
-                <option value="subscribed" ${transaction.subscriptionStatus === "subscribed" ? "selected" : ""}>Subscription</option>
-                <option value="ignored" ${transaction.subscriptionStatus === "ignored" ? "selected" : ""}>Not a subscription</option>
-              </select>
-            </label>
+          <div class="transaction-month-stack">
+            ${transactions
+              .map((transaction) => {
+                const merchantLabel = String(transaction.merchant || "?").trim().slice(0, 1).toUpperCase();
+                const sourceLabel = transaction.source === "plaid" ? "Connected" : "Manual";
+                return `
+                  <article class="transaction-item premium-transaction-item">
+                    <div class="transaction-main-row">
+                      <div class="transaction-avatar">${merchantLabel}</div>
+                      <div class="transaction-main-copy">
+                        <div class="transaction-top">
+                          <h3>${transaction.merchant}</h3>
+                          <strong>${currency.format(transaction.amount)}</strong>
+                        </div>
+                        <p>${transaction.category} | ${sourceLabel} | ${transaction.date}</p>
+                      </div>
+                    </div>
+                    <div class="transaction-review-row">
+                      <label>
+                        Category
+                        <select data-transaction-category="${transaction.id}">
+                          <option value="housing" ${transaction.category === "housing" ? "selected" : ""}>Housing</option>
+                          <option value="essentials" ${transaction.category === "essentials" ? "selected" : ""}>Essentials</option>
+                          <option value="debt" ${transaction.category === "debt" ? "selected" : ""}>Debt</option>
+                          <option value="car" ${transaction.category === "car" ? "selected" : ""}>Car</option>
+                          <option value="fun" ${transaction.category === "fun" ? "selected" : ""}>Fun</option>
+                          <option value="other" ${transaction.category === "other" ? "selected" : ""}>Other</option>
+                        </select>
+                      </label>
+                      <label>
+                        Recurring
+                        <select data-transaction-subscription="${transaction.id}">
+                          <option value="auto" ${(!transaction.subscriptionStatus || transaction.subscriptionStatus === "auto") ? "selected" : ""}>Auto</option>
+                          <option value="subscribed" ${transaction.subscriptionStatus === "subscribed" ? "selected" : ""}>Subscription</option>
+                          <option value="ignored" ${transaction.subscriptionStatus === "ignored" ? "selected" : ""}>Not recurring</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div class="transaction-actions-row">
+                      <button type="button" class="ghost-btn" data-save-transaction="${transaction.id}">Save review</button>
+                      <button type="button" class="ghost-btn" data-delete-transaction="${transaction.id}">Delete</button>
+                    </div>
+                  </article>
+                `;
+              })
+              .join("")}
           </div>
-          <div class="transaction-actions-row">
-            <button type="button" class="ghost-btn" data-save-transaction="${transaction.id}">Save review</button>
-            <button type="button" class="ghost-btn" data-delete-transaction="${transaction.id}">Delete</button>
-          </div>
-        </article>
-      `
-    )
+        </section>
+      `;
+    })
     .join("");
 
   container.querySelectorAll("[data-delete-transaction]").forEach((button) => {
@@ -1805,6 +1842,68 @@ function renderHealth(snapshot) {
     snapshot.leftover > 500 && snapshot.creditCardBalance === 0 ? "Room to grow" : "Cautious";
 }
 
+function renderSnapshotCommandCenter(summary) {
+  const badge = document.getElementById("snapshot-badge");
+  const headline = document.getElementById("snapshot-headline");
+  const summaryCopy = document.getElementById("snapshot-summary-copy");
+  const nextTitle = document.getElementById("snapshot-next-title");
+  const nextBody = document.getElementById("snapshot-next-body");
+  const secondTitle = document.getElementById("snapshot-second-title");
+  const secondBody = document.getElementById("snapshot-second-body");
+  const thirdTitle = document.getElementById("snapshot-third-title");
+  const thirdBody = document.getElementById("snapshot-third-body");
+
+  document.getElementById("snapshot-leftover").textContent = currency.format(summary.leftover);
+  document.getElementById("snapshot-burn").textContent = currency.format(summary.totalExpenses);
+  document.getElementById("snapshot-runway").textContent =
+    summary.totalExpenses > 0
+      ? `${(summary.cashAssets / summary.totalExpenses).toFixed(1)} months`
+      : "0 months";
+  document.getElementById("snapshot-retirement-pace").textContent = summary.hasInvestmentAccess
+    ? summary.retirementGap > 0
+      ? `${currency.format(summary.retirementGap)} short`
+      : "On track"
+    : "Locked";
+
+  if (summary.leftover < 0) {
+    badge.textContent = "Pressure";
+    badge.className = "command-badge danger";
+    headline.textContent = "Your monthly plan is running short right now.";
+    summaryCopy.textContent = `Growr estimates you're about ${currency.format(Math.abs(summary.leftover))} short each month after core bills and debt payments.`;
+    nextTitle.textContent = "Cut cash leakage first";
+    nextBody.textContent = "Trim flexible spending and pause optional investing until the monthly plan gets back above zero.";
+    secondTitle.textContent = "Attack high-interest debt";
+    secondBody.textContent = "Credit card balances will keep making the month tighter until they stop eating your margin.";
+  } else if (summary.debtRatio > 0.3) {
+    badge.textContent = "Tight";
+    badge.className = "command-badge warn";
+    headline.textContent = "You still have money left, but debt is eating flexibility.";
+    summaryCopy.textContent = `You have ${currency.format(summary.leftover)} left each month, but debt pressure is still high enough to slow everything else down.`;
+    nextTitle.textContent = "Use leftover cash strategically";
+    nextBody.textContent = "Direct part of your monthly margin toward the most expensive debt before increasing lifestyle spending.";
+    secondTitle.textContent = "Watch the car and debt stack";
+    secondBody.textContent = "Those two categories together are probably the biggest reason the month still feels heavy.";
+  } else {
+    badge.textContent = "Stable";
+    badge.className = "command-badge good";
+    headline.textContent = "You still have room to work with this month.";
+    summaryCopy.textContent = `Growr estimates ${currency.format(summary.leftover)} left after your core monthly plan, which gives you room to save, invest, or speed up debt payoff.`;
+    nextTitle.textContent = "Protect your monthly margin";
+    nextBody.textContent = "Keep fixed costs from creeping up so this leftover cash stays useful instead of disappearing into lifestyle drift.";
+    secondTitle.textContent = "Build automatic progress";
+    secondBody.textContent = "Use some of the monthly room for emergency savings, retirement contributions, or faster debt payoff.";
+  }
+
+  thirdTitle.textContent = summary.hasInvestmentAccess
+    ? "Pressure-test retirement now"
+    : "Unlock the future view";
+  thirdBody.textContent = summary.hasInvestmentAccess
+    ? summary.retirementGap > 0
+      ? `At your current pace, retirement may still be about ${currency.format(summary.retirementGap)} per month short of your target.`
+      : "Your current retirement pace is covering the monthly income target you entered."
+    : "Upgrade to compare your target retirement income with what your current portfolio path may actually support.";
+}
+
 function updateDashboard() {
   const income = getValue("income");
   const housing = getValue("housing");
@@ -2039,6 +2138,14 @@ function updateDashboard() {
     carRatio,
     emergencyMonths,
     creditCardBalance,
+  });
+  renderSnapshotCommandCenter({
+    leftover,
+    totalExpenses,
+    debtRatio,
+    cashAssets,
+    retirementGap,
+    hasInvestmentAccess: hasInvestmentAccess(),
   });
 
   renderCharts({
@@ -2509,16 +2616,16 @@ function connectPlaidAccounts() {
 
 function importPlaidTransactions() {
   if (!state.user) {
-    setPlaidMessage("Sign in before importing transactions.");
+    setPlaidMessage("Sign in before refreshing connected data.");
     return;
   }
 
   if (!isEmailVerified()) {
-    setPlaidMessage("Verify your email in Account before importing Plaid transactions.");
+    setPlaidMessage("Verify your email in Account before refreshing connected data.");
     return;
   }
 
-  setPlaidMessage("Importing Plaid transactions...");
+  setPlaidMessage("Refreshing connected account data...");
   fetch("/api/plaid/import-transactions", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

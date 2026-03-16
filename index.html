@@ -102,6 +102,65 @@
             <span>Built for quick decisions</span>
           </div>
         </section>
+        <section class="snapshot-command-center">
+          <article class="glass command-card command-card-primary">
+            <div class="command-card-top">
+              <div>
+                <p class="eyebrow">Command center</p>
+                <h2 id="snapshot-headline">You still have room to work with this month.</h2>
+              </div>
+              <span class="command-badge" id="snapshot-badge">Stable</span>
+            </div>
+            <div class="command-metric-grid">
+              <div class="command-metric">
+                <span>Left after fixed costs</span>
+                <strong id="snapshot-leftover">$0</strong>
+              </div>
+              <div class="command-metric">
+                <span>Monthly burn rate</span>
+                <strong id="snapshot-burn">$0</strong>
+              </div>
+              <div class="command-metric">
+                <span>Cash runway</span>
+                <strong id="snapshot-runway">0 months</strong>
+              </div>
+              <div class="command-metric">
+                <span>Retirement pace</span>
+                <strong id="snapshot-retirement-pace">Needs setup</strong>
+              </div>
+            </div>
+            <p class="command-copy" id="snapshot-summary-copy">Add your numbers so Growr can surface the biggest pressure point and the best next move.</p>
+          </article>
+          <article class="glass command-card">
+            <div class="section-heading compact">
+              <p class="eyebrow">Next moves</p>
+              <h2>What deserves attention first</h2>
+            </div>
+            <div class="next-move-list">
+              <div class="next-move-item">
+                <span>1</span>
+                <div>
+                  <strong id="snapshot-next-title">Build your first clear plan</strong>
+                  <p id="snapshot-next-body">Start with income, bills, and debt so Growr can calculate what is actually left each month.</p>
+                </div>
+              </div>
+              <div class="next-move-item">
+                <span>2</span>
+                <div>
+                  <strong id="snapshot-second-title">Connect accounts when you are ready</strong>
+                  <p id="snapshot-second-body">Link transactions later so Growr can organize categories, subscriptions, and recurring bills automatically.</p>
+                </div>
+              </div>
+              <div class="next-move-item">
+                <span>3</span>
+                <div>
+                  <strong id="snapshot-third-title">Set your future target</strong>
+                  <p id="snapshot-third-body">Use the investing tools to see how much monthly retirement income your current path may support.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
         <section class="glass quickstart-panel">
           <div class="section-heading compact">
             <p class="eyebrow">Quick start</p>
@@ -944,7 +1003,7 @@
           <div id="accounts-note" class="helper-banner hidden"></div>
           <div class="accounts-toolbar">
             <button id="connect-accounts" class="primary-btn">Connect accounts with Plaid</button>
-            <button id="import-transactions" class="secondary-btn">Import Plaid transactions</button>
+            <button id="import-transactions" class="secondary-btn">Refresh connected data</button>
             <p id="plaid-message" class="status-message">
               Connect checking, credit cards, loans, and investment accounts to pull live data.
             </p>
