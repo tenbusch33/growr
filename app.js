@@ -442,6 +442,53 @@ function renderHeroState() {
   hero.classList.toggle("hero-compact", shouldCompact);
 }
 
+function getMobilePageMeta(page) {
+  const meta = {
+    home: { title: "Growr", kicker: "Home" },
+    snapshot: { title: "Dashboard", kicker: "Snapshot" },
+    recurring: { title: "Recurring", kicker: "Subscriptions + bills" },
+    spending: { title: "Spending", kicker: "Income and categories" },
+    transactions: { title: "Transactions", kicker: "All activity" },
+    couples: { title: "Couples", kicker: "Household view" },
+    investing: { title: "Investing", kicker: "Future planning" },
+    networth: { title: "Net worth", kicker: "Your full picture" },
+    accounts: { title: "Accounts", kicker: "Connected money" },
+    account: { title: "More", kicker: "Profile and billing" },
+    auth: { title: "Growr", kicker: "Welcome" },
+    privacy: { title: "Privacy", kicker: "Legal" },
+    terms: { title: "Terms", kicker: "Legal" },
+  };
+
+  return meta[page] || { title: "Growr", kicker: "Money app" };
+}
+
+function updateMobileAppChrome() {
+  document.body.dataset.page = state.currentPage;
+  document.body.classList.toggle("mobile-app-shell", state.currentPage !== "home");
+
+  const header = document.getElementById("mobile-app-header");
+  const title = document.getElementById("mobile-app-header-title");
+  const kicker = document.getElementById("mobile-app-header-kicker");
+  const badge = document.getElementById("mobile-app-header-badge");
+  const meta = getMobilePageMeta(state.currentPage);
+
+  if (header && title && kicker) {
+    const showHeader = state.currentPage !== "home";
+    header.classList.toggle("hidden", !showHeader);
+    header.setAttribute("aria-hidden", showHeader ? "false" : "true");
+    title.textContent = meta.title;
+    kicker.textContent = meta.kicker;
+  }
+
+  if (badge) {
+    badge.textContent = state.user ? "•" : "○";
+  }
+
+  document.querySelectorAll(".mobile-nav-btn").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.pageTarget === state.currentPage);
+  });
+}
+
 function setActivePage(page) {
   const nextPage = document.querySelector(`.app-page[data-page="${page}"]`) ? page : "snapshot";
   state.currentPage = nextPage;
@@ -458,6 +505,7 @@ function setActivePage(page) {
     setAiWidgetOpen(false);
   }
   renderHeroState();
+  updateMobileAppChrome();
 }
 
 function setAuthView(mode = "signup") {
