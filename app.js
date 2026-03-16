@@ -532,11 +532,17 @@ function setTransactionStatus(text) {
 }
 
 function setSubscriptionStatus(text) {
-  document.getElementById("subscription-status").textContent = text;
+  const element = document.getElementById("subscription-status");
+  if (element) {
+    element.textContent = text;
+  }
 }
 
 function setBillStatus(text) {
-  document.getElementById("bill-status").textContent = text;
+  const element = document.getElementById("bill-status");
+  if (element) {
+    element.textContent = text;
+  }
 }
 
 function setPaycheckStatus(text) {
@@ -1672,19 +1678,34 @@ function renderTransactions() {
 
 function renderSubscriptions() {
   const container = document.getElementById("subscription-list");
+  if (!container) {
+    return;
+  }
   const total = state.subscriptions.reduce(
     (sum, item) => sum + Number(item.monthlyEstimate || 0),
     0
   );
+  const biggestSubscription = state.subscriptions
+    .slice()
+    .sort((left, right) => Number(right.monthlyEstimate || right.amount || 0) - Number(left.monthlyEstimate || left.amount || 0))[0];
 
   document.getElementById("subscription-total").textContent = currency.format(total);
   document.getElementById("subscription-count").textContent = String(state.subscriptions.length);
+  document.getElementById("subscription-biggest").textContent = biggestSubscription
+    ? currency.format(biggestSubscription.monthlyEstimate || biggestSubscription.amount || 0)
+    : "$0";
   document.getElementById("subscription-review-label").textContent = state.subscriptions.length
     ? "Ready to review"
     : "Needs data";
   document.getElementById("subscription-action-label").textContent = state.subscriptions.length
     ? "Trim the extras"
     : "Review list";
+  document.getElementById("subscription-automation-label").textContent = state.subscriptions.length
+    ? "Auto-detected"
+    : "Needs linked data";
+  document.getElementById("subscription-focus-label").textContent = biggestSubscription
+    ? formatMerchantName(biggestSubscription.merchant)
+    : "Trim extras";
 
   if (!state.subscriptions.length) {
     container.innerHTML = `
@@ -1730,6 +1751,9 @@ function renderSubscriptions() {
 
 function renderBills() {
   const container = document.getElementById("bill-list");
+  if (!container) {
+    return;
+  }
   const total = state.recurringBills.reduce(
     (sum, item) => sum + Number(item.monthlyEstimate || 0),
     0
@@ -1790,6 +1814,9 @@ function formatDaysUntil(days) {
 
 function renderRecurringIncome() {
   const container = document.getElementById("paycheck-list");
+  if (!container) {
+    return;
+  }
   const monthlyIncome = state.recurringIncome.reduce(
     (sum, item) => sum + Number(item.estimatedMonthlyIncome || 0),
     0
@@ -1863,15 +1890,6 @@ function renderRecurringInsights() {
     (sum, item) => sum + Number(item.monthlyEstimate || 0),
     0
   );
-  const billTotal = state.recurringBills.reduce(
-    (sum, item) => sum + Number(item.monthlyEstimate || 0),
-    0
-  );
-  const incomeTotal = state.recurringIncome.reduce(
-    (sum, item) => sum + Number(item.estimatedMonthlyIncome || 0),
-    0
-  );
-
   const insights = [];
 
   if (subscriptionTotal > 0) {
@@ -1884,25 +1902,21 @@ function renderRecurringInsights() {
     });
   }
 
-  if (billTotal > 0) {
-    insights.push({
-      label: "Fixed monthly load",
-      body: `${currency.format(billTotal)} per month looks like recurring bills Growr can use to keep your plan more accurate.`,
-    });
-  }
+  insights.push({
+    label: "Automation still on",
+    body: "Growr still uses recurring bills and paycheck patterns in the background to sharpen your budget, snapshot, and monthly recommendations.",
+  });
 
-  if (incomeTotal > 0) {
-    insights.push({
-      label: "Recurring income",
-      body: `Growr sees about ${currency.format(incomeTotal)} per month in repeating deposits, which helps auto-fill your income baseline.`,
-    });
-  }
+  insights.push({
+    label: "Real examples",
+    body: "Recognizable merchants like Adobe, DoorDash, Netflix, Spotify, Apple, or Amazon can show up here once Growr has enough linked history to trust the pattern.",
+  });
 
   if (!insights.length) {
     container.innerHTML = `
       <article class="automation-highlight-card recurring-insight-card">
         <span>Need linked history</span>
-        <strong>Connect accounts to unlock the recurring hub</strong>
+        <strong>Connect accounts to unlock the subscriptions view</strong>
       </article>
     `;
     return;
@@ -2043,14 +2057,14 @@ function loadTransactions() {
     renderRecurringInsights();
     renderCategoryProgress();
     setTransactionStatus("Sign in to save and load transactions.");
-    setSubscriptionStatus("Sign in to review recurring charges and subscriptions.");
+    setSubscriptionStatus("Sign in to review your subscriptions.");
     setBillStatus("Sign in to review recurring bills.");
     setPaycheckStatus("Sign in to review recurring income.");
     return Promise.resolve();
   }
 
   setTransactionStatus("Loading transactions...");
-  setSubscriptionStatus("Scanning for recurring charges...");
+  setSubscriptionStatus("Scanning for subscriptions...");
   setBillStatus("Scanning for recurring bills...");
   setPaycheckStatus("Scanning for recurring income...");
   return Promise.all([
@@ -2080,7 +2094,7 @@ function loadTransactions() {
       setTransactionStatus("Transactions loaded.");
       setSubscriptionStatus(
         state.subscriptions.length
-          ? "Growr found likely recurring charges. Review anything that looks off."
+          ? "Growr found likely subscriptions. Review anything that looks off."
           : "No recurring subscriptions found yet."
       );
       setBillStatus(
