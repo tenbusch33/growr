@@ -6,12 +6,12 @@
   --line: rgba(16, 16, 16, 0.08);
   --primary: #ff5a36;
   --secondary: #00b894;
-  --tertiary: #ffd33d;
+  --tertiary: #ffc78a;
   --accent: #3867ff;
   --pink: #ff4fa1;
   --cyan: #14b8ff;
   --danger: #df3d5a;
-  --premium: #d7ff2f;
+  --premium: #ffc38a;
   --shadow: 0 20px 44px rgba(16, 16, 16, 0.055);
   --shadow-soft: 0 10px 24px rgba(16, 16, 16, 0.04);
 }
@@ -31,7 +31,7 @@ body {
   color: var(--ink);
   background:
     radial-gradient(circle at top left, rgba(255, 90, 54, 0.05), transparent 24%),
-    radial-gradient(circle at 85% 0%, rgba(215, 255, 47, 0.12), transparent 20%),
+    radial-gradient(circle at 85% 0%, rgba(255, 195, 138, 0.16), transparent 20%),
     linear-gradient(180deg, #fbfcf8 0%, #f6f8fb 100%);
 }
 
@@ -286,7 +286,7 @@ select {
   padding: 6px 8px 5px;
   border-radius: 13px;
   background:
-    radial-gradient(circle at 22% 22%, rgba(255, 211, 61, 0.3), transparent 45%),
+    radial-gradient(circle at 22% 22%, rgba(255, 186, 120, 0.3), transparent 45%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
   overflow: hidden;
 }
@@ -295,7 +295,7 @@ select {
   display: block;
   width: 6px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #ffd33d, #ff6a3d);
+  background: linear-gradient(180deg, #ffc38a, #ff7e52);
   box-shadow: 0 0 14px rgba(255, 106, 61, 0.25);
 }
 
@@ -400,7 +400,7 @@ select {
   margin: 0 0 20px;
   padding: 14px 24px;
   border-radius: 0 0 22px 22px;
-  background: linear-gradient(90deg, var(--premium), #f2ff98);
+  background: linear-gradient(90deg, var(--premium), #ffe0bf);
   color: #101010;
   box-shadow: var(--shadow-soft);
 }
@@ -493,7 +493,7 @@ select {
   gap: 16px;
   align-content: start;
   background:
-    radial-gradient(circle at top right, rgba(215, 255, 47, 0.18), transparent 26%),
+    radial-gradient(circle at top right, rgba(255, 195, 138, 0.18), transparent 26%),
     linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
   min-height: 100%;
 }
@@ -771,7 +771,7 @@ select {
 
 .story-panel-dark {
   background:
-    radial-gradient(circle at 76% 18%, rgba(215, 255, 47, 0.12), transparent 18%),
+    radial-gradient(circle at 76% 18%, rgba(255, 195, 138, 0.12), transparent 18%),
     linear-gradient(135deg, #171b23 0%, #232936 100%);
 }
 
@@ -994,7 +994,7 @@ select {
   width: 230px;
   height: 230px;
   border-radius: 999px;
-  background: radial-gradient(circle at 35% 35%, rgba(215, 255, 47, 0.92), rgba(215, 255, 47, 0.05) 70%);
+  background: radial-gradient(circle at 35% 35%, rgba(255, 195, 138, 0.95), rgba(255, 195, 138, 0.06) 70%);
   filter: blur(2px);
 }
 
@@ -1573,7 +1573,7 @@ select {
   color: #fff;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   background:
-    radial-gradient(circle at 16% 16%, rgba(215, 255, 47, 0.12), transparent 18%),
+    radial-gradient(circle at 16% 16%, rgba(255, 195, 138, 0.12), transparent 18%),
     linear-gradient(180deg, #070707 0%, #0d0d0d 100%);
   display: flex;
   flex-direction: column;
@@ -1607,7 +1607,7 @@ select {
 }
 
 .auth-showcase-copy .eyebrow {
-  color: rgba(215, 255, 47, 0.86);
+  color: rgba(255, 170, 110, 0.92);
 }
 
 .auth-showcase-visual {
@@ -1871,7 +1871,7 @@ select {
   height: 10px;
   border-radius: 999px;
   background: var(--premium);
-  box-shadow: 0 0 16px rgba(215, 255, 47, 0.62);
+  box-shadow: 0 0 16px rgba(255, 186, 120, 0.52);
 }
 
 .ai-widget-panel {
@@ -2057,7 +2057,7 @@ select {
   padding: 18px;
   border-radius: 22px;
   border: 1px dashed var(--line);
-  background: linear-gradient(135deg, rgba(56, 103, 255, 0.04), rgba(255, 211, 61, 0.1));
+  background: linear-gradient(135deg, rgba(56, 103, 255, 0.04), rgba(255, 186, 120, 0.12));
 }
 
 .ai-empty p,
@@ -2222,7 +2222,7 @@ select {
 }
 
 .plan-option-card em {
-  color: rgba(215, 255, 47, 0.86);
+  color: rgba(255, 170, 110, 0.92);
   font-style: normal;
   font-weight: 700;
 }
@@ -2234,8 +2234,8 @@ select {
 }
 
 .plan-option input:checked + .plan-option-card {
-  border-color: rgba(215, 255, 47, 0.72);
-  box-shadow: 0 0 0 4px rgba(215, 255, 47, 0.12);
+  border-color: rgba(255, 186, 120, 0.72);
+  box-shadow: 0 0 0 4px rgba(255, 186, 120, 0.16);
   background: linear-gradient(180deg, #171d28 0%, #11161f 100%);
 }
 
@@ -2270,7 +2270,7 @@ select {
 
 .command-card-primary {
   background:
-    radial-gradient(circle at top left, rgba(215, 255, 47, 0.2), transparent 28%),
+    radial-gradient(circle at top left, rgba(255, 195, 138, 0.2), transparent 28%),
     linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
 }
 
@@ -2307,7 +2307,7 @@ select {
 }
 
 .command-badge.warn {
-  background: rgba(255, 211, 61, 0.18);
+  background: rgba(255, 186, 120, 0.18);
   color: #8c6800;
 }
 
@@ -3531,7 +3531,7 @@ select {
 
 .nav-login-btn,
 .nav-account-btn {
-  border: 1px solid rgba(215, 255, 47, 0.5);
+  border: 1px solid rgba(255, 186, 120, 0.5);
   background: transparent;
   color: #fff;
 }
@@ -3540,7 +3540,7 @@ select {
   border: 1px solid transparent;
   background: var(--premium);
   color: #101010;
-  box-shadow: 0 16px 30px rgba(215, 255, 47, 0.18);
+  box-shadow: 0 16px 30px rgba(255, 186, 120, 0.18);
 }
 
 .nav-login-btn:hover,

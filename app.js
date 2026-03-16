@@ -670,10 +670,11 @@ function populateAccountForm() {
   verificationInput.disabled = false;
   nameInput.value = state.user.fullName || "";
   emailInput.value = state.user.email || "";
-  planLabel.textContent = state.user.plan === "bundle" ? "Budget + Investing" : "Budget Core";
-  if (state.user.couplesAddOn) {
-    planLabel.textContent += " + Couples";
-  }
+  planLabel.textContent = state.user.plan === "bundle"
+    ? "Budget + Investing"
+    : state.user.couplesAddOn
+      ? "Couples"
+      : "Budget Core";
   trialLabel.textContent = state.user.trialActive
     ? `${Math.max(Number(state.user.trialDaysRemaining || 0), 0)} days left`
     : "No active trial";
@@ -686,8 +687,8 @@ function populateAccountForm() {
   if (state.user.plan !== "bundle") {
     upgradePanel.classList.remove("hidden");
     upgradeCopy.textContent = state.user.trialActive
-      ? `Your trial is live. Upgrade to Budget + Investing for $14.99/month${state.user.couplesAddOn ? ", plus your $1.99 couples add-on," : ""} or save 20% with annual billing before it ends.`
-      : `Move to Budget + Investing for $14.99/month${state.user.couplesAddOn ? ", plus your $1.99 couples add-on," : ""} or save 20% with annual billing to unlock forecasts, retirement planning, and investment-linked account views.`;
+      ? `Your trial is live. Upgrade to Budget + Investing for $14.99/month, with couples included, or save 20% with annual billing before it ends.`
+      : `Move to Budget + Investing for $14.99/month, with couples included, or save 20% with annual billing to unlock forecasts, retirement planning, and investment-linked account views.`;
   } else {
     upgradePanel.classList.add("hidden");
   }
@@ -798,15 +799,17 @@ function renderCouplesExperience({
     accessNote.classList.remove("hidden");
     accessNote.textContent = "Sign in to turn on shared household planning and see how Growr would summarize your money as a couple.";
     headline.textContent = "Bring both sides of the money picture together.";
-    copy.textContent = "The couples add-on gives one household view for recurring bills, cash, and next moves without losing each person's separate accounts.";
+    copy.textContent = "The Couples package gives one household view for recurring bills, cash, and next moves without losing each person's separate accounts.";
   } else if (!hasCouples) {
     accessNote.classList.remove("hidden");
-    accessNote.textContent = "Add Couples for $1.99/month to unlock a shared household view, recurring review together, and faster monthly money check-ins.";
+    accessNote.textContent = "Move to the Couples package for $8.99/month to unlock a shared household view, recurring review together, and faster monthly money check-ins.";
     headline.textContent = "Your plan is ready to expand into a household view.";
     copy.textContent = "Growr can already estimate your household picture from the current plan. Turn on Couples to make the shared version part of your account.";
   } else {
     accessNote.classList.remove("hidden");
-    accessNote.textContent = "Couples add-on is active. Shared invites and partner permissions are the next step, but your household view is already on.";
+    accessNote.textContent = state.user?.plan === "bundle"
+      ? "Budget + Investing includes couples already. Shared invites and partner permissions are the next step, but your household view is already on."
+      : "Couples is active. Shared invites and partner permissions are the next step, but your household view is already on.";
     headline.textContent = "The household view is active and ready for money check-ins.";
     copy.textContent = "Use this page to keep shared bills, cash, and long-term progress in one simpler household picture.";
   }
@@ -998,7 +1001,7 @@ function renderAccountState() {
       <span class="trial-pill">${formatTrialMessage()}</span>
     </div>
     <p>You are signed in on the ${
-      `${state.user.plan === "bundle" ? "Budget + Investing" : "Budget Core"}${state.user.couplesAddOn ? " + Couples" : ""}`
+      `${state.user.plan === "bundle" ? "Budget + Investing" : state.user.couplesAddOn ? "Couples" : "Budget Core"}`
     } plan.</p>
     <p>${
       state.user.trialActive
@@ -3182,9 +3185,9 @@ function handleSignup(event) {
   const fullName = document.getElementById("fullName").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-  const couplesAddOn = Boolean(document.getElementById("couplesAddOn")?.checked);
   const plan =
     document.querySelector('input[name="plan"]:checked')?.value || "budget";
+  const couplesAddOn = plan === "couples" || plan === "bundle";
   const button = document.getElementById("signup-button");
 
   button.disabled = true;

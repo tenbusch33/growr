@@ -65,8 +65,8 @@
             </div>
             <div class="hero-badges">
               <span>Budget Core from $6.99/mo</span>
+              <span>Couples from $8.99/mo</span>
               <span>Budget + Investing from $14.99/mo</span>
-              <span>Couples add-on + $1.99/mo</span>
               <span>Save 20% with annual billing</span>
               <span>Live account linking</span>
             </div>
@@ -280,7 +280,7 @@
                 Add a couples view to share one household picture, review recurring bills together,
                 and make monthly money check-ins faster without giving up your own accounts.
               </p>
-              <button type="button" class="secondary-btn" data-auth-target="signup">Add couples access</button>
+              <button type="button" class="secondary-btn" data-auth-target="signup">See couples plans</button>
             </div>
           </article>
         </section>
@@ -296,11 +296,23 @@
               <h3>$6.99<span>/month</span></h3>
               <p class="trial-pill">7-day free trial</p>
               <p class="price-billing-note">or $67.10/year billed annually, about 20% off</p>
-              <p class="price-addon-note">Optional couples add-on: + $1.99/mo or $19.10/year</p>
+              <p class="price-addon-note">Best for one-person money planning and everyday budget clarity.</p>
               <ul>
                 <li>Income and bill tracking</li>
                 <li>Debt and car payment analysis</li>
                 <li>Monthly cash flow recommendations</li>
+              </ul>
+            </article>
+            <article class="glass price-card">
+              <p class="plan-name">Couples</p>
+              <h3>$8.99<span>/month</span></h3>
+              <p class="trial-pill">7-day free trial</p>
+              <p class="price-billing-note">or $86.30/year billed annually, about 20% off</p>
+              <p class="price-addon-note">A shared household view for partners who want one calmer money dashboard together.</p>
+              <ul>
+                <li>Shared household cash and net worth view</li>
+                <li>Recurring bills and subscriptions together</li>
+                <li>Cleaner monthly money check-ins as a pair</li>
               </ul>
             </article>
             <article class="glass price-card featured">
@@ -308,11 +320,12 @@
               <h3>$14.99<span>/month</span></h3>
               <p class="trial-pill">7-day free trial</p>
               <p class="price-billing-note">or $143.90/year billed annually, about 20% off</p>
-              <p class="price-addon-note">Optional couples add-on: + $1.99/mo or $19.10/year</p>
+              <p class="price-addon-note">Includes couples features automatically, plus the full investing layer.</p>
               <ul>
                 <li>401(k), Roth IRA, Traditional IRA, HSA, 529, and brokerage forecasts</li>
                 <li>Age-based allocation suggestions</li>
                 <li>Goal and contribution comparisons</li>
+                <li>Shared household view included</li>
               </ul>
             </article>
           </div>
@@ -1296,7 +1309,7 @@
           <div class="page-intro-callouts">
             <span>Household view</span>
             <span>Shared check-ins</span>
-            <span>Couples add-on</span>
+            <span>Couples plan</span>
           </div>
         </section>
         <section class="glass section-bridge">
@@ -1381,7 +1394,7 @@
               </article>
               <article class="recommendation-item warn">
                 <h3>Partner invites next</h3>
-                <p>The couples add-on is in place now. Shared invites and partner-specific permissions are the next product step to make this fully collaborative.</p>
+                <p>The couples package is in place now. Shared invites and partner-specific permissions are the next product step to make this fully collaborative.</p>
               </article>
             </div>
           </article>
@@ -1460,22 +1473,19 @@
                       </span>
                     </label>
                     <label class="plan-option">
+                      <input type="radio" name="plan" value="couples" />
+                      <span class="plan-option-card">
+                        <strong>Couples</strong>
+                        <em>$8.99/mo or $86.30/year after trial</em>
+                        <small>Shared household view, recurring review together, and cleaner money check-ins as a pair.</small>
+                      </span>
+                    </label>
+                    <label class="plan-option">
                       <input type="radio" name="plan" value="bundle" />
                       <span class="plan-option-card">
                         <strong>Budget + Investing</strong>
                         <em>$14.99/mo or $143.90/year after trial</em>
-                        <small>Everything in Budget Core plus forecasts and retirement guidance.</small>
-                      </span>
-                    </label>
-                  </fieldset>
-                  <fieldset class="plan-picker add-on-picker">
-                    <legend>Add-ons</legend>
-                    <label class="plan-option">
-                      <input type="checkbox" id="couplesAddOn" />
-                      <span class="plan-option-card">
-                        <strong>Couples view</strong>
-                        <em>+ $1.99/mo or $19.10/year</em>
-                        <small>Shared household view, recurring review together, and cleaner money check-ins as a pair.</small>
+                        <small>Everything in Couples plus forecasts, retirement planning, and investing guidance.</small>
                       </span>
                     </label>
                   </fieldset>

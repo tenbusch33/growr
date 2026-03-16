@@ -1200,8 +1200,8 @@ const server = http.createServer((request, response) => {
         const fullName = String(payload.fullName || "").trim();
         const email = String(payload.email || "").trim().toLowerCase();
         const password = String(payload.password || "").trim();
-        const plan = payload.plan === "bundle" ? "bundle" : "budget";
-        const couplesAddOn = Boolean(payload.couplesAddOn);
+  const plan = payload.plan === "bundle" ? "bundle" : "budget";
+  const couplesAddOn = payload.plan === "couples" || payload.plan === "bundle" || Boolean(payload.couplesAddOn);
 
         if (!fullName || !email || !password) {
           sendJson(response, 400, { error: "Name, email, and password are required." });
