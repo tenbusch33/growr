@@ -1372,7 +1372,7 @@ function renderTransactions() {
               <span>${monthLabel}</span>
               <strong>${transactions.length} transactions</strong>
             </div>
-            <strong>${currency.format(monthTotal)}</strong>
+            <strong>${monthTotal < 0 ? `${currency.format(Math.abs(monthTotal))} in` : currency.format(monthTotal)}</strong>
           </div>
           <div class="transaction-month-stack">
             ${transactions

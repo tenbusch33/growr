@@ -2257,10 +2257,13 @@ select {
 }
 
 .month-chip {
-  padding: 16px 18px;
+  padding: 18px 18px 20px;
   border-radius: 22px;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  background:
+    radial-gradient(circle at top right, rgba(56, 103, 255, 0.08), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  box-shadow: var(--shadow-soft);
 }
 
 .month-chip strong {
@@ -2269,14 +2272,30 @@ select {
   font-size: 1.25rem;
 }
 
+.month-chip span {
+  font-weight: 800;
+}
+
 .transaction-month-section {
   display: grid;
   gap: 12px;
 }
 
 .transaction-month-header {
-  padding: 0 4px;
+  padding: 4px 6px 2px;
   align-items: center;
+}
+
+.transaction-month-header > div span {
+  display: block;
+  color: var(--subtle);
+  font-size: 0.9rem;
+}
+
+.transaction-month-header > div strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.35rem;
 }
 
 .transaction-month-stack {
@@ -2374,7 +2393,11 @@ select {
 }
 
 .premium-transaction-item {
-  padding: 18px 20px;
+  padding: 20px 20px 18px;
+  background:
+    radial-gradient(circle at top right, rgba(56, 103, 255, 0.06), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+  box-shadow: var(--shadow-soft);
 }
 
 .transaction-avatar {
@@ -2394,6 +2417,10 @@ select {
 .transaction-main-copy {
   flex: 1;
   min-width: 0;
+}
+
+.transaction-main-row {
+  gap: 14px;
 }
 
 .transaction-badge-row {
@@ -2429,6 +2456,11 @@ select {
   color: var(--ink);
 }
 
+.transaction-top strong {
+  font-family: "Sora", sans-serif;
+  font-size: 1.02rem;
+}
+
 .subscription-item {
   padding: 16px 18px;
   border: 1px solid var(--line);
@@ -2461,6 +2493,23 @@ select {
 .subscription-meta {
   color: var(--subtle);
   font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.transaction-review-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(16, 16, 16, 0.06);
+}
+
+.transaction-actions-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
 }
 
 .subscription-top,
