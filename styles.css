@@ -1875,10 +1875,10 @@ select {
 }
 
 .ai-widget-panel {
-  width: min(960px, calc(100vw - 32px));
-  max-height: min(78vh, 860px);
+  width: min(820px, calc(100vw - 32px));
+  max-height: min(82vh, 860px);
   overflow: auto;
-  padding: 22px;
+  padding: 18px;
   border-radius: 28px;
   box-shadow: 0 30px 70px rgba(17, 17, 17, 0.22);
 }
@@ -1893,7 +1893,7 @@ select {
 
 .ai-widget-panel-top h2 {
   margin: 8px 0 0;
-  font-size: 1.45rem;
+  font-size: 1.3rem;
 }
 
 .ai-widget-close {
@@ -1901,7 +1901,8 @@ select {
 }
 
 .ai-layout-floating {
-  grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.72fr);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
 }
 
 .ai-layout {
@@ -1917,11 +1918,16 @@ select {
 
 .ai-side-column {
   display: grid;
-  gap: 16px;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ai-context-card {
+  grid-column: 1 / -1;
 }
 
 .ai-side-card {
-  padding: 20px;
+  padding: 18px;
   border: 1px solid var(--line);
   border-radius: 22px;
   background:
@@ -1942,12 +1948,13 @@ select {
 
 .ai-mini-metrics {
   display: grid;
-  gap: 12px;
-  margin-top: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .ai-mini-metric {
-  padding: 14px 16px;
+  padding: 12px 14px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.85);
   border: 1px solid rgba(16, 16, 16, 0.06);
@@ -1976,9 +1983,9 @@ select {
 
 .ai-starter-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .prompt-chip {
@@ -1986,8 +1993,9 @@ select {
   background: #fff;
   color: var(--ink);
   border-radius: 999px;
-  padding: 10px 14px;
+  padding: 9px 13px;
   font-weight: 700;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: background 180ms ease, transform 180ms ease, border-color 180ms ease;
 }
@@ -2008,7 +2016,7 @@ select {
   display: grid;
   gap: 12px;
   margin-bottom: 16px;
-  min-height: 180px;
+  min-height: 120px;
 }
 
 .ai-message {
@@ -2054,8 +2062,8 @@ select {
 }
 
 .ai-empty {
-  padding: 18px;
-  border-radius: 22px;
+  padding: 16px 18px;
+  border-radius: 20px;
   border: 1px dashed var(--line);
   background: linear-gradient(135deg, rgba(56, 103, 255, 0.04), rgba(255, 186, 120, 0.12));
 }
@@ -2068,12 +2076,12 @@ select {
 .ai-empty ul {
   padding-left: 18px;
   color: var(--subtle);
-  line-height: 1.7;
+  line-height: 1.55;
 }
 
 .ai-form {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .ai-input-wrap {
@@ -2090,8 +2098,38 @@ select {
   border: 1px solid var(--line);
   background: #fafafa;
   resize: vertical;
-  min-height: 96px;
+  min-height: 84px;
   font: inherit;
+}
+
+#ai-widget-panel #ai-note {
+  padding: 14px 16px;
+  border-radius: 18px;
+  margin-bottom: 12px;
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+
+#ai-widget-panel .ai-input-wrap > span {
+  font-size: 0.98rem;
+}
+
+#ai-widget-panel .ai-side-card .eyebrow {
+  margin-bottom: 6px;
+}
+
+@media (max-width: 960px) {
+  .ai-side-column {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-context-card {
+    grid-column: auto;
+  }
+
+  .ai-mini-metrics {
+    grid-template-columns: 1fr;
+  }
 }
 
 .ai-actions {
