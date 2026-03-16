@@ -186,8 +186,57 @@ function publicAccount(account) {
     trialEndsAt,
     trialActive,
     trialDaysRemaining,
+    billingInterval: account.billingInterval || "monthly",
+    billingHistory: Array.isArray(account.billingHistory) ? account.billingHistory.slice(-12).reverse() : [],
     createdAt: account.createdAt,
   };
+}
+
+function getPlanPricing(plan, couplesAddOn = false, billingInterval = "monthly") {
+  const planKey = plan === "bundle" ? "bundle" : couplesAddOn ? "couples" : "budget";
+  const catalog = {
+    budget: {
+      label: "Budget Core",
+      monthly: 6.99,
+      yearly: 67.1,
+    },
+    couples: {
+      label: "Couples",
+      monthly: 8.99,
+      yearly: 86.3,
+    },
+    bundle: {
+      label: "Budget + Investing",
+      monthly: 14.99,
+      yearly: 143.9,
+    },
+  };
+  const entry = catalog[planKey];
+  return {
+    planKey,
+    label: entry.label,
+    amount: billingInterval === "yearly" ? entry.yearly : entry.monthly,
+    billingInterval,
+  };
+}
+
+function addBillingHistoryEntry(account, entry) {
+  if (!Array.isArray(account.billingHistory)) {
+    account.billingHistory = [];
+  }
+
+  account.billingHistory.push({
+    id: crypto.randomBytes(8).toString("hex"),
+    date: entry.date || new Date().toISOString(),
+    type: entry.type || "note",
+    status: entry.status || "info",
+    title: entry.title || "",
+    detail: entry.detail || "",
+    amount: typeof entry.amount === "number" ? entry.amount : null,
+    billingInterval: entry.billingInterval || account.billingInterval || "monthly",
+  });
+
+  account.billingHistory = account.billingHistory.slice(-24);
 }
 
 function hasInvestmentAccess(account) {
@@ -431,6 +480,12 @@ function handleStripeEvent(event) {
         account.stripeSubscriptionId = session.subscription;
         account.subscriptionStatus = "checkout_completed";
         account.pendingPlan = session.metadata?.plan || account.plan;
+        addBillingHistoryEntry(account, {
+          type: "checkout",
+          status: "pending",
+          title: "Checkout started",
+          detail: "Billing setup was started in Stripe.",
+        });
       });
     }
     return;
@@ -444,6 +499,13 @@ function handleStripeEvent(event) {
       account.stripeSubscriptionId = invoice.subscription || account.stripeSubscriptionId;
       account.plan = account.pendingPlan || account.plan;
       delete account.pendingPlan;
+      addBillingHistoryEntry(account, {
+        type: "charge",
+        status: "paid",
+        title: "Subscription billed",
+        detail: "Growr billing was paid successfully.",
+        amount: typeof invoice.amount_paid === "number" ? invoice.amount_paid / 100 : null,
+      });
     });
     return;
   }
@@ -453,6 +515,13 @@ function handleStripeEvent(event) {
     updateAccountByCustomerId(invoice.customer, (account) => {
       account.subscriptionActive = false;
       account.subscriptionStatus = "past_due";
+      addBillingHistoryEntry(account, {
+        type: "charge",
+        status: "failed",
+        title: "Payment failed",
+        detail: "Growr could not collect the latest subscription payment.",
+        amount: typeof invoice.amount_due === "number" ? invoice.amount_due / 100 : null,
+      });
     });
     return;
   }
@@ -1286,6 +1355,7 @@ const server = http.createServer((request, response) => {
           email,
           plan,
           couplesAddOn,
+          billingInterval: "monthly",
           subscriptionActive: true,
           subscriptionStatus: "trialing",
           trialEndsAt,
@@ -1293,6 +1363,16 @@ const server = http.createServer((request, response) => {
           passwordHash: credentials.passwordHash,
           createdAt: new Date().toISOString(),
         };
+        const pricing = getPlanPricing(account.plan, account.couplesAddOn, account.billingInterval);
+        addBillingHistoryEntry(account, {
+          type: "trial",
+          status: "trialing",
+          title: "Free trial started",
+          detail: `${pricing.label} trial started. First ${pricing.billingInterval} bill comes after the trial unless you change or cancel.`,
+          amount: 0,
+          billingInterval: account.billingInterval,
+          date: account.createdAt,
+        });
 
         applyEmailVerificationState(account);
 
@@ -1500,7 +1580,16 @@ const server = http.createServer((request, response) => {
     }
 
     account.plan = "bundle";
+    account.couplesAddOn = true;
     account.subscriptionActive = true;
+    addBillingHistoryEntry(account, {
+      type: "plan_change",
+      status: "updated",
+      title: "Plan changed",
+      detail: "Subscription changed to Budget + Investing in local demo mode.",
+      amount: 0,
+      billingInterval: account.billingInterval || "monthly",
+    });
     writeJson(accountsFile, accounts);
 
     const checkoutUrl = getCheckoutUrl("bundle");
@@ -1547,7 +1636,17 @@ const server = http.createServer((request, response) => {
 
         account.plan = requestedPlan === "bundle" ? "bundle" : "budget";
         account.couplesAddOn = requestedPlan === "couples" || requestedPlan === "bundle";
+        account.billingInterval = account.billingInterval || "monthly";
         account.subscriptionActive = true;
+        const pricing = getPlanPricing(account.plan, account.couplesAddOn, account.billingInterval);
+        addBillingHistoryEntry(account, {
+          type: "plan_change",
+          status: "updated",
+          title: "Plan changed",
+          detail: `Subscription changed to ${pricing.label}.`,
+          amount: 0,
+          billingInterval: account.billingInterval,
+        });
         writeJson(accountsFile, accounts);
 
         sendJson(response, 200, {

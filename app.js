@@ -643,6 +643,62 @@ function getCurrentPlanKey(user = state.user) {
   return user.couplesAddOn ? "couples" : "budget";
 }
 
+function formatBillingAmount(amount, billingInterval = "monthly") {
+  if (typeof amount !== "number") {
+    return billingInterval === "yearly" ? "Yearly billing" : "Monthly billing";
+  }
+
+  return `${currency.format(amount)} / ${billingInterval === "yearly" ? "year" : "month"}`;
+}
+
+function renderBillingStatements(user = state.user) {
+  const panel = document.getElementById("account-statements-panel");
+  const status = document.getElementById("account-statements-status");
+  const list = document.getElementById("account-statements-list");
+
+  if (!panel || !status || !list) {
+    return;
+  }
+
+  if (!user) {
+    panel.classList.add("hidden");
+    list.innerHTML = "";
+    return;
+  }
+
+  panel.classList.remove("hidden");
+  const entries = Array.isArray(user.billingHistory) ? user.billingHistory : [];
+
+  if (!entries.length) {
+    status.textContent = "No billing activity yet. Your future trial, plan, and payment events will appear here.";
+    list.innerHTML = "";
+    return;
+  }
+
+  status.textContent = "Recent billing activity for your Growr subscription.";
+  list.innerHTML = entries
+    .map((entry) => {
+      const dateLabel = entry.date
+        ? new Date(entry.date).toLocaleDateString()
+        : "Unknown date";
+      const amountLabel = formatBillingAmount(entry.amount, entry.billingInterval);
+      return `
+        <article class="statement-item">
+          <div class="statement-top">
+            <div>
+              <strong>${escapeHtml(entry.title || "Billing update")}</strong>
+              <span>${escapeHtml(dateLabel)}</span>
+            </div>
+            <strong>${escapeHtml(entry.status || "info")}</strong>
+          </div>
+          <p class="statement-detail">${escapeHtml(entry.detail || "")}</p>
+          <p class="statement-meta">${escapeHtml(amountLabel)}</p>
+        </article>
+      `;
+    })
+    .join("");
+}
+
 function populateAccountForm() {
   const nameInput = document.getElementById("accountFullName");
   const emailInput = document.getElementById("accountEmail");
@@ -705,6 +761,7 @@ function populateAccountForm() {
     upgradePanel.classList.add("hidden");
     billingPanel.classList.add("hidden");
     billingHelp.classList.add("hidden");
+    renderBillingStatements(null);
     setAccountStatus("Sign in to update your account details.");
     setVerificationStatus("Sign in to manage email verification.");
     updatePlannerActionState();
@@ -788,6 +845,7 @@ function populateAccountForm() {
   );
   billingButton.classList.toggle("hidden", !state.config?.stripeApiConfigured);
   billingHelp.classList.toggle("hidden", !state.config?.stripeApiConfigured);
+  renderBillingStatements(state.user);
   updatePlannerActionState();
 }
 
