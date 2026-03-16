@@ -33,8 +33,9 @@
             <div class="page-tabs topbar-tabs">
               <button class="tab-btn is-active" data-page-target="home">Home</button>
               <button class="tab-btn" data-page-target="snapshot">Snapshot</button>
-              <button class="tab-btn" data-page-target="budget">Budget</button>
-              <button class="tab-btn" data-page-target="subscriptions">Subscriptions</button>
+              <button class="tab-btn" data-page-target="recurring">Recurring</button>
+              <button class="tab-btn" data-page-target="spending">Spending</button>
+              <button class="tab-btn" data-page-target="transactions">Transactions</button>
               <button class="tab-btn" data-page-target="couples">Couples</button>
               <button class="tab-btn" data-page-target="investing">Investing</button>
               <button class="tab-btn" data-page-target="networth">Net Worth</button>
@@ -258,7 +259,7 @@
                 Link real accounts when you are ready, reduce manual entry, and let Growr turn live
                 balances and transactions into a cleaner subscription view with real examples people recognize.
               </p>
-              <button type="button" class="ghost-btn" data-page-target="subscriptions">See subscriptions</button>
+              <button type="button" class="ghost-btn" data-page-target="recurring">See recurring charges</button>
             </div>
           </article>
 
@@ -823,90 +824,103 @@
         </section>
         </section>
 
-        <section class="app-page" data-page="budget">
+        <section class="app-page" data-page="spending">
         <section class="glass page-intro">
           <div>
-            <p class="eyebrow">Budget</p>
-            <h2>Stay on top of spending</h2>
-            <p class="page-intro-text">Track category targets, log transactions, and understand where the month is getting tight.</p>
+            <p class="eyebrow">Spending</p>
+            <h2>See income, spending, and what is left over</h2>
+            <p class="page-intro-text">Use one spending dashboard to see money in, money out, net income, category breakdowns, and where the month is drifting.</p>
           </div>
           <div class="page-intro-callouts">
-            <span>Monthly targets</span>
-            <span>Transaction filters</span>
-            <span>Progress by category</span>
+            <span>Income vs spend</span>
+            <span>Category breakdown</span>
+            <span>Weekly to yearly view</span>
           </div>
         </section>
         <section class="glass section-bridge">
           <div>
-            <p class="eyebrow">Review-first budgeting</p>
-            <h2>Let Growr organize the month, then make quick corrections.</h2>
-            <p class="page-intro-text">Import transactions, review recurring charges, confirm bills, and only edit the pieces that actually need your attention.</p>
+            <p class="eyebrow">Spending dashboard</p>
+            <h2>Let Growr organize your spending first, then review what looks off.</h2>
+            <p class="page-intro-text">This page keeps the money story simple: how much came in, how much went out, what category is biggest, and how your current period compares with the last one.</p>
           </div>
           <div class="bridge-points">
-            <span>Auto-fill support</span>
-            <span>Recurring detection</span>
-            <span>Fast category cleanup</span>
+            <span>Current period view</span>
+            <span>Net income</span>
+            <span>Pie breakdown</span>
+          </div>
+        </section>
+        <section class="glass spending-period-bar">
+          <div class="period-toggle-group" id="spending-period-toggle">
+            <button type="button" class="period-btn is-active" data-spending-period="week">Week</button>
+            <button type="button" class="period-btn" data-spending-period="month">Month</button>
+            <button type="button" class="period-btn" data-spending-period="quarter">Quarter</button>
+            <button type="button" class="period-btn" data-spending-period="year">Year</button>
+          </div>
+          <div class="period-range-controls">
+            <button type="button" class="ghost-btn" id="spending-period-prev">Back</button>
+            <strong id="spending-period-label">This month</strong>
+            <button type="button" class="ghost-btn" id="spending-period-next">Forward</button>
           </div>
         </section>
         <section class="budget-coach-grid">
           <article class="glass coach-card">
-            <p class="eyebrow">Budget coach</p>
-            <h3>Keep the month simple</h3>
-            <p>Focus on fixed bills first, protect essentials second, then decide how much room you really have left.</p>
+            <p class="eyebrow">Income</p>
+            <h3>See what came in</h3>
+            <p>Growr totals deposits and income-like transactions so you can compare them against what left your accounts.</p>
           </article>
           <article class="glass coach-card">
-            <p class="eyebrow">Good rhythm</p>
-            <h3>Check spending weekly</h3>
-            <p>Small weekly adjustments are easier than trying to fix the whole month at the end.</p>
+            <p class="eyebrow">Net income</p>
+            <h3>See what is left</h3>
+            <p>Instead of guessing, Growr shows what is left after spending for the period you are reviewing.</p>
           </article>
           <article class="glass coach-card">
-            <p class="eyebrow">Best use</p>
-            <h3>Use this page like a pulse check</h3>
-            <p>If one category runs hot, adjust there first before cutting everywhere else.</p>
+            <p class="eyebrow">Start a budget</p>
+            <h3>Use spending to set targets</h3>
+            <p>If a category runs hot here, that is the easiest place to tighten your budget targets next.</p>
           </article>
         </section>
         <section class="glass automation-hub">
           <div class="section-heading">
-            <p class="eyebrow">Automated month view</p>
-            <h2>Let Growr organize the month for you</h2>
-            <p class="page-intro-text">Connected transactions become a living monthly dashboard with spend trends, payday hints, recurring charges, and category patterns you can review quickly.</p>
+            <p class="eyebrow">Spending overview</p>
+            <h2>See the current period in one clean dashboard</h2>
+            <p class="page-intro-text">Growr groups the current period so you can compare income, total spend, net income, and category breakdowns without digging through transactions first.</p>
           </div>
           <div class="automation-summary-grid">
             <article class="mini-stat">
-              <span>This month spent</span>
+              <span>Total spend</span>
               <strong id="auto-spend-total">$0</strong>
             </article>
             <article class="mini-stat">
-              <span>This month income</span>
+              <span>Income</span>
               <strong id="auto-income-total">$0</strong>
             </article>
             <article class="mini-stat">
-              <span>Recurring bills + subscriptions</span>
-              <strong id="auto-recurring-total">$0</strong>
+              <span>Net income</span>
+              <strong id="auto-net-total">$0</strong>
             </article>
             <article class="mini-stat">
-              <span>Flexible spend</span>
-              <strong id="auto-flex-total">$0</strong>
+              <span>Start a budget</span>
+              <strong id="auto-flex-total">Review top category</strong>
             </article>
           </div>
           <div class="automation-highlight-row">
             <div class="automation-highlight-card">
-              <span>Next paycheck pattern</span>
-              <strong id="auto-payday-hint">Need transaction history</strong>
+              <span>Compared with last period</span>
+              <strong id="auto-trend-hint">Waiting on data</strong>
             </div>
             <div class="automation-highlight-card">
               <span>Biggest spending category</span>
               <strong id="auto-pressure-hint">Waiting on data</strong>
             </div>
             <div class="automation-highlight-card">
-              <span>Monthly trend</span>
-              <strong id="auto-trend-hint">Waiting on data</strong>
+              <span>Current period</span>
+              <strong id="auto-payday-hint">Need transaction history</strong>
             </div>
           </div>
           <div class="automation-visual-grid">
             <article class="chart-card">
               <div class="chart-card-top">
-                <h3>Monthly trend</h3>
+                <h3>Spending trend</h3>
                 <strong id="monthly-trend-label">$0</strong>
               </div>
               <svg id="monthly-trend-chart" class="line-chart" viewBox="0 0 420 220" preserveAspectRatio="none" aria-label="Monthly spend trend"></svg>
@@ -919,7 +933,7 @@
             </article>
             <article class="chart-card">
               <div class="chart-card-top">
-                <h3>This month by category</h3>
+                <h3>Spending by category</h3>
                 <strong id="category-donut-label">$0</strong>
               </div>
               <div class="donut-wrap">
@@ -938,112 +952,44 @@
           <article class="glass budget-workbench">
             <div class="section-heading">
               <p class="eyebrow">Budget categories</p>
-              <h2>Your monthly targets</h2>
+              <h2>Turn this into a budget</h2>
             </div>
             <div id="category-progress" class="category-progress"></div>
           </article>
-
-          <article class="glass budget-workbench">
-            <div class="section-heading">
-              <p class="eyebrow">Transactions</p>
-              <h2>Track your spending</h2>
-            </div>
-            <form id="transaction-form" class="transaction-form">
-              <label>Merchant<input type="text" id="txMerchant" placeholder="Trader Joe's" required /></label>
-              <label>Amount<input type="number" id="txAmount" min="0" step="0.01" placeholder="84.52" required /></label>
-              <label>Category
-                <select id="txCategory">
-                  <option value="housing">Housing</option>
-                  <option value="essentials">Essentials</option>
-                  <option value="debt">Debt</option>
-                  <option value="car">Car</option>
-                  <option value="fun">Fun</option>
-                  <option value="other">Other</option>
-                </select>
-              </label>
-              <label>Date<input type="date" id="txDate" required /></label>
-              <button type="submit" class="primary-btn">Add transaction</button>
-            </form>
-            <p id="transaction-status" class="status-message">Sign in to save and load transactions.</p>
-      <div class="transaction-dashboard">
-              <div class="transaction-summary-grid">
-                <article class="mini-stat">
-                  <span>Visible spend</span>
-                  <strong id="tx-visible-total">$0</strong>
-                </article>
-                <article class="mini-stat">
-                  <span>Transactions shown</span>
-                  <strong id="tx-count">0</strong>
-                </article>
-                <article class="mini-stat">
-                  <span>Largest category</span>
-                  <strong id="tx-top-category">None</strong>
-                </article>
-              </div>
-              <div class="transaction-filters">
-                <label>
-                  Category
-                  <select id="transaction-filter-category">
-                    <option value="all">All categories</option>
-                    <option value="housing">Housing</option>
-                    <option value="essentials">Essentials</option>
-                    <option value="debt">Debt</option>
-                    <option value="car">Car</option>
-                    <option value="fun">Fun</option>
-                    <option value="other">Other</option>
-                  </select>
-                </label>
-                <label>
-                  Source
-                  <select id="transaction-filter-source">
-                    <option value="all">All sources</option>
-                    <option value="manual">Manual</option>
-                    <option value="plaid">Plaid</option>
-                  </select>
-                </label>
-                <label>
-                  Search
-                  <input type="text" id="transaction-search" placeholder="Search merchant" />
-                </label>
-              </div>
-            </div>
-            <div id="transaction-month-groups" class="transaction-month-groups"></div>
-            <div id="transaction-list" class="transaction-list"></div>
-          </article>
         </section>
 
         </section>
 
-        <section class="app-page" data-page="subscriptions">
+        <section class="app-page" data-page="recurring">
         <section class="glass page-intro">
           <div>
-            <p class="eyebrow">Subscriptions</p>
-            <h2>See exactly what keeps charging you every month</h2>
-          <p class="page-intro-text">Growr watches linked transactions for repeating merchants, estimates the monthly total, and gives you one cleaner list to review fast.</p>
+            <p class="eyebrow">Recurring</p>
+            <h2>See subscriptions and due-soon bills in one place</h2>
+          <p class="page-intro-text">Growr watches linked transactions for repeating merchants, separates subscriptions from essential bills, and shows what is likely due next.</p>
           </div>
           <div class="page-intro-callouts">
             <span>Adobe</span>
             <span>DoorDash</span>
-            <span>Netflix</span>
+            <span>Mortgage</span>
           </div>
         </section>
         <section class="glass section-bridge">
           <div>
-            <p class="eyebrow">Subscription center</p>
-            <h2>Let Growr catch the repeating charges, then keep only what deserves to stay.</h2>
-            <p class="page-intro-text">Instead of hunting merchant by merchant, use this page to review what looks like a subscription, what costs the most, and what may be an easy save.</p>
+            <p class="eyebrow">Recurring center</p>
+            <h2>Let Growr catch the repeating charges, then show what is due soon.</h2>
+            <p class="page-intro-text">Instead of hunting merchant by merchant, review subscriptions, monthly bills, and the next expected charge timing all from one page.</p>
           </div>
           <div class="bridge-points">
               <span>Monthly subscription total</span>
-            <span>Known merchants</span>
+            <span>Due soon bills</span>
             <span>Approve Growr's guesses</span>
           </div>
         </section>
         <section class="glass recurring-hub">
           <div class="section-heading">
-            <p class="eyebrow">Subscription summary</p>
-            <h2>Your repeating subscriptions in one place</h2>
-            <p class="page-intro-text">Growr keeps the page focused on subscriptions, while still using bills and paycheck patterns behind the scenes to improve the rest of the app.</p>
+            <p class="eyebrow">Recurring summary</p>
+            <h2>Your subscriptions and due-soon bills</h2>
+            <p class="page-intro-text">See what repeats every month, what costs the most, and which recurring bills are likely coming up next.</p>
           </div>
           <div class="recurring-summary-grid">
             <article class="mini-stat">
@@ -1090,23 +1036,120 @@
           </article>
           <article class="glass recommendations-panel">
             <div class="section-heading compact">
-              <p class="eyebrow">Why this works</p>
-              <h2>Growr still automates the rest in the background</h2>
+              <p class="eyebrow">Due soon</p>
+              <h2>Recurring bills Growr thinks are coming up next</h2>
             </div>
-            <div class="recommendation-list">
-              <article class="recommendation-item good">
-                <h3>Subscriptions are front and center</h3>
-                <p>Growr gives recurring charges their own page so the quickest monthly savings are easier to see without digging through bills and payroll data.</p>
+            <div class="transaction-summary-grid">
+              <article class="mini-stat">
+                <span>Monthly bills</span>
+                <strong id="bill-total">$0</strong>
               </article>
-              <article class="recommendation-item">
-                <h3>Bills still sharpen the budget</h3>
-                <p>Recurring bill detection still runs behind the scenes to auto-fill your planner, stabilize monthly cash flow, and improve recommendations.</p>
+              <article class="mini-stat">
+                <span>Bills found</span>
+                <strong id="bill-count">0</strong>
               </article>
-              <article class="recommendation-item">
-                <h3>Paychecks still support automation</h3>
-                <p>Recurring income detection still helps Growr estimate monthly income and due-soon timing, even though this page stays focused on subscriptions only.</p>
+              <article class="mini-stat">
+                <span>Review status</span>
+                <strong id="bill-review-label">Needs data</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Budget impact</span>
+                <strong id="bill-impact-label">Waiting on data</strong>
               </article>
             </div>
+            <p id="bill-status" class="status-message">Connect accounts or refresh connected data to see due-soon recurring bills here.</p>
+            <div id="bill-list" class="subscription-list"></div>
+          </article>
+        </section>
+        </section>
+
+        <section class="app-page" data-page="transactions">
+        <section class="glass page-intro">
+          <div>
+            <p class="eyebrow">Transactions</p>
+            <h2>See every transaction across all your accounts</h2>
+            <p class="page-intro-text">Use one ledger for every connected and manual transaction, then filter, search, and clean up what Growr found.</p>
+          </div>
+          <div class="page-intro-callouts">
+            <span>All accounts</span>
+            <span>Monthly groups</span>
+            <span>Search and filters</span>
+          </div>
+        </section>
+        <section class="budgeting-grid">
+          <article class="glass budget-workbench">
+            <div class="section-heading">
+              <p class="eyebrow">Add transaction</p>
+              <h2>Enter one manually if needed</h2>
+            </div>
+            <form id="transaction-form" class="transaction-form">
+              <label>Merchant<input type="text" id="txMerchant" placeholder="Trader Joe's" required /></label>
+              <label>Amount<input type="number" id="txAmount" min="0" step="0.01" placeholder="84.52" required /></label>
+              <label>Category
+                <select id="txCategory">
+                  <option value="housing">Housing</option>
+                  <option value="essentials">Essentials</option>
+                  <option value="debt">Debt</option>
+                  <option value="car">Car</option>
+                  <option value="fun">Fun</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+              <label>Date<input type="date" id="txDate" required /></label>
+              <button type="submit" class="primary-btn">Add transaction</button>
+            </form>
+            <p id="transaction-status" class="status-message">Sign in to save and load transactions.</p>
+          </article>
+
+          <article class="glass budget-workbench">
+            <div class="section-heading">
+              <p class="eyebrow">Ledger</p>
+              <h2>All transactions in one list</h2>
+            </div>
+            <div class="transaction-dashboard">
+              <div class="transaction-summary-grid">
+                <article class="mini-stat">
+                  <span>Visible spend</span>
+                  <strong id="tx-visible-total">$0</strong>
+                </article>
+                <article class="mini-stat">
+                  <span>Transactions shown</span>
+                  <strong id="tx-count">0</strong>
+                </article>
+                <article class="mini-stat">
+                  <span>Largest category</span>
+                  <strong id="tx-top-category">None</strong>
+                </article>
+              </div>
+              <div class="transaction-filters">
+                <label>
+                  Category
+                  <select id="transaction-filter-category">
+                    <option value="all">All categories</option>
+                    <option value="housing">Housing</option>
+                    <option value="essentials">Essentials</option>
+                    <option value="debt">Debt</option>
+                    <option value="car">Car</option>
+                    <option value="fun">Fun</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+                <label>
+                  Source
+                  <select id="transaction-filter-source">
+                    <option value="all">All sources</option>
+                    <option value="manual">Manual</option>
+                    <option value="plaid">Plaid</option>
+                  </select>
+                </label>
+                <label>
+                  Search
+                  <input type="text" id="transaction-search" placeholder="Search merchant" />
+                </label>
+              </div>
+            </div>
+            <div id="transaction-month-groups" class="transaction-month-groups"></div>
+            <div id="transaction-list" class="transaction-list"></div>
           </article>
         </section>
         </section>
@@ -1919,8 +1962,9 @@
           <div class="footer-link-column">
             <strong>Product</strong>
             <button type="button" class="footer-link" data-page-target="snapshot">Snapshot</button>
-            <button type="button" class="footer-link" data-page-target="budget">Budget</button>
-            <button type="button" class="footer-link" data-page-target="subscriptions">Subscriptions</button>
+            <button type="button" class="footer-link" data-page-target="recurring">Recurring</button>
+            <button type="button" class="footer-link" data-page-target="spending">Spending</button>
+            <button type="button" class="footer-link" data-page-target="transactions">Transactions</button>
             <button type="button" class="footer-link" data-page-target="couples">Couples</button>
           </div>
           <div class="footer-link-column">

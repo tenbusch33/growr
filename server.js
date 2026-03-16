@@ -939,6 +939,16 @@ function detectSubscriptionsFromTransactions(transactions) {
     "dropbox",
     "canva",
     "max",
+    "doordash",
+    "dashpass",
+    "ubereats",
+    "instacart",
+    "amazon music",
+    "apple one",
+    "icloud",
+    "patreon",
+    "substack",
+    "audible",
   ];
   const billKeywords = [
     "rent",
@@ -955,14 +965,59 @@ function detectSubscriptionsFromTransactions(transactions) {
     "student loan",
     "car payment",
   ];
+  const excludedRecurringKeywords = [
+    "payment",
+    "autopay",
+    "online payment",
+    "credit card payment",
+    "card payment",
+    "transfer",
+    "transfer to",
+    "transfer from",
+    "ach",
+    "zelle",
+    "venmo",
+    "cash app",
+    "apple cash",
+    "bank transfer",
+    "online banking",
+    "mobile banking",
+    "deposit",
+    "withdrawal",
+    "withdraw",
+    "fidelity",
+    "etrade",
+    "e trade",
+    "charles schwab",
+    "vanguard",
+    "chase",
+    "wells fargo",
+    "bank of america",
+    "capital one",
+    "citi",
+    "citibank",
+    "american express",
+    "amex",
+    "discover",
+    "paypal",
+  ];
 
   const candidateGroups = new Map();
 
   transactions
     .filter((entry) => Number(entry.amount) > 0)
     .forEach((entry) => {
+      const rawMerchant = String(entry.merchant || "").toLowerCase().trim();
       const merchantKey = normalizeMerchantName(entry.merchant);
-      if (!merchantKey || ["housing", "debt", "car"].includes(entry.category)) {
+      const excludedRecurringMatch = excludedRecurringKeywords.some(
+        (keyword) => rawMerchant.includes(keyword) || merchantKey.includes(keyword)
+      );
+
+      if (
+        !merchantKey ||
+        ["housing", "debt", "car"].includes(entry.category) ||
+        excludedRecurringMatch
+      ) {
         return;
       }
 
@@ -997,12 +1052,27 @@ function detectSubscriptionsFromTransactions(transactions) {
       const manualFalse = sorted.some((entry) => entry.subscriptionStatus === "ignored");
       const subscriptionKeywordMatch = subscriptionKeywords.some((keyword) => merchantKey.includes(keyword));
       const billKeywordMatch = billKeywords.some((keyword) => merchantKey.includes(keyword));
+      const rawMerchantMatch = sorted.some((entry) =>
+        excludedRecurringKeywords.some((keyword) =>
+          String(entry.merchant || "").toLowerCase().includes(keyword)
+        )
+      );
       const cadenceMatch = sorted.length >= 2 && avgInterval >= 20 && avgInterval <= 40 && amountVariation <= 0.45;
       const latest = sorted[sorted.length - 1];
+      const nextExpectedDate = avgInterval
+        ? new Date(new Date(latest.date).getTime() + Math.round(avgInterval) * 24 * 60 * 60 * 1000)
+        : null;
       const billCategory = ["housing", "debt", "car"].includes(latest.category) || billKeywordMatch;
       const type = billCategory ? "bill" : "subscription";
 
-      if (manualFalse || (!manualTrue && !subscriptionKeywordMatch && !billKeywordMatch && !cadenceMatch)) {
+      if (
+        manualFalse ||
+        rawMerchantMatch ||
+        (!manualTrue &&
+          !subscriptionKeywordMatch &&
+          !billKeywordMatch &&
+          !cadenceMatch)
+      ) {
         return null;
       }
 
@@ -1021,6 +1091,7 @@ function detectSubscriptionsFromTransactions(transactions) {
             ? "Marked as subscription"
             : "Recurring pattern detected",
         lastDate: latest.date,
+        nextExpectedDate: nextExpectedDate ? nextExpectedDate.toISOString().slice(0, 10) : null,
         monthlyEstimate: avgInterval ? avgAmount * (30 / avgInterval) : avgAmount,
         transactionIds: sorted.map((entry) => entry.id),
         status: manualTrue ? "confirmed" : "detected",

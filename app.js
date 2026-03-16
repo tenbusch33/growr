@@ -43,6 +43,8 @@ const state = {
   subscriptions: [],
   recurringBills: [],
   recurringIncome: [],
+  spendingPeriod: "month",
+  spendingOffset: 0,
   transactionFilters: {
     category: "all",
     source: "all",
@@ -717,6 +719,7 @@ function getAccountPlanDisplay(planKey = "budget", billingInterval = "monthly") 
 function refreshAccountPlanPreview() {
   const status = document.getElementById("account-plan-status");
   const note = document.getElementById("account-plan-interval-note");
+  const changeButton = document.getElementById("account-change-plan-button");
   const selectedPlan =
     document.querySelector('input[name="accountPlan"]:checked')?.value || getCurrentPlanKey();
   const selectedBillingInterval =
@@ -733,6 +736,11 @@ function refreshAccountPlanPreview() {
   note.textContent = selectedBillingInterval === "yearly"
     ? `${display.label} renews at ${display.priceLabel}. Yearly billing keeps the 20% savings in place.`
     : `${display.label} renews at ${display.priceLabel}. Switch to yearly if you want the lower annual price.`;
+  if (changeButton) {
+    const isAlreadyCurrent = selectedPlan === getCurrentPlanKey() && selectedBillingInterval === (state.user?.billingInterval || "monthly");
+    changeButton.textContent = isAlreadyCurrent ? "Current subscription" : "Save subscription change";
+    changeButton.disabled = !state.user || isAlreadyCurrent;
+  }
 }
 
 function renderBillingStatements(user = state.user) {
@@ -1389,6 +1397,78 @@ function groupTransactionsByMonth(transactions) {
   }, {});
 }
 
+function getPeriodRange(period = "month", offset = 0) {
+  const today = new Date();
+  const base = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  if (period === "week") {
+    const day = base.getDay();
+    const mondayOffset = (day + 6) % 7;
+    const start = new Date(base);
+    start.setDate(base.getDate() - mondayOffset + offset * 7);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 7);
+    return { start, end };
+  }
+
+  if (period === "quarter") {
+    const quarterStartMonth = Math.floor(base.getMonth() / 3) * 3 + offset * 3;
+    const start = new Date(base.getFullYear(), quarterStartMonth, 1);
+    const end = new Date(start.getFullYear(), start.getMonth() + 3, 1);
+    return { start, end };
+  }
+
+  if (period === "year") {
+    const start = new Date(base.getFullYear() + offset, 0, 1);
+    const end = new Date(start.getFullYear() + 1, 0, 1);
+    return { start, end };
+  }
+
+  const start = new Date(base.getFullYear(), base.getMonth() + offset, 1);
+  const end = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+  return { start, end };
+}
+
+function formatPeriodLabel(period = "month", offset = 0) {
+  const { start, end } = getPeriodRange(period, offset);
+  const today = new Date();
+  const isCurrent =
+    offset === 0 &&
+    today >= start &&
+    today < end &&
+    ((period === "week") || (period === "month") || (period === "quarter") || (period === "year"));
+
+  if (period === "week") {
+    if (isCurrent) {
+      return "This week";
+    }
+    return `${start.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${new Date(
+      end.getTime() - 24 * 60 * 60 * 1000
+    ).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+  }
+
+  if (period === "quarter") {
+    const quarter = Math.floor(start.getMonth() / 3) + 1;
+    return isCurrent ? `This quarter` : `Q${quarter} ${start.getFullYear()}`;
+  }
+
+  if (period === "year") {
+    return isCurrent ? "This year" : String(start.getFullYear());
+  }
+
+  return isCurrent
+    ? "This month"
+    : start.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
+
+function getTransactionsForPeriod(period = state.spendingPeriod, offset = state.spendingOffset) {
+  const { start, end } = getPeriodRange(period, offset);
+  return state.transactions.filter((transaction) => {
+    const date = new Date(transaction.date);
+    return !Number.isNaN(date.getTime()) && date >= start && date < end;
+  });
+}
+
 function buildMonthlyAutomationData() {
   const transactions = state.transactions
     .slice()
@@ -1522,6 +1602,75 @@ function buildMonthlyAutomationData() {
     flexibleSpend,
     recurringIncome: recurringIncomeCandidates[0] || null,
   };
+}
+
+function renderSpendingOverview() {
+  const periodLabel = document.getElementById("spending-period-label");
+  if (!periodLabel) {
+    return;
+  }
+
+  const filtered = getTransactionsForPeriod();
+  const periodIncome = Math.abs(
+    filtered
+      .filter((entry) => Number(entry.amount || 0) < 0)
+      .reduce((sum, entry) => sum + Number(entry.amount || 0), 0)
+  );
+  const periodSpend = filtered
+    .filter((entry) => Number(entry.amount || 0) > 0)
+    .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+  const netIncome = periodIncome - periodSpend;
+  const byCategory = filtered
+    .filter((entry) => Number(entry.amount || 0) > 0)
+    .reduce((totals, entry) => {
+      const key = entry.category || "other";
+      totals[key] = (totals[key] || 0) + Number(entry.amount || 0);
+      return totals;
+    }, {});
+
+  periodLabel.textContent = formatPeriodLabel();
+  document.getElementById("auto-income-total").textContent = currency.format(periodIncome);
+  document.getElementById("auto-spend-total").textContent = currency.format(periodSpend);
+  document.getElementById("auto-net-total").textContent = currency.format(netIncome);
+
+  const topCategoryEntry = Object.entries(byCategory).sort((left, right) => right[1] - left[1])[0];
+  document.getElementById("auto-pressure-hint").textContent = topCategoryEntry
+    ? `${formatCategoryLabel(topCategoryEntry[0])} ${currency.format(topCategoryEntry[1])}`
+    : "Waiting on data";
+  document.getElementById("auto-flex-total").textContent = topCategoryEntry
+    ? `Trim ${formatCategoryLabel(topCategoryEntry[0])}`
+    : "Review top category";
+
+  const priorOffset = state.spendingOffset - 1;
+  const priorTransactions = getTransactionsForPeriod(state.spendingPeriod, priorOffset);
+  const priorSpend = priorTransactions
+    .filter((entry) => Number(entry.amount || 0) > 0)
+    .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+  const spendDifference = periodSpend - priorSpend;
+  document.getElementById("auto-trend-hint").textContent = priorTransactions.length
+    ? spendDifference === 0
+      ? "Flat vs last period"
+      : `${currency.format(Math.abs(spendDifference))} ${spendDifference > 0 ? "higher" : "lower"}`
+    : "Waiting on data";
+
+  document.getElementById("auto-payday-hint").textContent = filtered.length
+    ? formatPeriodLabel()
+    : "Need transaction history";
+
+  renderCategoryDonutChart(byCategory, periodSpend);
+  updateSpendingPeriodControls();
+}
+
+function updateSpendingPeriodControls() {
+  const label = document.getElementById("spending-period-label");
+  if (!label) {
+    return;
+  }
+
+  label.textContent = formatPeriodLabel();
+  document.querySelectorAll("[data-spending-period]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.spendingPeriod === state.spendingPeriod);
+  });
 }
 
 function renderMonthlyTrendChart(series) {
@@ -3846,6 +3995,7 @@ function handleAccountPlanChange() {
 
   if (selectedPlan === currentPlan && selectedBillingInterval === currentBillingInterval) {
     planStatus.textContent = "That subscription and billing cadence are already active.";
+    refreshAccountPlanPreview();
     return;
   }
 
@@ -3876,10 +4026,12 @@ function handleAccountPlanChange() {
       }
     })
     .catch((error) => {
-      planStatus.textContent = error.message;
+      renderAccountState();
+      setAccountStatus(error.message);
+      planStatus.textContent = `${error.message} Your saved subscription was not changed.`;
     })
     .finally(() => {
-      button.disabled = false;
+      refreshAccountPlanPreview();
     });
 }
 
