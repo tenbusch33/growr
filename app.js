@@ -2664,6 +2664,7 @@ function loadTransactions() {
       renderRecurringIncome();
       renderRecurringInsights();
       renderCategoryProgress();
+      updateDashboard();
       setTransactionStatus("Transactions loaded.");
       setSubscriptionStatus(
         state.subscriptions.length
@@ -2686,6 +2687,7 @@ function loadTransactions() {
       setSubscriptionStatus(error.message);
       setBillStatus(error.message);
       setPaycheckStatus(error.message);
+      updateDashboard();
     });
 }
 
@@ -3472,6 +3474,137 @@ function renderSnapshotFeed(summary) {
     .join("");
 }
 
+function renderSnapshotMiniTrend(series) {
+  const chart = document.getElementById("snapshot-mini-trend");
+  if (!chart) {
+    return;
+  }
+
+  const usableSeries = (series || []).filter((point) => Number(point.spend || 0) > 0).slice(-6);
+  if (!usableSeries.length) {
+    chart.innerHTML = "";
+    return;
+  }
+
+  const width = 420;
+  const height = 180;
+  const paddingX = 18;
+  const paddingTop = 18;
+  const paddingBottom = 16;
+  const maxValue = Math.max(...usableSeries.map((point) => Number(point.spend || 0)), 1);
+  const stepX = usableSeries.length > 1 ? (width - paddingX * 2) / (usableSeries.length - 1) : 0;
+  const points = usableSeries.map((point, index) => {
+    const x = paddingX + stepX * index;
+    const y =
+      height -
+      paddingBottom -
+      (Number(point.spend || 0) / maxValue) * (height - paddingTop - paddingBottom);
+    return { x, y };
+  });
+
+  const linePath = points.reduce((path, point, index) => {
+    if (index === 0) {
+      return `M ${point.x} ${point.y}`;
+    }
+    const previous = points[index - 1];
+    const midX = (previous.x + point.x) / 2;
+    return `${path} C ${midX} ${previous.y}, ${midX} ${point.y}, ${point.x} ${point.y}`;
+  }, "");
+
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - paddingBottom} L ${points[0].x} ${height - paddingBottom} Z`;
+  const lastPoint = points[points.length - 1];
+
+  chart.innerHTML = `
+    <defs>
+      <linearGradient id="snapshot-mini-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#7d8fff" stop-opacity="0.24"></stop>
+        <stop offset="100%" stop-color="#7d8fff" stop-opacity="0"></stop>
+      </linearGradient>
+    </defs>
+    <path d="${areaPath}" fill="url(#snapshot-mini-fill)"></path>
+    <path d="${linePath}" fill="none" stroke="#6e86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+    <circle cx="${lastPoint.x}" cy="${lastPoint.y}" r="10" fill="#ffffff" stroke="#6e86ff" stroke-width="6"></circle>
+  `;
+}
+
+function renderSnapshotDashboard(summary, automation) {
+  const accounts = state.linkedSummary.accounts || [];
+  const accountMatcher = (patterns) =>
+    accounts.reduce((sum, account) => {
+      const haystack = `${account.typeLabel || ""} ${account.displayName || ""} ${account.name || ""}`.toLowerCase();
+      return patterns.some((pattern) => haystack.includes(pattern))
+        ? sum + Number(account.currentBalance || 0)
+        : sum;
+    }, 0);
+  const checkingBalance = accountMatcher(["checking"]);
+  const savingsBalance = accountMatcher(["savings"]);
+  const cardBalance = Number(state.linkedSummary.creditCardDebt || 0);
+  const netCash = Number(state.linkedSummary.cashTotal || summary.cashAssets || 0) - cardBalance;
+  const investmentsBalance = hasInvestmentAccess()
+    ? Math.max(Number(state.linkedSummary.investmentsTotal || 0), Number(summary.currentInvestmentAssets || 0))
+    : 0;
+  const linkedCount = accounts.length;
+  const latestMonth = automation.monthlySeries[automation.monthlySeries.length - 1];
+  const priorMonth = automation.monthlySeries[automation.monthlySeries.length - 2];
+  const spendDifference =
+    latestMonth && priorMonth ? Number(latestMonth.spend || 0) - Number(priorMonth.spend || 0) : null;
+  const nextIncome = state.recurringIncome
+    .slice()
+    .sort((left, right) => {
+      const leftTime = left.nextExpectedDate ? new Date(left.nextExpectedDate).getTime() : Number.MAX_SAFE_INTEGER;
+      const rightTime = right.nextExpectedDate ? new Date(right.nextExpectedDate).getTime() : Number.MAX_SAFE_INTEGER;
+      return leftTime - rightTime;
+    })[0];
+  const nextIncomeDays = nextIncome?.nextExpectedDate
+    ? Math.max(
+        Math.round((new Date(nextIncome.nextExpectedDate) - new Date()) / (1000 * 60 * 60 * 24)),
+        0
+      )
+    : null;
+
+  document.getElementById("snapshot-current-spend").textContent = currency.format(automation.currentMonthSpend || 0);
+  document.getElementById("snapshot-vs-last-icon").textContent =
+    spendDifference === null ? "-" : spendDifference < 0 ? "OK" : spendDifference > 0 ? "UP" : "EV";
+  document.getElementById("snapshot-vs-last").textContent =
+    spendDifference === null
+      ? "Need more monthly history"
+      : spendDifference < 0
+        ? `${currency.format(Math.abs(spendDifference))} below last month`
+        : spendDifference > 0
+          ? `${currency.format(spendDifference)} above last month`
+          : "Tracking with last month";
+  document.getElementById("snapshot-payday-card").textContent = nextIncome
+    ? nextIncomeDays === 0
+      ? "Payday is due now"
+      : `Payday in ${nextIncomeDays} day${nextIncomeDays === 1 ? "" : "s"}`
+    : "Need linked deposits";
+
+  document.getElementById("snapshot-priority-label").textContent = linkedCount
+    ? summary.leftover < 0
+      ? "This month needs attention first"
+      : "Your connected accounts are ready"
+    : "Connect accounts to unlock automatic tracking";
+  document.getElementById("snapshot-priority-meta").textContent = linkedCount
+    ? summary.leftover < 0
+      ? "Review spending"
+      : "Refresh data"
+    : "Add account";
+
+  document.getElementById("snapshot-checking-balance").textContent = currency.format(checkingBalance);
+  document.getElementById("snapshot-card-balance").textContent = currency.format(cardBalance);
+  document.getElementById("snapshot-net-cash").textContent = currency.format(netCash);
+  document.getElementById("snapshot-savings-balance").textContent = currency.format(savingsBalance);
+  document.getElementById("snapshot-investments-balance").textContent = hasInvestmentAccess()
+    ? currency.format(investmentsBalance)
+    : "Locked";
+  document.getElementById("snapshot-net-worth-card").textContent = currency.format(summary.netWorth || 0);
+  document.getElementById("snapshot-sync-status").textContent = linkedCount
+    ? `Showing ${linkedCount} connected account${linkedCount === 1 ? "" : "s"}.`
+    : "Connect accounts to see balances here.";
+
+  renderSnapshotMiniTrend(automation.monthlySeries);
+}
+
 function renderHouseholdOverview(summary) {
   const recurringTotal =
     state.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0) +
@@ -3807,6 +3940,15 @@ function updateDashboard() {
     retirementGap,
     hasInvestmentAccess: hasInvestmentAccess(),
   });
+  renderSnapshotDashboard(
+    {
+      leftover,
+      cashAssets,
+      currentInvestmentAssets,
+      netWorth,
+    },
+    buildMonthlyAutomationData()
+  );
   renderHouseholdOverview({
     cashAssets,
     currentInvestmentAssets,
@@ -4282,10 +4424,12 @@ function loadLinkedSummary() {
           liabilities: [],
           investments: [],
         });
+        updateDashboard();
         return;
       }
 
       renderLinkedSummary(payload);
+      updateDashboard();
       setPlaidMessage(
         payload.connected
           ? `Loaded ${payload.accounts.length} linked accounts from Plaid.`
@@ -4518,6 +4662,9 @@ document.querySelectorAll('input[name="accountPlan"], input[name="accountBilling
   input.addEventListener("change", refreshAccountPlanPreview);
 });
 document.getElementById("connect-accounts").addEventListener("click", connectPlaidAccounts);
+document.getElementById("snapshot-sync-btn")?.addEventListener("click", () => {
+  syncConnectedWorkspace();
+});
 document.getElementById("import-transactions").addEventListener("click", () => {
   syncConnectedWorkspace({ autoFill: false });
 });

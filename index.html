@@ -373,6 +373,92 @@
             <span>Built for quick decisions</span>
           </div>
         </section>
+        <section class="snapshot-priority-strip">
+          <button type="button" class="snapshot-priority-btn" data-page-target="accounts">
+            <span id="snapshot-priority-label">Connect accounts to unlock automatic tracking</span>
+            <strong id="snapshot-priority-meta">Add account</strong>
+          </button>
+        </section>
+        <section class="snapshot-dashboard-layout">
+          <article class="glass snapshot-spend-card">
+            <div class="snapshot-spend-top">
+              <div>
+                <span class="snapshot-card-label">Current spend this month</span>
+                <strong id="snapshot-current-spend">$0</strong>
+              </div>
+              <div class="snapshot-spend-trend">
+                <span id="snapshot-vs-last-icon" class="snapshot-vs-last-icon">•</span>
+                <strong id="snapshot-vs-last">$0 from last month</strong>
+              </div>
+            </div>
+            <svg id="snapshot-mini-trend" class="snapshot-mini-trend" viewBox="0 0 420 180" preserveAspectRatio="none" aria-label="Current spending trend"></svg>
+            <div class="snapshot-payday-row">
+              <div class="snapshot-payday-icon">$</div>
+              <div>
+                <span class="snapshot-payday-label">Next paycheck</span>
+                <strong id="snapshot-payday-card">Need deposits</strong>
+              </div>
+              <button type="button" class="snapshot-inline-link" data-page-target="spending">Details</button>
+            </div>
+          </article>
+          <article class="glass snapshot-accounts-card">
+            <div class="snapshot-accounts-head">
+              <div>
+                <span class="snapshot-card-label">Accounts</span>
+                <strong>Connected balances</strong>
+              </div>
+              <button type="button" class="snapshot-inline-link" data-page-target="accounts">Add account</button>
+            </div>
+            <div class="snapshot-accounts-list">
+              <div class="snapshot-account-row">
+                <div class="snapshot-account-copy">
+                  <span class="snapshot-account-icon">🏦</span>
+                  <span>Checking</span>
+                </div>
+                <strong id="snapshot-checking-balance">$0</strong>
+              </div>
+              <div class="snapshot-account-row">
+                <div class="snapshot-account-copy">
+                  <span class="snapshot-account-icon">💳</span>
+                  <span>Card balance</span>
+                </div>
+                <strong id="snapshot-card-balance">$0</strong>
+              </div>
+              <div class="snapshot-account-row">
+                <div class="snapshot-account-copy">
+                  <span class="snapshot-account-icon">💵</span>
+                  <span>Net cash</span>
+                </div>
+                <strong id="snapshot-net-cash">$0</strong>
+              </div>
+              <div class="snapshot-account-row">
+                <div class="snapshot-account-copy">
+                  <span class="snapshot-account-icon">🛟</span>
+                  <span>Savings</span>
+                </div>
+                <strong id="snapshot-savings-balance">$0</strong>
+              </div>
+              <div class="snapshot-account-row">
+                <div class="snapshot-account-copy">
+                  <span class="snapshot-account-icon">📈</span>
+                  <span>Investments</span>
+                </div>
+                <strong id="snapshot-investments-balance">$0</strong>
+              </div>
+              <div class="snapshot-account-row">
+                <div class="snapshot-account-copy">
+                  <span class="snapshot-account-icon">🏠</span>
+                  <span>Net worth</span>
+                </div>
+                <strong id="snapshot-net-worth-card">$0</strong>
+              </div>
+            </div>
+            <div class="snapshot-sync-row">
+              <span id="snapshot-sync-status">Connect accounts to see balances here.</span>
+              <button type="button" class="ghost-btn" id="snapshot-sync-btn">Refresh connected data</button>
+            </div>
+          </article>
+        </section>
         <section class="monarch-strip">
           <article class="glass monarch-tile">
             <span>Cash on hand</span>
