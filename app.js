@@ -75,6 +75,22 @@ const chartPalette = {
   other: "linear-gradient(180deg, #64748b, #94a3b8)",
 };
 
+const chartSolidPalette = {
+  housing: "#3867ff",
+  essentials: "#00b894",
+  debt: "#ff5a36",
+  car: "#ff4fa1",
+  leftover: "#ffd33d",
+  k401: "#3867ff",
+  roth: "#00b894",
+  traditionalIra: "#14b8ff",
+  hsa: "#7c4dff",
+  college529: "#ff9f1c",
+  brokerage: "#ff4fa1",
+  fun: "#7c4dff",
+  other: "#64748b",
+};
+
 const categoryTargets = [
   { key: "housing", label: "Housing", target: 2100, color: chartPalette.housing },
   { key: "essentials", label: "Essentials", target: 850, color: chartPalette.essentials },
@@ -744,6 +760,331 @@ function renderCategoryProgress() {
     .join("");
 }
 
+function normalizeMerchantName(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function groupTransactionsByMonth(transactions) {
+  return transactions.reduce((groups, transaction) => {
+    const date = new Date(transaction.date);
+    if (Number.isNaN(date.getTime())) {
+      return groups;
+    }
+
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    if (!groups[key]) {
+      groups[key] = [];
+    }
+    groups[key].push(transaction);
+    return groups;
+  }, {});
+}
+
+function buildMonthlyAutomationData() {
+  const transactions = state.transactions
+    .slice()
+    .filter((transaction) => transaction && transaction.date)
+    .sort((left, right) => new Date(left.date) - new Date(right.date));
+  const monthGroups = groupTransactionsByMonth(transactions);
+  const monthKeys = Object.keys(monthGroups).sort();
+  const recentKeys = monthKeys.slice(-6);
+  const monthlySeries = recentKeys.map((key) => {
+    const items = monthGroups[key];
+    const spend = items
+      .filter((entry) => Number(entry.amount || 0) > 0)
+      .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+    const income = Math.abs(
+      items
+        .filter((entry) => Number(entry.amount || 0) < 0)
+        .reduce((sum, entry) => sum + Number(entry.amount || 0), 0)
+    );
+    return {
+      key,
+      label: new Date(`${key}-01T00:00:00`).toLocaleDateString("en-US", {
+        month: "short",
+      }),
+      spend,
+      income,
+      net: income - spend,
+    };
+  });
+
+  const now = new Date();
+  const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const currentMonthTransactions = monthGroups[currentKey] || [];
+  const currentMonthSpend = currentMonthTransactions
+    .filter((entry) => Number(entry.amount || 0) > 0)
+    .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+  const currentMonthIncome = Math.abs(
+    currentMonthTransactions
+      .filter((entry) => Number(entry.amount || 0) < 0)
+      .reduce((sum, entry) => sum + Number(entry.amount || 0), 0)
+  );
+  const currentCategorySpend = currentMonthTransactions
+    .filter((entry) => Number(entry.amount || 0) > 0)
+    .reduce((totals, entry) => {
+      const key = entry.category || "other";
+      totals[key] = (totals[key] || 0) + Number(entry.amount || 0);
+      return totals;
+    }, {});
+
+  const recurringTotal =
+    state.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0) +
+    state.recurringBills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0);
+  const flexibleSpend =
+    (currentCategorySpend.fun || 0) +
+    (currentCategorySpend.other || 0) +
+    Math.max((currentCategorySpend.essentials || 0) - recurringTotal * 0.15, 0);
+
+  const depositGroups = transactions
+    .filter((entry) => Number(entry.amount || 0) < 0)
+    .reduce((groups, entry) => {
+      const key = normalizeMerchantName(entry.merchant);
+      if (!key) {
+        return groups;
+      }
+
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(entry);
+      return groups;
+    }, {});
+
+  const recurringIncomeCandidates = Object.entries(depositGroups)
+    .map(([merchantKey, entries]) => {
+      const sorted = entries
+        .slice()
+        .sort((left, right) => new Date(left.date) - new Date(right.date));
+      if (sorted.length < 2) {
+        return null;
+      }
+      const intervals = [];
+      for (let index = 1; index < sorted.length; index += 1) {
+        const previous = new Date(sorted[index - 1].date);
+        const current = new Date(sorted[index].date);
+        intervals.push((current - previous) / (1000 * 60 * 60 * 24));
+      }
+      const averageInterval =
+        intervals.reduce((sum, value) => sum + value, 0) / Math.max(intervals.length, 1);
+      if (!(averageInterval >= 10 && averageInterval <= 35)) {
+        return null;
+      }
+
+      const averageAmount =
+        Math.abs(sorted.reduce((sum, entry) => sum + Number(entry.amount || 0), 0)) /
+        sorted.length;
+      const lastDate = new Date(sorted[sorted.length - 1].date);
+      const nextDate = new Date(lastDate);
+      nextDate.setDate(lastDate.getDate() + Math.round(averageInterval));
+      const daysUntil = Math.round((nextDate - now) / (1000 * 60 * 60 * 24));
+
+      return {
+        merchant: sorted[sorted.length - 1].merchant || merchantKey,
+        averageInterval,
+        averageAmount,
+        nextDate,
+        daysUntil,
+        count: sorted.length,
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => right.count - left.count || left.daysUntil - right.daysUntil);
+
+  return {
+    monthlySeries,
+    currentMonthSpend,
+    currentMonthIncome,
+    currentCategorySpend,
+    recurringTotal,
+    flexibleSpend,
+    recurringIncome: recurringIncomeCandidates[0] || null,
+  };
+}
+
+function renderMonthlyTrendChart(series) {
+  const chart = document.getElementById("monthly-trend-chart");
+  const label = document.getElementById("monthly-trend-label");
+  const note = document.getElementById("monthly-trend-note");
+
+  if (!series.length) {
+    chart.innerHTML = "";
+    label.textContent = "$0";
+    note.textContent = "Import or add transactions to let Growr build a monthly trend.";
+    return;
+  }
+
+  const width = 420;
+  const height = 220;
+  const padding = 20;
+  const maxValue = Math.max(...series.map((point) => Math.max(point.spend, point.income, 1)));
+  const stepX = series.length > 1 ? (width - padding * 2) / (series.length - 1) : 0;
+  const toPoint = (value, index) => {
+    const x = padding + stepX * index;
+    const y = height - padding - (value / maxValue) * (height - padding * 2);
+    return `${x},${y}`;
+  };
+  const spendPoints = series.map((point, index) => toPoint(point.spend, index)).join(" ");
+  const incomePoints = series.map((point, index) => toPoint(point.income, index)).join(" ");
+  const latest = series[series.length - 1];
+  const previous = series[series.length - 2];
+  const trendDelta = previous ? latest.spend - previous.spend : 0;
+
+  chart.innerHTML = `
+    <defs>
+      <linearGradient id="growrSpendLine" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#ff5a36"></stop>
+        <stop offset="100%" stop-color="#ff8b70"></stop>
+      </linearGradient>
+      <linearGradient id="growrIncomeLine" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#3867ff"></stop>
+        <stop offset="100%" stop-color="#6c8cff"></stop>
+      </linearGradient>
+    </defs>
+    <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#d9e0ea" stroke-width="1.5"></line>
+    ${series
+      .map((point, index) => {
+        const x = padding + stepX * index;
+        return `
+          <text x="${x}" y="${height - 2}" text-anchor="middle" fill="#7a8599" font-size="12">${point.label}</text>
+        `;
+      })
+      .join("")}
+    <polyline points="${incomePoints}" fill="none" stroke="url(#growrIncomeLine)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    <polyline points="${spendPoints}" fill="none" stroke="url(#growrSpendLine)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    ${series
+      .map((point, index) => {
+        const incomePoint = toPoint(point.income, index).split(",");
+        const spendPoint = toPoint(point.spend, index).split(",");
+        return `
+          <circle cx="${incomePoint[0]}" cy="${incomePoint[1]}" r="4.5" fill="#3867ff"></circle>
+          <circle cx="${spendPoint[0]}" cy="${spendPoint[1]}" r="4.5" fill="#ff5a36"></circle>
+        `;
+      })
+      .join("")}
+  `;
+
+  label.textContent = currency.format(latest.spend);
+  note.textContent = previous
+    ? trendDelta > 0
+      ? `Spending is up ${currency.format(Math.abs(trendDelta))} versus ${previous.label}.`
+      : `Spending is down ${currency.format(Math.abs(trendDelta))} versus ${previous.label}.`
+    : "Growr will compare new months here as soon as more history comes in.";
+}
+
+function renderCategoryDonut(categorySpend) {
+  const chart = document.getElementById("category-donut-chart");
+  const center = document.getElementById("category-donut-center");
+  const label = document.getElementById("category-donut-label");
+  const legend = document.getElementById("category-donut-legend");
+  const entries = Object.entries(categorySpend)
+    .filter(([, amount]) => amount > 0)
+    .sort((left, right) => right[1] - left[1]);
+  const total = entries.reduce((sum, [, amount]) => sum + amount, 0);
+
+  if (!total) {
+    chart.style.background = "conic-gradient(#edf1f6 0deg, #edf1f6 360deg)";
+    center.textContent = "$0";
+    label.textContent = "$0";
+    legend.innerHTML = `<div class="linked-item empty-state"><strong>No category chart yet</strong><p>Add or import transactions to see this month take shape.</p></div>`;
+    return;
+  }
+
+  let angle = 0;
+  const stops = entries.map(([key, amount]) => {
+    const nextAngle = angle + (amount / total) * 360;
+    const color = chartSolidPalette[key] || chartSolidPalette.other;
+    const stop = `${color} ${angle}deg ${nextAngle}deg`;
+    angle = nextAngle;
+    return stop;
+  });
+
+  chart.style.background = `conic-gradient(${stops.join(", ")})`;
+  center.textContent = currency.format(total);
+  label.textContent = currency.format(total);
+  legend.innerHTML = entries
+    .map(([key, amount]) => {
+      const color = chartPalette[key] || chartPalette.other;
+      return `
+        <div class="legend-item">
+          <span class="legend-dot" style="background:${color}"></span>
+          <p>${key}</p>
+          <strong>${currency.format(amount)}</strong>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderAutomationHub() {
+  const data = buildMonthlyAutomationData();
+  const topCategoryEntry = Object.entries(data.currentCategorySpend).sort((left, right) => right[1] - left[1])[0];
+  const latestSeries = data.monthlySeries[data.monthlySeries.length - 1];
+  const priorSeries = data.monthlySeries[data.monthlySeries.length - 2];
+
+  document.getElementById("auto-spend-total").textContent = currency.format(data.currentMonthSpend);
+  document.getElementById("auto-income-total").textContent = currency.format(data.currentMonthIncome);
+  document.getElementById("auto-recurring-total").textContent = currency.format(data.recurringTotal);
+  document.getElementById("auto-flex-total").textContent = currency.format(data.flexibleSpend);
+  document.getElementById("auto-payday-hint").textContent = data.recurringIncome
+    ? data.recurringIncome.daysUntil >= 0
+      ? `${data.recurringIncome.merchant} likely in ${data.recurringIncome.daysUntil} days`
+      : `${data.recurringIncome.merchant} looks like a recurring deposit`
+    : "Need linked deposits";
+  document.getElementById("auto-pressure-hint").textContent = topCategoryEntry
+    ? `${topCategoryEntry[0]} is leading at ${currency.format(topCategoryEntry[1])}`
+    : "Waiting on category data";
+  document.getElementById("auto-trend-hint").textContent =
+    latestSeries && priorSeries
+      ? latestSeries.spend > priorSeries.spend
+        ? "Spending is trending up"
+        : "Spending is settling down"
+      : "Need more monthly history";
+
+  renderMonthlyTrendChart(data.monthlySeries);
+  renderCategoryDonut(data.currentCategorySpend);
+}
+
+function renderTransactionMonthGroups(transactions) {
+  const container = document.getElementById("transaction-month-groups");
+  const monthGroups = groupTransactionsByMonth(transactions);
+  const monthKeys = Object.keys(monthGroups).sort((left, right) => right.localeCompare(left)).slice(0, 4);
+
+  if (!monthKeys.length) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = monthKeys
+    .map((key) => {
+      const items = monthGroups[key];
+      const spend = items
+        .filter((entry) => Number(entry.amount || 0) > 0)
+        .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+      const income = Math.abs(
+        items
+          .filter((entry) => Number(entry.amount || 0) < 0)
+          .reduce((sum, entry) => sum + Number(entry.amount || 0), 0)
+      );
+      const label = new Date(`${key}-01T00:00:00`).toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      });
+
+      return `
+        <article class="month-chip">
+          <span>${label}</span>
+          <strong>${currency.format(spend)}</strong>
+          <p>${currency.format(income)} in deposits</p>
+        </article>
+      `;
+    })
+    .join("");
+}
+
 function renderTransactions() {
   const container = document.getElementById("transaction-list");
   const filteredTransactions = state.transactions.filter((transaction) => {
@@ -769,6 +1110,8 @@ function renderTransactions() {
       </div>
     `;
     updateTransactionSummary(filteredTransactions);
+    renderTransactionMonthGroups(state.transactions);
+    renderAutomationHub();
     return;
   }
 
@@ -825,6 +1168,8 @@ function renderTransactions() {
   });
 
   updateTransactionSummary(filteredTransactions);
+  renderTransactionMonthGroups(state.transactions);
+  renderAutomationHub();
 }
 
 function renderSubscriptions() {

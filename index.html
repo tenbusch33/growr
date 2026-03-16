@@ -18,11 +18,15 @@
       <header class="hero">
         <nav class="topbar">
           <button type="button" class="brand brand-home-btn" data-page-target="snapshot" aria-label="Go to Growr home">
-            <span class="brand-mark">Growr</span>
-            <div>
-              <p>Growr</p>
-              <span>Know your money. Grow your future.</span>
-            </div>
+            <span class="brand-mark">
+              <span class="brand-icon" aria-hidden="true">
+                <span class="brand-bar brand-bar-one"></span>
+                <span class="brand-bar brand-bar-two"></span>
+                <span class="brand-bar brand-bar-three"></span>
+                <span class="brand-trend"></span>
+              </span>
+              <span class="brand-word">Growr</span>
+            </span>
           </button>
           <div class="topbar-actions">
             <div class="page-tabs topbar-tabs">
@@ -613,6 +617,66 @@
             <p>If one category runs hot, adjust there first before cutting everywhere else.</p>
           </article>
         </section>
+        <section class="glass automation-hub">
+          <div class="section-heading">
+            <p class="eyebrow">Automated month view</p>
+            <h2>Let Growr organize the month for you</h2>
+            <p class="page-intro-text">Connected transactions become a living monthly dashboard with spend trends, payday hints, recurring charges, and category patterns you can review quickly.</p>
+          </div>
+          <div class="automation-summary-grid">
+            <article class="mini-stat">
+              <span>This month spent</span>
+              <strong id="auto-spend-total">$0</strong>
+            </article>
+            <article class="mini-stat">
+              <span>This month income</span>
+              <strong id="auto-income-total">$0</strong>
+            </article>
+            <article class="mini-stat">
+              <span>Recurring bills + subscriptions</span>
+              <strong id="auto-recurring-total">$0</strong>
+            </article>
+            <article class="mini-stat">
+              <span>Flexible spend</span>
+              <strong id="auto-flex-total">$0</strong>
+            </article>
+          </div>
+          <div class="automation-highlight-row">
+            <div class="automation-highlight-card">
+              <span>Likely payday rhythm</span>
+              <strong id="auto-payday-hint">Need transaction history</strong>
+            </div>
+            <div class="automation-highlight-card">
+              <span>Category pressure point</span>
+              <strong id="auto-pressure-hint">Waiting on data</strong>
+            </div>
+            <div class="automation-highlight-card">
+              <span>Monthly trend</span>
+              <strong id="auto-trend-hint">Waiting on data</strong>
+            </div>
+          </div>
+          <div class="automation-visual-grid">
+            <article class="chart-card">
+              <div class="chart-card-top">
+                <h3>Monthly trend</h3>
+                <strong id="monthly-trend-label">$0</strong>
+              </div>
+              <svg id="monthly-trend-chart" class="line-chart" viewBox="0 0 420 220" preserveAspectRatio="none" aria-label="Monthly spend trend"></svg>
+              <p id="monthly-trend-note" class="chart-note">Growr compares the last few months to show whether spending is settling down or drifting up.</p>
+            </article>
+            <article class="chart-card">
+              <div class="chart-card-top">
+                <h3>This month by category</h3>
+                <strong id="category-donut-label">$0</strong>
+              </div>
+              <div class="donut-wrap">
+                <div id="category-donut-chart" class="donut-chart" aria-label="Category share"></div>
+                <div id="category-donut-center" class="donut-center">$0</div>
+              </div>
+              <div id="category-donut-legend" class="legend-list"></div>
+            </article>
+          </div>
+        </section>
         <section class="subscription-grid">
           <article class="glass recommendations-panel">
             <div class="section-heading compact">
@@ -732,6 +796,7 @@
                 </label>
               </div>
             </div>
+            <div id="transaction-month-groups" class="transaction-month-groups"></div>
             <div id="transaction-list" class="transaction-list"></div>
           </article>
         </section>
@@ -936,11 +1001,15 @@
         <section class="auth-destination">
           <article class="auth-showcase">
             <button type="button" class="auth-brand-lockup brand-home-btn" data-page-target="snapshot" aria-label="Go to Growr home">
-              <span class="brand-mark">Growr</span>
-              <div>
-                <p>Growr</p>
-                <span>Know your money. Grow your future.</span>
-              </div>
+              <span class="brand-mark">
+                <span class="brand-icon" aria-hidden="true">
+                  <span class="brand-bar brand-bar-one"></span>
+                  <span class="brand-bar brand-bar-two"></span>
+                  <span class="brand-bar brand-bar-three"></span>
+                  <span class="brand-trend"></span>
+                </span>
+                <span class="brand-word">Growr</span>
+              </span>
             </button>
             <div class="auth-showcase-copy">
               <p class="eyebrow" id="auth-mode-kicker">Growr access</p>
