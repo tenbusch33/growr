@@ -770,6 +770,33 @@ function savePlaidItem(item) {
   writeJson(plaidItemsFile, items);
 }
 
+async function fetchPlaidInstitutionMetadata(institutionId) {
+  if (!institutionId) {
+    return null;
+  }
+
+  try {
+    const response = await plaidRequest("/institutions/get_by_id", {
+      institution_id: institutionId,
+      country_codes: ["US"],
+      options: {
+        include_optional_metadata: true,
+      },
+    });
+
+    const institution = response.institution || {};
+    return {
+      institutionId,
+      name: institution.name || "",
+      primaryColor: institution.primary_color || "",
+      url: institution.url || "",
+      logo: institution.logo ? `data:image/png;base64,${institution.logo}` : "",
+    };
+  } catch {
+    return null;
+  }
+}
+
 function mapPlaidCategory(personalFinanceCategory, accountSubtype) {
   const primary = personalFinanceCategory?.primary || "";
   const detailed = personalFinanceCategory?.detailed || "";
@@ -1068,7 +1095,7 @@ function currencyAmount(value) {
   return typeof value === "number" ? value : 0;
 }
 
-function buildPlaidSummary(accountsData, liabilitiesData, holdingsData, preferences = {}) {
+function buildPlaidSummary(accountsData, liabilitiesData, holdingsData, preferences = {}, institution = null) {
   const nicknameMap = preferences.nicknames || {};
   const hiddenAccountIds = new Set(preferences.hiddenAccountIds || []);
 
@@ -1082,6 +1109,7 @@ function buildPlaidSummary(accountsData, liabilitiesData, holdingsData, preferen
     displayName: nicknameMap[account.account_id] || account.name,
     typeLabel: `${account.type}${account.subtype ? ` / ${account.subtype}` : ""}`,
     currentBalance: currencyAmount(account.balances?.current),
+    institution,
   }));
 
   const accountsById = new Map(accounts.map((account) => [account.accountId, account]));
@@ -1095,18 +1123,21 @@ function buildPlaidSummary(accountsData, liabilitiesData, holdingsData, preferen
       name: accountsById.get(entry.account_id)?.displayName || "Credit account",
       kind: "Credit card",
       amount: currencyAmount(entry.last_statement_balance),
+      institution,
     })),
     ...mortgageLiabilities.map((entry) => ({
       accountId: entry.account_id,
       name: accountsById.get(entry.account_id)?.displayName || "Mortgage account",
       kind: "Mortgage",
       amount: currencyAmount(entry.outstanding_principal_balance),
+      institution,
     })),
     ...studentLiabilities.map((entry) => ({
       accountId: entry.account_id,
       name: accountsById.get(entry.account_id)?.displayName || "Student loan",
       kind: "Student loan",
       amount: currencyAmount(entry.last_statement_balance),
+      institution,
     })),
   ];
 
@@ -1134,6 +1165,7 @@ function buildPlaidSummary(accountsData, liabilitiesData, holdingsData, preferen
         displayName: nicknameMap[account.account_id] || account.name,
         value: aggregate.value,
         holdingsCount: aggregate.holdingsCount,
+        institution,
       };
     });
 
@@ -1157,6 +1189,7 @@ function buildPlaidSummary(accountsData, liabilitiesData, holdingsData, preferen
     creditCardDebt,
     loanDebt,
     investmentsTotal,
+    institution,
     preferences: {
       nicknames: nicknameMap,
       hiddenAccountIds: Array.from(hiddenAccountIds),
@@ -2015,6 +2048,10 @@ const server = http.createServer((request, response) => {
         const exchange = await plaidRequest("/item/public_token/exchange", {
           public_token: publicToken,
         });
+        const institutionId = payload.metadata?.institution?.institution_id || "";
+        const institutionMetadata = institutionId
+          ? await fetchPlaidInstitutionMetadata(institutionId)
+          : null;
 
         savePlaidItem({
           userId: session.account.id,
@@ -2023,6 +2060,7 @@ const server = http.createServer((request, response) => {
           transactionsCursor: null,
           linkedAt: new Date().toISOString(),
           institution: payload.metadata?.institution || null,
+          institutionMetadata,
         });
 
         sendJson(response, 200, {
@@ -2224,17 +2262,38 @@ const server = http.createServer((request, response) => {
       return;
     }
 
-    Promise.all([
-      plaidRequest("/accounts/get", { access_token: item.accessToken }),
-      plaidRequest("/liabilities/get", { access_token: item.accessToken }),
-      plaidRequest("/investments/holdings/get", { access_token: item.accessToken }),
-    ])
-      .then(([accountsData, liabilitiesData, holdingsData]) => {
+    Promise.resolve(
+      item.institutionMetadata ||
+        (item.institution?.institution_id
+          ? fetchPlaidInstitutionMetadata(item.institution.institution_id)
+          : null)
+    )
+      .then((institutionMetadata) => {
+        if (institutionMetadata && !item.institutionMetadata) {
+          savePlaidItem({
+            ...item,
+            institutionMetadata,
+          });
+        }
+
+        return Promise.all([
+          plaidRequest("/accounts/get", { access_token: item.accessToken }),
+          plaidRequest("/liabilities/get", { access_token: item.accessToken }),
+          plaidRequest("/investments/holdings/get", { access_token: item.accessToken }),
+        ]).then(([accountsData, liabilitiesData, holdingsData]) => ({
+          accountsData,
+          liabilitiesData,
+          holdingsData,
+          institutionMetadata,
+        }));
+      })
+      .then(({ accountsData, liabilitiesData, holdingsData, institutionMetadata }) => {
         const summary = buildPlaidSummary(
           accountsData,
           liabilitiesData,
           holdingsData,
-          getPlaidPreferences(item)
+          getPlaidPreferences(item),
+          institutionMetadata
         );
         if (!hasInvestmentAccess(session.account)) {
           summary.investmentsTotal = 0;

@@ -346,12 +346,29 @@ function getIdentityProfile(value) {
   };
 }
 
-function renderIdentityBadge(value, className = "transaction-avatar") {
-  const profile = getIdentityProfile(value);
+function renderIdentityBadge(value, className = "transaction-avatar", overrideProfile = null) {
+  const profile = overrideProfile || getIdentityProfile(value);
   const logoMarkup = profile.logo
     ? `<img class="identity-logo" src="${escapeHtml(profile.logo)}" alt="${escapeHtml(formatMerchantName(value || profile.label))} logo" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" /><span class="identity-fallback" style="display:none;">${escapeHtml(profile.label)}</span>`
     : `<span class="identity-fallback">${escapeHtml(profile.label)}</span>`;
   return `<div class="${className}" style="--identity-bg:${profile.bg}; --identity-color:${profile.color};">${logoMarkup}</div>`;
+}
+
+function getInstitutionProfile(institution, fallbackValue = "") {
+  if (!institution) {
+    return getIdentityProfile(fallbackValue);
+  }
+
+  if (institution.logo) {
+    return {
+      label: getMerchantBadge(institution.name || fallbackValue),
+      bg: "#ffffff",
+      color: institution.primaryColor || "#1e3a8a",
+      logo: institution.logo,
+    };
+  }
+
+  return getIdentityProfile(institution.name || fallbackValue);
 }
 
 function formatTransactionDate(value) {
@@ -2029,7 +2046,7 @@ function renderLinkedSummary(summary) {
       (account) => `
         <article class="linked-item">
           <div class="linked-item-row">
-            ${renderIdentityBadge(account.name, "linked-avatar")}
+            ${renderIdentityBadge(account.name, "linked-avatar", getInstitutionProfile(account.institution, account.name))}
             <div class="linked-item-copy">
               <strong>${account.displayName || account.name}</strong>
               <p>${account.typeLabel}</p>
@@ -2058,7 +2075,7 @@ function renderLinkedSummary(summary) {
       (liability) => `
         <article class="linked-item">
           <div class="linked-item-row">
-            ${renderIdentityBadge(liability.name, "linked-avatar")}
+            ${renderIdentityBadge(liability.name, "linked-avatar", getInstitutionProfile(liability.institution, liability.name))}
             <div class="linked-item-copy">
               <strong>${liability.name}</strong>
               <p>${liability.kind}</p>
@@ -2077,7 +2094,11 @@ function renderLinkedSummary(summary) {
       (investment) => `
         <article class="linked-item">
           <div class="linked-item-row">
-            ${renderIdentityBadge(investment.displayName || investment.accountName, "linked-avatar")}
+            ${renderIdentityBadge(
+              investment.displayName || investment.accountName,
+              "linked-avatar",
+              getInstitutionProfile(investment.institution, investment.displayName || investment.accountName)
+            )}
             <div class="linked-item-copy">
               <strong>${investment.displayName || investment.accountName}</strong>
               <p>${investment.holdingsCount} holdings</p>
