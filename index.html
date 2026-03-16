@@ -17,7 +17,7 @@
     <div class="page-shell">
       <header class="hero">
         <nav class="topbar">
-          <button type="button" class="brand brand-home-btn" data-page-target="snapshot" aria-label="Go to Growr home">
+          <button type="button" class="brand brand-home-btn" data-page-target="home" aria-label="Go to Growr home">
             <span class="brand-mark">
               <span class="brand-icon" aria-hidden="true">
                 <span class="brand-bar brand-bar-one"></span>
@@ -30,7 +30,8 @@
           </button>
           <div class="topbar-actions">
             <div class="page-tabs topbar-tabs">
-              <button class="tab-btn is-active" data-page-target="snapshot">Snapshot</button>
+              <button class="tab-btn is-active" data-page-target="home">Home</button>
+              <button class="tab-btn" data-page-target="snapshot">Snapshot</button>
               <button class="tab-btn" data-page-target="budget">Budget</button>
               <button class="tab-btn" data-page-target="recurring">Recurring</button>
               <button class="tab-btn" data-page-target="investing">Investing</button>
@@ -110,7 +111,155 @@
       </header>
 
       <main class="workspace-main">
-        <section class="app-page is-active" data-page="snapshot">
+        <section class="app-page is-active" data-page="home">
+        <section class="story-stack" id="how-it-works">
+          <article class="story-panel story-panel-light">
+            <div class="story-visual story-visual-clarity">
+              <div class="visual-frame">
+                <div class="visual-window">
+                  <div class="visual-window-top">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <div class="visual-balance-card">
+                    <p>Monthly clarity</p>
+                    <strong>$1,485 left after fixed bills</strong>
+                    <div class="visual-balance-bars">
+                      <span class="bar-one"></span>
+                      <span class="bar-two"></span>
+                      <span class="bar-three"></span>
+                    </div>
+                  </div>
+                  <div class="visual-mini-grid">
+                    <div>
+                      <span>Debt stress</span>
+                      <strong>Medium</strong>
+                    </div>
+                    <div>
+                      <span>Emergency fund</span>
+                      <strong>1.4 months</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="story-copy">
+              <p class="eyebrow">One clean starting point</p>
+              <h2>Snapshot turns your financial mess into one simple read.</h2>
+              <p>
+                Instead of bouncing between accounts, bills, and vague goals, Growr gives you
+                one first screen that shows cash flow, debt pressure, and the next move worth making.
+              </p>
+              <button type="button" class="primary-btn premium-cta" data-page-target="snapshot">Explore Snapshot</button>
+            </div>
+          </article>
+
+          <article class="story-panel story-panel-dark">
+            <div class="story-visual story-visual-investing">
+              <div class="visual-orb"></div>
+              <div class="visual-invest-cards">
+                <article>
+                  <span>401(k)</span>
+                  <strong>$182K</strong>
+                  <em>10-year projection</em>
+                </article>
+                <article>
+                  <span>Roth IRA</span>
+                  <strong>$68K</strong>
+                  <em>Tax-free retirement growth</em>
+                </article>
+                <article>
+                  <span>HSA</span>
+                  <strong>$31K</strong>
+                  <em>Triple-tax advantage</em>
+                </article>
+              </div>
+            </div>
+            <div class="story-copy story-copy-dark">
+              <p class="eyebrow">Long-term confidence</p>
+              <h2>Forecast retirement and investing accounts without spreadsheet pain.</h2>
+              <p>
+                Compare your 401(k), Roth IRA, HSA, brokerage, and more with contribution-based
+                projections that make future tradeoffs easier to understand.
+              </p>
+              <button type="button" class="secondary-btn" data-page-target="investing">See investing tools</button>
+            </div>
+          </article>
+
+          <article class="story-panel story-panel-blue">
+            <div class="story-visual story-visual-accounts">
+              <div class="visual-device">
+                <div class="visual-device-top"></div>
+                <div class="visual-account-list">
+                  <div class="account-row">
+                    <span>Checking</span>
+                    <strong>$4,830</strong>
+                  </div>
+                  <div class="account-row">
+                    <span>Credit card</span>
+                    <strong>$1,920</strong>
+                  </div>
+                  <div class="account-row">
+                    <span>Brokerage</span>
+                    <strong>$12,400</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="story-copy">
+              <p class="eyebrow">Connected money</p>
+              <h2>Bring banks, cards, debt, and investments into one connected view.</h2>
+              <p>
+                Link real accounts when you are ready, reduce manual entry, and let Growr turn live
+                balances into more useful guidance.
+              </p>
+              <button type="button" class="ghost-btn" data-page-target="accounts">Connect accounts</button>
+            </div>
+          </article>
+        </section>
+
+        <section id="pricing" class="pricing-section">
+          <div class="section-heading">
+            <p class="eyebrow">Pricing</p>
+            <h2>Choose your plan</h2>
+          </div>
+          <div class="pricing-grid">
+            <article class="glass price-card">
+              <p class="plan-name">Budget Core</p>
+              <h3>$7.99<span>/month</span></h3>
+              <p class="trial-pill">7-day free trial</p>
+              <ul>
+                <li>Income and bill tracking</li>
+                <li>Debt and car payment analysis</li>
+                <li>Monthly cash flow recommendations</li>
+              </ul>
+            </article>
+            <article class="glass price-card featured">
+              <p class="plan-name">Investing Add-on</p>
+              <h3>$12.99<span>/month total</span></h3>
+              <p class="trial-pill">7-day free trial</p>
+              <ul>
+                <li>401(k), Roth IRA, Traditional IRA, HSA, 529, and brokerage forecasts</li>
+                <li>Age-based allocation suggestions</li>
+                <li>Goal and contribution comparisons</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="glass launch-cta-panel">
+          <div class="section-heading">
+            <p class="eyebrow">Ready to start</p>
+            <h2>Open your Growr account in a dedicated setup flow.</h2>
+            <p class="page-intro-text">The homepage stays focused on the product. When you are ready, sign up or log in on a clean full-page auth experience.</p>
+          </div>
+          <div class="hero-cta-row">
+            <button type="button" class="primary-btn premium-cta" data-auth-target="signup">Create your account</button>
+            <button type="button" class="ghost-btn" data-auth-target="login">Existing member log in</button>
+          </div>
+        </section>
+        </section>
+
+        <section class="app-page" data-page="snapshot">
         <section class="glass page-intro">
           <div>
             <p class="eyebrow">Snapshot</p>
@@ -238,110 +387,6 @@
             <div id="snapshot-feed-list" class="snapshot-feed-list"></div>
           </article>
         </section>
-        <section class="story-stack" id="story-stack">
-          <article class="story-panel story-panel-light">
-            <div class="story-visual story-visual-clarity">
-              <div class="visual-frame">
-                <div class="visual-window">
-                  <div class="visual-window-top">
-                    <span></span><span></span><span></span>
-                  </div>
-                  <div class="visual-balance-card">
-                    <p>Monthly clarity</p>
-                    <strong>$1,485 left after fixed bills</strong>
-                    <div class="visual-balance-bars">
-                      <span class="bar-one"></span>
-                      <span class="bar-two"></span>
-                      <span class="bar-three"></span>
-                    </div>
-                  </div>
-                  <div class="visual-mini-grid">
-                    <div>
-                      <span>Debt stress</span>
-                      <strong>Medium</strong>
-                    </div>
-                    <div>
-                      <span>Emergency fund</span>
-                      <strong>1.4 months</strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="story-copy">
-              <p class="eyebrow">One clean starting point</p>
-              <h2>Snapshot turns your financial mess into one simple read.</h2>
-              <p>
-                Instead of bouncing between accounts, bills, and vague goals, Growr gives you
-                one first screen that shows cash flow, debt pressure, and the next move worth making.
-              </p>
-              <button type="button" class="primary-btn premium-cta" data-page-target="snapshot">Explore Snapshot</button>
-            </div>
-          </article>
-
-          <article class="story-panel story-panel-dark">
-            <div class="story-visual story-visual-investing">
-              <div class="visual-orb"></div>
-              <div class="visual-invest-cards">
-                <article>
-                  <span>401(k)</span>
-                  <strong>$182K</strong>
-                  <em>10-year projection</em>
-                </article>
-                <article>
-                  <span>Roth IRA</span>
-                  <strong>$68K</strong>
-                  <em>Tax-free retirement growth</em>
-                </article>
-                <article>
-                  <span>HSA</span>
-                  <strong>$31K</strong>
-                  <em>Triple-tax advantage</em>
-                </article>
-              </div>
-            </div>
-            <div class="story-copy story-copy-dark">
-              <p class="eyebrow">Long-term confidence</p>
-              <h2>Forecast retirement and investing accounts without spreadsheet pain.</h2>
-              <p>
-                Compare your 401(k), Roth IRA, HSA, brokerage, and more with contribution-based
-                projections that make future tradeoffs easier to understand.
-              </p>
-              <button type="button" class="secondary-btn" data-page-target="investing">See investing tools</button>
-            </div>
-          </article>
-
-          <article class="story-panel story-panel-blue">
-            <div class="story-visual story-visual-accounts">
-              <div class="visual-device">
-                <div class="visual-device-top"></div>
-                <div class="visual-account-list">
-                  <div class="account-row">
-                    <span>Checking</span>
-                    <strong>$4,830</strong>
-                  </div>
-                  <div class="account-row">
-                    <span>Credit card</span>
-                    <strong>$1,920</strong>
-                  </div>
-                  <div class="account-row">
-                    <span>Brokerage</span>
-                    <strong>$12,400</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="story-copy">
-              <p class="eyebrow">Connected money</p>
-              <h2>Bring banks, cards, debt, and investments into one connected view.</h2>
-              <p>
-                Link real accounts when you are ready, reduce manual entry, and let Growr turn live
-                balances into more useful guidance.
-              </p>
-              <button type="button" class="ghost-btn" data-page-target="accounts">Connect accounts</button>
-            </div>
-          </article>
-        </section>
         <section class="glass ai-coach-panel">
           <div class="section-heading">
             <p class="eyebrow">Ask Growr</p>
@@ -405,68 +450,6 @@
             </aside>
           </div>
         </section>
-        <section id="how-it-works" class="info-grid">
-          <article class="glass info-card">
-            <h2>Plan your month</h2>
-            <p>
-              Add income, bills, debt payments, and car costs. Growr turns that into a simple monthly plan.
-            </p>
-          </article>
-            <article class="glass info-card">
-              <h2>Project long-term growth</h2>
-              <p>
-                Forecast retirement and investing accounts with long-run assumptions so you can compare paths side by side.
-              </p>
-            </article>
-          <article class="glass info-card">
-            <h2>Know what to do next</h2>
-            <p>
-              Get plain-language suggestions around debt payoff, savings pressure, and whether investing should wait.
-            </p>
-          </article>
-        </section>
-
-        <section id="pricing" class="pricing-section">
-          <div class="section-heading">
-            <p class="eyebrow">Pricing</p>
-            <h2>Choose your plan</h2>
-          </div>
-          <div class="pricing-grid">
-            <article class="glass price-card">
-              <p class="plan-name">Budget Core</p>
-              <h3>$7.99<span>/month</span></h3>
-              <p class="trial-pill">7-day free trial</p>
-              <ul>
-                <li>Income and bill tracking</li>
-                <li>Debt and car payment analysis</li>
-                <li>Monthly cash flow recommendations</li>
-              </ul>
-            </article>
-            <article class="glass price-card featured">
-              <p class="plan-name">Investing Add-on</p>
-              <h3>$12.99<span>/month total</span></h3>
-              <p class="trial-pill">7-day free trial</p>
-              <ul>
-                <li>401(k), Roth IRA, Traditional IRA, HSA, 529, and brokerage forecasts</li>
-                <li>Age-based allocation suggestions</li>
-                <li>Goal and contribution comparisons</li>
-              </ul>
-            </article>
-          </div>
-        </section>
-
-        <section class="glass launch-cta-panel">
-          <div class="section-heading">
-            <p class="eyebrow">Ready to start</p>
-            <h2>Open your Growr account in a dedicated setup flow.</h2>
-            <p class="page-intro-text">The homepage stays focused on the product. When you are ready, sign up or log in on a clean full-page auth experience.</p>
-          </div>
-          <div class="hero-cta-row">
-            <button type="button" class="primary-btn premium-cta" data-auth-target="signup">Create your account</button>
-            <button type="button" class="ghost-btn" data-auth-target="login">Existing member log in</button>
-          </div>
-        </section>
-
         <section id="planner" class="planner-grid">
           <div class="glass planner-panel">
           <div class="section-heading compact">
@@ -1507,6 +1490,14 @@
               <button type="button" class="primary-btn" id="account-save-button">Save account details</button>
               <button type="button" class="ghost-btn" id="account-billing-button">Manage billing</button>
               <button type="button" class="ghost-btn" id="account-logout-button">Log out</button>
+            </div>
+            <div id="account-upgrade-panel" class="account-upgrade-panel hidden">
+              <div>
+                <p class="eyebrow">Growr Plus</p>
+                <h3>Upgrade without hunting for it</h3>
+                <p id="account-upgrade-copy">Move to Budget + Investing to unlock forecasts, retirement planning, and investment-linked account views.</p>
+              </div>
+              <button type="button" class="primary-btn" id="account-upgrade-button">Upgrade to Budget + Investing</button>
             </div>
           </article>
 

@@ -1921,6 +1921,7 @@ select {
 }
 
 .next-move-item {
+  justify-content: flex-start;
   align-items: flex-start;
   padding: 16px 0;
   border-top: 1px solid var(--line);
@@ -1942,6 +1943,12 @@ select {
   font-weight: 800;
 }
 
+.next-move-item > div {
+  flex: 1;
+  min-width: 0;
+  max-width: 760px;
+}
+
 .next-move-item strong {
   display: block;
   margin: 0 0 6px;
@@ -1955,22 +1962,25 @@ select {
 
 .score-wrap {
   display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: 18px;
+  grid-template-columns: minmax(196px, 220px) 1fr;
+  gap: 22px;
   align-items: center;
 }
 
 .score-orb {
-  width: 180px;
-  height: 180px;
+  --score-angle: 0deg;
+  --score-color: var(--secondary);
+  width: 196px;
+  height: 196px;
   border-radius: 999px;
   display: grid;
   place-items: center;
   text-align: center;
   background:
-    radial-gradient(circle at center, #ffffff 0 52%, transparent 53%),
-    conic-gradient(var(--secondary) 0deg, #eaeef4 0deg);
+    radial-gradient(circle at center, #ffffff 0 56%, transparent 57%),
+    conic-gradient(from -90deg, var(--score-color) 0deg var(--score-angle), #eaeef4 var(--score-angle) 360deg);
   border: 1px solid var(--line);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
 .score-orb strong {
@@ -2000,6 +2010,35 @@ select {
   color: var(--subtle);
   line-height: 1.6;
   margin: 0;
+}
+
+.account-upgrade-panel {
+  margin-top: 16px;
+  padding: 20px 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(56, 103, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(247, 250, 255, 0.98), rgba(255, 255, 255, 0.98)),
+    linear-gradient(135deg, rgba(56, 103, 255, 0.04), rgba(255, 90, 54, 0.04));
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.account-upgrade-panel h3,
+.account-upgrade-panel p {
+  margin: 0;
+}
+
+.account-upgrade-panel h3 {
+  margin: 6px 0 8px;
+}
+
+.account-upgrade-panel p:last-child {
+  color: var(--subtle);
+  line-height: 1.6;
 }
 
 .signal-grid {
@@ -3170,6 +3209,10 @@ select {
     justify-content: flex-start;
     padding-top: 8px;
     border-top: 1px solid var(--line);
+  }
+
+  .account-upgrade-panel {
+    align-items: flex-start;
   }
 
   .bridge-actions {

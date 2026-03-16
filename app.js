@@ -20,7 +20,7 @@ const returns = {
 
 const state = {
   config: null,
-  currentPage: "snapshot",
+  currentPage: "home",
   authMode: "signup",
   plaidHandler: null,
   user: null,
@@ -370,7 +370,7 @@ function renderHeroState() {
     return;
   }
 
-  const shouldCompact = state.currentPage !== "snapshot" || Boolean(state.user);
+  const shouldCompact = state.currentPage !== "home" || Boolean(state.user);
   hero.classList.toggle("hero-compact", shouldCompact);
 }
 
@@ -533,6 +533,8 @@ function populateAccountForm() {
   const subscriptionLabel = document.getElementById("accountSubscriptionLabel");
   const emailStatusLabel = document.getElementById("accountEmailStatusLabel");
   const verificationNote = document.getElementById("account-verify-note");
+  const upgradePanel = document.getElementById("account-upgrade-panel");
+  const upgradeCopy = document.getElementById("account-upgrade-copy");
 
   if (!state.user) {
     nameInput.value = "";
@@ -556,6 +558,7 @@ function populateAccountForm() {
     subscriptionLabel.textContent = "Unavailable";
     emailStatusLabel.textContent = "Unavailable";
     verificationNote.classList.add("hidden");
+    upgradePanel.classList.add("hidden");
     setAccountStatus("Sign in to update your account details.");
     setVerificationStatus("Sign in to manage email verification.");
     return;
@@ -586,6 +589,14 @@ function populateAccountForm() {
   verificationNote.textContent = state.config?.emailConfigured
     ? "We can send a verification code to this email so the account feels more secure and recoverable."
     : "Email delivery is not connected yet, so verification will stay in app until a provider is added.";
+  if (state.user.plan !== "bundle") {
+    upgradePanel.classList.remove("hidden");
+    upgradeCopy.textContent = state.user.trialActive
+      ? "Your trial is live. Upgrade now to unlock retirement planning, investing forecasts, and richer connected-account views before it ends."
+      : "Move to Budget + Investing to unlock forecasts, retirement planning, and investment-linked account views.";
+  } else {
+    upgradePanel.classList.add("hidden");
+  }
   setAccountStatus(
     state.user.trialActive
       ? `Signed in. Your free trial ends ${new Date(state.user.trialEndsAt).toLocaleDateString()}.`
@@ -2322,9 +2333,11 @@ function renderHealth(snapshot) {
   const signalSavings = document.getElementById("signal-savings");
   const signalDebt = document.getElementById("signal-debt");
   const signalInvesting = document.getElementById("signal-investing");
+  const scoreColor = score >= 75 ? "#00b894" : score >= 50 ? "#ffd33d" : "#ff5a36";
 
   healthScore.textContent = String(score);
-  orb.style.background = `radial-gradient(circle at center, #ffffff 0 52%, transparent 53%), conic-gradient(${score >= 75 ? "#00b894" : score >= 50 ? "#ffd33d" : "#ff5a36"} ${score * 3.6}deg, #eaeef4 0deg)`;
+  orb.style.setProperty("--score-angle", `${score * 3.6}deg`);
+  orb.style.setProperty("--score-color", scoreColor);
 
   if (score >= 75) {
     healthLabel.textContent = "Strong footing";
@@ -3443,6 +3456,9 @@ function loadConfig() {
       }
 
       state.user = session.authenticated ? session.account : null;
+      if (!window.location.hash) {
+        setActivePage(state.user ? "snapshot" : "home");
+      }
       renderAccountState();
       if (state.user) {
         return loadPlanner().then(() => {
@@ -3483,7 +3499,7 @@ document.querySelectorAll("[data-scroll]").forEach((button) => {
   button.addEventListener("click", () => {
     const target = document.querySelector(button.dataset.scroll);
     if (target) {
-      setActivePage("snapshot");
+      setActivePage("home");
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   });
@@ -3528,6 +3544,7 @@ document.getElementById("import-transactions").addEventListener("click", () => {
 document.getElementById("save-plan").addEventListener("click", () => savePlanner(true));
 document.getElementById("autofill-plan").addEventListener("click", autofillPlannerFromConnectedData);
 document.getElementById("upgrade-button").addEventListener("click", handleUpgrade);
+document.getElementById("account-upgrade-button").addEventListener("click", handleUpgrade);
 document.getElementById("transaction-form").addEventListener("submit", createTransaction);
 document.getElementById("ai-form").addEventListener("submit", handleAiSubmit);
 document.getElementById("ai-reset-button").addEventListener("click", resetAiCoach);
@@ -3568,7 +3585,7 @@ applyFeatureGate();
 renderAiMessages();
 syncAiAvailability();
 setAuthView(state.authMode);
-setActivePage(window.location.hash.replace("#", "") || "snapshot");
+setActivePage(window.location.hash.replace("#", "") || "home");
 loadConfig();
 handleCheckoutReturn();
 document.getElementById("txDate").value = new Date().toISOString().slice(0, 10);
