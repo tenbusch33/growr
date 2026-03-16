@@ -139,7 +139,7 @@ function getAllocation(age) {
       title: "Growth-forward mix",
       stocks: 90,
       bonds: 10,
-      note: "A longer runway can usually handle more stock exposure, especially in broad index funds.",
+      note: "Having more cash set aside usually means you can handle more stock exposure, especially in broad index funds.",
       funds: ["S&P 500 index fund", "Total market index fund", "International index fund"],
     };
   }
@@ -216,7 +216,7 @@ function buildRecommendations(snapshot) {
     items.push({
       level: "good",
       title: "Cash flow can support stronger investing",
-      body: "With positive monthly margin and no credit card balance, consider increasing retirement contributions toward 15% of income.",
+    body: "If you still have money left each month and no credit card balance, consider increasing retirement contributions toward 15% of income.",
     });
   }
 
@@ -1930,7 +1930,7 @@ function renderRecurringInsights() {
 
   if (subscriptionTotal > 0) {
     insights.push({
-      label: "Subscription drag",
+    label: "Monthly subscription total",
       body:
         subscriptionTotal >= 100
           ? `${currency.format(subscriptionTotal)} per month is tied up in recurring subscriptions. That is worth reviewing for easy savings.`
@@ -2616,7 +2616,7 @@ function renderCharts(data) {
   const largestExpense = cashSegments
     .filter((segment) => segment.key !== "leftover")
     .sort((first, second) => second.amount - first.amount)[0];
-  expenseNote.textContent = `${largestExpense.label} is currently the largest monthly pressure point.`;
+  expenseNote.textContent = `${largestExpense.label} is currently the biggest monthly cost.`;
   investNote.textContent = hasInvestmentAccess()
     ? `Projected total after ${data.years} years: ${currency.format(data.totalFuture)}.`
     : "Investment forecasting is available on the Bundle plan.";
@@ -2644,8 +2644,8 @@ function renderCharts(data) {
       fillColor: "#8af0d7",
       noteText:
         data.retirementGap > 0
-          ? `Current pace may still leave about ${currency.format(data.retirementGap)} per month uncovered at retirement.`
-          : "Current pace is covering the retirement income target you entered.",
+      ? `Current pace may still leave about ${currency.format(data.retirementGap)} per month uncovered at retirement.`
+          : "Current saving pace is covering the retirement income target you entered.",
     });
     return;
   }
@@ -2653,7 +2653,7 @@ function renderCharts(data) {
   document.getElementById("retirement-runway-chart").innerHTML = "";
   document.getElementById("retirement-runway-label").textContent = "Locked";
   document.getElementById("retirement-runway-note").textContent =
-    "Upgrade to Bundle to compare your projected retirement path against the nest egg your target income needs.";
+    "Upgrade to Bundle to compare your projected retirement path against the amount your monthly retirement income goal may need.";
 }
 
 function renderHealth(snapshot) {
@@ -2731,9 +2731,9 @@ function renderSnapshotCommandCenter(summary) {
     badge.textContent = "Tight";
     badge.className = "command-badge warn";
     headline.textContent = "You still have money left, but debt is eating flexibility.";
-    summaryCopy.textContent = `You have ${currency.format(summary.leftover)} left each month, but debt pressure is still high enough to slow everything else down.`;
-    nextTitle.textContent = "Use leftover cash strategically";
-    nextBody.textContent = "Direct part of your monthly margin toward the most expensive debt before increasing lifestyle spending.";
+    summaryCopy.textContent = `You have ${currency.format(summary.leftover)} left each month, but debt is still high enough to slow everything else down.`;
+    nextTitle.textContent = "Use your extra money on purpose";
+    nextBody.textContent = "Put part of the money left this month toward your most expensive debt before raising lifestyle spending.";
     secondTitle.textContent = "Watch the car and debt stack";
     secondBody.textContent = "Those two categories together are probably the biggest reason the month still feels heavy.";
   } else {
@@ -2741,20 +2741,20 @@ function renderSnapshotCommandCenter(summary) {
     badge.className = "command-badge good";
     headline.textContent = "You still have room to work with this month.";
     summaryCopy.textContent = `Growr estimates ${currency.format(summary.leftover)} left after your core monthly plan, which gives you room to save, invest, or speed up debt payoff.`;
-    nextTitle.textContent = "Protect your monthly margin";
-    nextBody.textContent = "Keep fixed costs from creeping up so this leftover cash stays useful instead of disappearing into lifestyle drift.";
-    secondTitle.textContent = "Build automatic progress";
-    secondBody.textContent = "Use some of the monthly room for emergency savings, retirement contributions, or faster debt payoff.";
+    nextTitle.textContent = "Protect the money you still have left";
+    nextBody.textContent = "Keep fixed costs from creeping up so this extra room does not quietly disappear.";
+    secondTitle.textContent = "Make progress automatically";
+    secondBody.textContent = "Use some of the extra room each month for emergency savings, retirement contributions, or faster debt payoff.";
   }
 
   thirdTitle.textContent = summary.hasInvestmentAccess
-    ? "Pressure-test retirement now"
-    : "Unlock the future view";
+    ? "Check whether retirement still looks on track"
+    : "Unlock retirement planning";
   thirdBody.textContent = summary.hasInvestmentAccess
     ? summary.retirementGap > 0
       ? `At your current pace, retirement may still be about ${currency.format(summary.retirementGap)} per month short of your target.`
-      : "Your current retirement pace is covering the monthly income target you entered."
-    : "Upgrade to compare your target retirement income with what your current portfolio path may actually support.";
+      : "Your current saving pace is covering the monthly retirement income target you entered."
+    : "Upgrade to compare your retirement income goal with what your current accounts may actually support.";
 }
 
 function renderSnapshotFeed(summary) {
@@ -2808,7 +2808,7 @@ function renderSnapshotFeed(summary) {
           : "This month is tracking close to last month.";
     changeBody.textContent =
       spendDifference > 0
-        ? `Growr sees ${currency.format(Math.abs(spendDifference))} more spend than last month so far, so this is a good time to check recurring drag and category spikes.`
+        ? `Growr sees ${currency.format(Math.abs(spendDifference))} more spending than last month so far, so this is a good time to check repeating charges and category spikes.`
         : spendDifference < 0
           ? `You are running about ${currency.format(Math.abs(spendDifference))} below last month so far, which gives you a little more room to redirect money intentionally.`
           : "The month looks steady so far. Use the live feed below to review recurring items, due-soon charges, and the next likely paycheck.";
@@ -2823,7 +2823,7 @@ function renderSnapshotFeed(summary) {
 
   if (linkedCount > 0) {
     feedItems.push({
-      label: "Autopilot",
+      label: "Automatic tracking",
       title: `Growr is tracking ${linkedCount} linked account${linkedCount === 1 ? "" : "s"}`,
       body:
         automation.recurringTotal > 0
@@ -2835,7 +2835,7 @@ function renderSnapshotFeed(summary) {
 
   if (topCategoryEntry) {
     feedItems.push({
-      label: "Biggest pressure point",
+      label: "Biggest cost right now",
       title: `${formatCategoryLabel(topCategoryEntry[0])} is leading the month`,
       body: `${currency.format(topCategoryEntry[1])} has gone to ${formatCategoryLabel(topCategoryEntry[0]).toLowerCase()} so far.`,
       tone: topCategoryEntry[1] > Math.max(summary.leftover, 0) ? "warn" : "",
@@ -2844,7 +2844,7 @@ function renderSnapshotFeed(summary) {
 
   if (biggestRecurring) {
     feedItems.push({
-      label: "Recurring drag",
+      label: "Monthly subscriptions + bills",
       title: `${formatMerchantName(biggestRecurring.merchant)} is one of the heaviest repeating charges`,
       body: `${currency.format(biggestRecurring.monthlyEstimate || biggestRecurring.amount || 0)} per month is currently being treated as recurring.`,
       tone: Number(biggestRecurring.monthlyEstimate || biggestRecurring.amount || 0) >= 100 ? "warn" : "",
@@ -2864,7 +2864,7 @@ function renderSnapshotFeed(summary) {
 
   if (nextIncome) {
     feedItems.push({
-      label: "Income rhythm",
+      label: "Next paycheck",
       title: `${formatMerchantName(nextIncome.merchant)} looks like your next recurring deposit`,
       body: nextIncome.nextExpectedDate
         ? `Likely around ${new Date(nextIncome.nextExpectedDate).toLocaleDateString()}. Growr can use this to auto-fill your income baseline.`
@@ -2877,14 +2877,14 @@ function renderSnapshotFeed(summary) {
     feedItems.unshift({
       label: "Urgent",
       title: "This month is currently running short",
-      body: `${currency.format(Math.abs(summary.leftover))} short after core monthly costs means trimming recurring spend and checking the biggest category first will matter most.`,
+      body: `${currency.format(Math.abs(summary.leftover))} short after core monthly costs means cutting repeating charges and checking the biggest spending category first will matter most.`,
       tone: "danger",
     });
   } else if (summary.leftover > 0 && automation.recurringTotal > 0) {
     feedItems.push({
       label: "What to do first",
-      title: "Protect the margin you still have",
-      body: `You still have ${currency.format(summary.leftover)} left, but recurring charges are already taking ${currency.format(automation.recurringTotal)} per month. That is the cleanest place to review first.`,
+      title: "Protect the money you still have left",
+      body: `You still have ${currency.format(summary.leftover)} left, but repeating charges are already taking ${currency.format(automation.recurringTotal)} per month. That is the cleanest place to review first.`,
       tone: "good",
     });
   }
@@ -3275,12 +3275,12 @@ function updateDashboard() {
     householdInvesting: currentInvestmentAssets + Number(state.linkedSummary.investmentsTotal || 0),
     nextMove:
       leftover < 0
-        ? "Trim recurring drag"
+    ? "Trim repeating charges"
         : debtRatio > 0.28
           ? "Review debt together"
           : emergencyMonths < 2
             ? "Rebuild cushion"
-            : "Put the monthly margin to work",
+    : "Put the money left this month to work",
   });
 
   renderCharts({

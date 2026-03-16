@@ -697,7 +697,7 @@ function buildAiFinancialContext(account) {
       `Signed-in user plan: ${account.plan}.`,
       `Monthly income: $${Math.round(income)}. Estimated monthly expenses: $${Math.round(totalExpenses)}. Leftover: $${Math.round(leftover)}.`,
       `Credit card balance: $${Math.round(creditCardBalance)}. Emergency fund: $${Math.round(emergencyFund)} (${emergencyMonths.toFixed(1)} months).`,
-      `Debt ratio: ${(debtRatio * 100).toFixed(0)}%. Car cost ratio: ${(carRatio * 100).toFixed(0)}%.`,
+      `Income going to debt: ${(debtRatio * 100).toFixed(0)}%. Income going to car costs: ${(carRatio * 100).toFixed(0)}%.`,
       `Home equity: $${Math.round(homeEquity)}. Car equity: $${Math.round(carEquity)}. Net worth estimate: $${Math.round(netWorth)}.`,
       `Investments tracked in planner: $${Math.round(investmentTotal)}.`,
       retirementAge
