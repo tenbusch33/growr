@@ -11,7 +11,8 @@
   --pink: #ff4fa1;
   --cyan: #14b8ff;
   --danger: #df3d5a;
-  --shadow: 0 20px 55px rgba(16, 16, 16, 0.08);
+  --shadow: 0 22px 60px rgba(16, 16, 16, 0.07);
+  --shadow-soft: 0 12px 30px rgba(16, 16, 16, 0.05);
 }
 
 * {
@@ -28,9 +29,9 @@ body {
   font-family: "Plus Jakarta Sans", sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(255, 90, 54, 0.08), transparent 22%),
-    radial-gradient(circle at top right, rgba(56, 103, 255, 0.08), transparent 20%),
-    linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+    radial-gradient(circle at top left, rgba(255, 90, 54, 0.06), transparent 24%),
+    radial-gradient(circle at 85% 0%, rgba(56, 103, 255, 0.05), transparent 22%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
 button,
@@ -108,7 +109,7 @@ select {
   padding: 14px 16px;
   border-radius: 18px;
   border: 1px solid var(--line);
-  background: linear-gradient(135deg, rgba(56, 103, 255, 0.06), rgba(20, 184, 255, 0.06));
+  background: linear-gradient(135deg, rgba(56, 103, 255, 0.04), rgba(20, 184, 255, 0.05));
   color: var(--subtle);
   line-height: 1.6;
 }
@@ -142,6 +143,12 @@ select {
   border-radius: 999px;
   font-weight: 800;
   cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+
+.tab-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(16, 16, 16, 0.16);
 }
 
 .tab-btn.is-active {
@@ -163,6 +170,12 @@ select {
   grid-template-columns: 1fr auto;
   align-items: center;
   margin-bottom: 28px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(12px);
 }
 
 .hero.hero-compact .topbar {
@@ -186,6 +199,7 @@ select {
   font-family: "Space Grotesk", sans-serif;
   font-size: 1.45rem;
   font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .brand p,
@@ -280,19 +294,24 @@ select {
 }
 
 .hero-card {
-  padding: 22px;
+  padding: 24px;
   display: grid;
   gap: 16px;
   align-content: start;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
 }
 
 .page-intro {
-  padding: 22px 24px;
+  padding: 24px 26px;
   display: flex;
-  gap: 18px;
+  gap: 22px;
   align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
+}
+
+.page-intro > div:first-child {
+  max-width: 700px;
 }
 
 .page-intro h2,
@@ -302,7 +321,7 @@ select {
 
 .page-intro-text {
   margin-top: 10px;
-  max-width: 700px;
+  max-width: 640px;
   color: var(--subtle);
   line-height: 1.65;
 }
@@ -312,6 +331,8 @@ select {
   gap: 8px 16px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  max-width: 320px;
+  align-content: flex-start;
 }
 
 .quickstart-grid {
@@ -342,12 +363,19 @@ select {
   letter-spacing: -0.01em;
 }
 
+.quickstart-grid .mini-stat p {
+  margin: 12px 0 0;
+  color: var(--subtle);
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
 .mini-stat,
 .metric-card,
 .allocation-card {
   padding: 16px;
   border-radius: 22px;
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
   border: 1px solid var(--line);
 }
 
@@ -399,6 +427,36 @@ select {
   padding: 24px;
 }
 
+.info-card,
+.price-card,
+.coach-card,
+.budget-workbench,
+.results-panel,
+.recommendations-panel,
+.planner-panel,
+.chart-card,
+.linked-card,
+.account-verify-card,
+.legal-block {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.info-card:hover,
+.price-card:hover,
+.coach-card:hover,
+.budget-workbench:hover,
+.results-panel:hover,
+.recommendations-panel:hover,
+.planner-panel:hover,
+.chart-card:hover,
+.linked-card:hover,
+.account-verify-card:hover,
+.legal-block:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+  border-color: rgba(16, 16, 16, 0.12);
+}
+
 .section-heading {
   margin-bottom: 18px;
 }
@@ -411,6 +469,22 @@ select {
   margin: 6px 0 12px;
   font-size: 2.2rem;
   font-family: "Space Grotesk", sans-serif;
+}
+
+.price-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.price-card::after {
+  content: "";
+  position: absolute;
+  inset: auto auto -42px -42px;
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(56, 103, 255, 0.08), transparent 70%);
+  pointer-events: none;
 }
 
 .price-card h3 span {
@@ -434,11 +508,37 @@ select {
 
 .price-card ul {
   margin: 0;
-  padding-left: 20px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.price-card li {
+  position: relative;
+  padding-left: 22px;
+}
+
+.price-card li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--secondary), var(--accent));
+  transform: translateY(-50%);
 }
 
 .featured {
   background: linear-gradient(135deg, rgba(255, 90, 54, 0.08), rgba(56, 103, 255, 0.08));
+}
+
+.auth-section {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96)),
+    radial-gradient(circle at top right, rgba(56, 103, 255, 0.05), transparent 30%);
 }
 
 .auth-form,
@@ -602,12 +702,30 @@ select {
 
 .auth-form input,
 .auth-form select,
-.planner-form input {
+.planner-form input,
+.ai-input-wrap textarea,
+.transaction-form input,
+.transaction-form select,
+.account-verify-form input {
   width: 100%;
   padding: 14px 16px;
   border-radius: 16px;
   border: 1px solid var(--line);
   background: #fafafa;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.auth-form input:focus,
+.auth-form select:focus,
+.planner-form input:focus,
+.ai-input-wrap textarea:focus,
+.transaction-form input:focus,
+.transaction-form select:focus,
+.account-verify-form input:focus {
+  outline: none;
+  border-color: rgba(56, 103, 255, 0.28);
+  box-shadow: 0 0 0 4px rgba(56, 103, 255, 0.08);
+  background: #fff;
 }
 
 .auth-form button {
@@ -628,6 +746,7 @@ select {
 
 .score-panel {
   padding: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
 }
 
 .score-wrap {
@@ -689,7 +808,7 @@ select {
   padding: 16px;
   border-radius: 20px;
   border: 1px solid var(--line);
-  background: #fafafa;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfd 100%);
 }
 
 .signal-card span {
@@ -722,8 +841,9 @@ select {
 .recommendation-item {
   padding: 16px;
   border-radius: 22px;
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
   border-left: 6px solid var(--secondary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 
 .recommendation-item.warn {
@@ -750,7 +870,8 @@ select {
   margin-top: 16px;
   padding: 18px;
   border-radius: 20px;
-  background: rgba(28, 165, 143, 0.1);
+  background: linear-gradient(135deg, rgba(28, 165, 143, 0.1), rgba(56, 103, 255, 0.08));
+  border: 1px solid rgba(28, 165, 143, 0.12);
 }
 
 .account-summary-top {
@@ -939,6 +1060,30 @@ select {
   background: #fafafa;
 }
 
+.account-signed-out-card {
+  margin: 8px 0 16px;
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px dashed var(--line);
+  background: linear-gradient(135deg, rgba(56, 103, 255, 0.04), rgba(20, 184, 255, 0.05));
+}
+
+.account-signed-out-card h3,
+.account-signed-out-card p {
+  margin: 0;
+}
+
+.account-signed-out-card h3 {
+  margin-bottom: 8px;
+  font-size: 1.15rem;
+}
+
+.account-signed-out-card p {
+  color: var(--subtle);
+  line-height: 1.65;
+  margin-bottom: 14px;
+}
+
 .legal-page {
   padding: 24px;
   display: grid;
@@ -998,7 +1143,7 @@ select {
   padding: 18px;
   border-radius: 24px;
   border: 1px solid var(--line);
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
 }
 
 .chart-card-top {
@@ -1134,7 +1279,7 @@ select {
 .checklist-item {
   padding: 14px 16px;
   border-radius: 18px;
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
   border: 1px solid var(--line);
 }
 
@@ -1319,6 +1464,14 @@ select {
 
   .page-intro {
     align-items: flex-start;
+  }
+
+  .page-intro-callouts {
+    width: 100%;
+    max-width: none;
+    justify-content: flex-start;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
   }
 
 }

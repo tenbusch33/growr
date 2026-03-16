@@ -366,6 +366,11 @@ function formatTrialMessage(user = state.user) {
 function populateAccountForm() {
   const nameInput = document.getElementById("accountFullName");
   const emailInput = document.getElementById("accountEmail");
+  const accountForm = document.getElementById("account-form");
+  const signedOutCard = document.getElementById("account-signed-out-card");
+  const metaGrid = document.getElementById("account-meta-grid");
+  const verifyCard = document.getElementById("account-verify-card");
+  const primaryActions = document.getElementById("account-primary-actions");
   const saveButton = document.getElementById("account-save-button");
   const billingButton = document.getElementById("account-billing-button");
   const logoutButton = document.getElementById("account-logout-button");
@@ -381,6 +386,11 @@ function populateAccountForm() {
   if (!state.user) {
     nameInput.value = "";
     emailInput.value = "";
+    accountForm.classList.add("hidden");
+    signedOutCard.classList.remove("hidden");
+    metaGrid.classList.add("hidden");
+    verifyCard.classList.add("hidden");
+    primaryActions.classList.add("hidden");
     nameInput.disabled = true;
     emailInput.disabled = true;
     saveButton.disabled = true;
@@ -400,6 +410,11 @@ function populateAccountForm() {
     return;
   }
 
+  accountForm.classList.remove("hidden");
+  signedOutCard.classList.add("hidden");
+  metaGrid.classList.remove("hidden");
+  verifyCard.classList.remove("hidden");
+  primaryActions.classList.remove("hidden");
   nameInput.disabled = false;
   emailInput.disabled = false;
   saveButton.disabled = false;

@@ -18,7 +18,7 @@
       <header class="hero">
         <nav class="topbar">
           <div class="brand">
-            <span class="brand-mark">M</span>
+            <span class="brand-mark">G</span>
             <div>
               <p>Growr</p>
               <span>Grow money with clarity.</span>
@@ -99,14 +99,17 @@
             <article class="mini-stat">
               <span>Step 1</span>
               <strong>Add your monthly numbers</strong>
+              <p>Start with income, bills, debt, and car costs so Growr has a clean baseline.</p>
             </article>
             <article class="mini-stat">
               <span>Step 2</span>
               <strong>Review your signals and suggestions</strong>
+              <p>Use Snapshot to see what is tight, what is healthy, and what deserves attention first.</p>
             </article>
             <article class="mini-stat">
               <span>Step 3</span>
               <strong>Connect accounts when you are ready</strong>
+              <p>Link banks and cards later to reduce manual entry once the basics already make sense.</p>
             </article>
           </div>
         </section>
@@ -767,11 +770,18 @@
               <h2>Profile and billing</h2>
             </div>
             <p class="status-message" id="account-status">Sign in to update your account details.</p>
-            <form id="account-form" class="planner-form">
+            <div id="account-signed-out-card" class="account-signed-out-card hidden">
+              <h3>Sign in to manage your account</h3>
+              <p>Update your email, verify your account, manage billing, and keep your plan details in one place.</p>
+              <div class="auth-inline-actions">
+                <button type="button" class="primary-btn" data-page-target="snapshot">Go to Log in</button>
+              </div>
+            </div>
+            <form id="account-form" class="planner-form" autocomplete="off">
               <label>Full name<input type="text" id="accountFullName" placeholder="Jordan Miles" /></label>
               <label>Email<input type="email" id="accountEmail" placeholder="jordan@email.com" /></label>
             </form>
-            <div class="account-meta-grid">
+            <div class="account-meta-grid" id="account-meta-grid">
               <article class="mini-stat">
                 <span>Plan</span>
                 <strong id="accountPlanLabel">Signed out</strong>
@@ -789,7 +799,7 @@
                 <strong id="accountEmailStatusLabel">Unavailable</strong>
               </article>
             </div>
-            <div class="account-verify-card">
+            <div class="account-verify-card" id="account-verify-card">
               <div class="section-heading compact">
                 <p class="eyebrow">Verification</p>
                 <h3>Confirm your email</h3>
@@ -807,7 +817,7 @@
                 <button type="button" class="primary-btn" id="account-verify-button">Verify email</button>
               </div>
             </div>
-            <div class="auth-inline-actions">
+            <div class="auth-inline-actions" id="account-primary-actions">
               <button type="button" class="primary-btn" id="account-save-button">Save account details</button>
               <button type="button" class="ghost-btn" id="account-billing-button">Manage billing</button>
               <button type="button" class="ghost-btn" id="account-logout-button">Log out</button>
