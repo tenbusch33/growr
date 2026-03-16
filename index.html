@@ -33,7 +33,7 @@
               <button class="tab-btn is-active" data-page-target="home">Home</button>
               <button class="tab-btn" data-page-target="snapshot">Snapshot</button>
               <button class="tab-btn" data-page-target="budget">Budget</button>
-              <button class="tab-btn" data-page-target="recurring">Recurring</button>
+              <button class="tab-btn" data-page-target="subscriptions">Subscriptions</button>
               <button class="tab-btn" data-page-target="couples">Couples</button>
               <button class="tab-btn" data-page-target="investing">Investing</button>
               <button class="tab-btn" data-page-target="networth">Net Worth</button>
@@ -95,7 +95,7 @@
         <section class="hero-power-strip">
           <article class="glass power-tile">
             <span>Autopilot</span>
-            <strong>Detect bills, subscriptions, and paychecks automatically.</strong>
+            <strong>Catch subscriptions like Adobe, DoorDash, and Netflix automatically.</strong>
           </article>
           <article class="glass power-tile">
             <span>AI coach</span>
@@ -120,7 +120,7 @@
           <h2>Everything you need, all in one app.</h2>
           <p>
             Connect your accounts and let Growr do the heavy lifting. Track spending,
-            organize recurring bills, forecast retirement, and see your full financial
+            catch subscriptions automatically, forecast retirement, and see your full financial
             picture without bouncing between five different tools.
           </p>
         </section>
@@ -234,16 +234,21 @@
                     <strong>$12,400</strong>
                   </div>
                 </div>
+                <div class="visual-subscription-strip">
+                  <div class="subscription-pill adobe-pill">Adobe <strong>$22.99</strong></div>
+                  <div class="subscription-pill doordash-pill">DoorDash <strong>$9.99</strong></div>
+                  <div class="subscription-pill netflix-pill">Netflix <strong>$15.49</strong></div>
+                </div>
               </div>
             </div>
             <div class="story-copy">
               <p class="eyebrow">Connected money</p>
-              <h2>Bring banks, cards, debt, and investments into one connected view.</h2>
+              <h2>Bring banks in once, then let Growr surface the subscriptions worth reviewing.</h2>
               <p>
                 Link real accounts when you are ready, reduce manual entry, and let Growr turn live
-                balances into more useful guidance.
+                balances and transactions into a cleaner subscription view with real examples people recognize.
               </p>
-              <button type="button" class="ghost-btn" data-page-target="accounts">Connect accounts</button>
+              <button type="button" class="ghost-btn" data-page-target="subscriptions">See subscriptions</button>
             </div>
           </article>
 
@@ -967,36 +972,36 @@
 
         </section>
 
-        <section class="app-page" data-page="recurring">
+        <section class="app-page" data-page="subscriptions">
         <section class="glass page-intro">
           <div>
-            <p class="eyebrow">Recurring</p>
-            <h2>Review subscriptions, bills, and paychecks in one place</h2>
-            <p class="page-intro-text">This is Growr's recurring hub. It groups the charges and deposits that repeat, highlights the biggest monthly drag, and helps you clean up what should count automatically.</p>
+            <p class="eyebrow">Subscriptions</p>
+            <h2>See exactly what keeps charging you every month</h2>
+            <p class="page-intro-text">Growr watches linked transactions for repeating merchants, estimates the monthly drag, and gives you one cleaner list to review fast.</p>
           </div>
           <div class="page-intro-callouts">
-            <span>Subscriptions</span>
-            <span>Bills</span>
-            <span>Paychecks</span>
+            <span>Adobe</span>
+            <span>DoorDash</span>
+            <span>Netflix</span>
           </div>
         </section>
         <section class="glass section-bridge">
           <div>
-            <p class="eyebrow">Recurring center</p>
-            <h2>Let Growr catch what repeats, then approve the important parts fast.</h2>
-            <p class="page-intro-text">Instead of searching through transactions one by one, use this page to see what looks recurring, what is essential, what may be cancelable, and when income likely lands next.</p>
+            <p class="eyebrow">Subscription center</p>
+            <h2>Let Growr catch the repeating charges, then keep only what deserves to stay.</h2>
+            <p class="page-intro-text">Instead of hunting merchant by merchant, use this page to review what looks like a subscription, what costs the most, and what may be an easy save.</p>
           </div>
           <div class="bridge-points">
-            <span>Review recurring drag</span>
-            <span>Spot payday rhythm</span>
+            <span>Monthly drag</span>
+            <span>Known merchants</span>
             <span>Approve Growr's guesses</span>
           </div>
         </section>
         <section class="glass recurring-hub">
           <div class="section-heading">
-            <p class="eyebrow">Recurring summary</p>
-            <h2>The money that keeps coming back every month</h2>
-            <p class="page-intro-text">Growr combines recurring spend and recurring income so you can see what repeats before it surprises you.</p>
+            <p class="eyebrow">Subscription summary</p>
+            <h2>Your repeating subscription drag in one place</h2>
+            <p class="page-intro-text">Growr keeps the page focused on subscriptions, while still using bills and paycheck patterns behind the scenes to improve the rest of the app.</p>
           </div>
           <div class="recurring-summary-grid">
             <article class="mini-stat">
@@ -1004,38 +1009,38 @@
               <strong id="subscription-total">$0</strong>
             </article>
             <article class="mini-stat">
-              <span>Monthly bills</span>
-              <strong id="bill-total">$0</strong>
+              <span>Subscriptions found</span>
+              <strong id="subscription-count">0</strong>
             </article>
             <article class="mini-stat">
-              <span>Estimated monthly paychecks</span>
-              <strong id="paycheck-total">$0</strong>
+              <span>Biggest subscription</span>
+              <strong id="subscription-biggest">$0</strong>
             </article>
             <article class="mini-stat">
-              <span>Next likely payday</span>
-              <strong id="paycheck-next">Need linked deposits</strong>
+              <span>Review status</span>
+              <strong id="subscription-review-label">Needs data</strong>
             </article>
           </div>
           <div id="recurring-insights" class="recurring-insights"></div>
         </section>
-        <section class="recurring-grid">
+        <section class="subscription-grid">
           <article class="glass recommendations-panel">
             <div class="section-heading compact">
               <p class="eyebrow">Subscriptions</p>
-              <h2>Recurring charges Growr found</h2>
+              <h2>Subscriptions Growr found</h2>
             </div>
             <div class="transaction-summary-grid">
               <article class="mini-stat">
-                <span>Recurring charges found</span>
-                <strong id="subscription-count">0</strong>
-              </article>
-              <article class="mini-stat">
-                <span>Review status</span>
-                <strong id="subscription-review-label">Needs data</strong>
-              </article>
-              <article class="mini-stat">
                 <span>What to do</span>
                 <strong id="subscription-action-label">Review list</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Automation</span>
+                <strong id="subscription-automation-label">Needs linked data</strong>
+              </article>
+              <article class="mini-stat">
+                <span>Focus</span>
+                <strong id="subscription-focus-label">Trim extras</strong>
               </article>
             </div>
             <p id="subscription-status" class="status-message">Connect accounts or refresh connected data to see likely subscriptions here.</p>
@@ -1043,47 +1048,23 @@
           </article>
           <article class="glass recommendations-panel">
             <div class="section-heading compact">
-              <p class="eyebrow">Bills</p>
-              <h2>Essential payments Growr found</h2>
+              <p class="eyebrow">Why this works</p>
+              <h2>Growr still automates the rest in the background</h2>
             </div>
-            <div class="transaction-summary-grid">
-              <article class="mini-stat">
-                <span>Recurring bills found</span>
-                <strong id="bill-count">0</strong>
+            <div class="recommendation-list">
+              <article class="recommendation-item good">
+                <h3>Subscriptions are front and center</h3>
+                <p>Growr gives recurring charges their own page so the quickest monthly savings are easier to see without digging through bills and payroll data.</p>
               </article>
-              <article class="mini-stat">
-                <span>Use</span>
-                <strong id="bill-review-label">Auto-fill ready</strong>
+              <article class="recommendation-item">
+                <h3>Bills still sharpen the budget</h3>
+                <p>Recurring bill detection still runs behind the scenes to auto-fill your planner, stabilize monthly cash flow, and improve recommendations.</p>
               </article>
-              <article class="mini-stat">
-                <span>Planner impact</span>
-                <strong id="bill-impact-label">Waiting on data</strong>
-              </article>
-            </div>
-            <p id="bill-status" class="status-message">Connect accounts and refresh data to let Growr spot recurring bills automatically.</p>
-            <div id="bill-list" class="subscription-list"></div>
-          </article>
-          <article class="glass recommendations-panel">
-            <div class="section-heading compact">
-              <p class="eyebrow">Paychecks</p>
-              <h2>Recurring income Growr found</h2>
-            </div>
-            <div class="transaction-summary-grid">
-              <article class="mini-stat">
-                <span>Recurring paychecks found</span>
-                <strong id="paycheck-count">0</strong>
-              </article>
-              <article class="mini-stat">
-                <span>Next likely deposit</span>
-                <strong id="paycheck-rhythm-label">Need linked deposits</strong>
-              </article>
-              <article class="mini-stat">
-                <span>Budget use</span>
-                <strong id="paycheck-use-label">Auto-fill income</strong>
+              <article class="recommendation-item">
+                <h3>Paychecks still support automation</h3>
+                <p>Recurring income detection still helps Growr estimate monthly income and due-soon timing, even though this page stays focused on subscriptions only.</p>
               </article>
             </div>
-            <p id="paycheck-status" class="status-message">Connect accounts and refresh data to let Growr detect recurring income automatically.</p>
-            <div id="paycheck-list" class="subscription-list"></div>
           </article>
         </section>
         </section>
@@ -1613,7 +1594,7 @@
                   <input type="text" id="accountVerificationCode" placeholder="Enter 6-digit code" />
                 </label>
               </form>
-              <div class="auth-inline-actions">
+              <div class="auth-inline-actions" id="account-verify-actions">
                 <button type="button" class="ghost-btn" id="account-resend-verification-button">Send verification email</button>
                 <button type="button" class="primary-btn" id="account-verify-button">Verify email</button>
               </div>
@@ -1633,7 +1614,7 @@
             </div>
           </article>
 
-          <article class="glass results-panel">
+          <article class="glass results-panel" id="account-billing-panel">
             <div class="section-heading compact">
               <p class="eyebrow">Billing help</p>
               <h2>Manage payments and cancellations</h2>
@@ -1840,7 +1821,7 @@
             <strong>Product</strong>
             <button type="button" class="footer-link" data-page-target="snapshot">Snapshot</button>
             <button type="button" class="footer-link" data-page-target="budget">Budget</button>
-            <button type="button" class="footer-link" data-page-target="recurring">Recurring</button>
+            <button type="button" class="footer-link" data-page-target="subscriptions">Subscriptions</button>
             <button type="button" class="footer-link" data-page-target="couples">Couples</button>
           </div>
           <div class="footer-link-column">

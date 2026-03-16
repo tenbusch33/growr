@@ -618,6 +618,8 @@ function populateAccountForm() {
   const resendButton = document.getElementById("account-resend-verification-button");
   const verifyButton = document.getElementById("account-verify-button");
   const verificationInput = document.getElementById("accountVerificationCode");
+  const verificationForm = document.getElementById("account-verify-form");
+  const verificationActions = document.getElementById("account-verify-actions");
   const planLabel = document.getElementById("accountPlanLabel");
   const trialLabel = document.getElementById("accountTrialLabel");
   const subscriptionLabel = document.getElementById("accountSubscriptionLabel");
@@ -625,6 +627,7 @@ function populateAccountForm() {
   const verificationNote = document.getElementById("account-verify-note");
   const upgradePanel = document.getElementById("account-upgrade-panel");
   const upgradeCopy = document.getElementById("account-upgrade-copy");
+  const billingPanel = document.getElementById("account-billing-panel");
 
   if (!state.user) {
     nameInput.value = "";
@@ -643,12 +646,15 @@ function populateAccountForm() {
     verifyButton.disabled = true;
     verificationInput.disabled = true;
     verificationInput.value = "";
+    verificationForm.classList.remove("hidden");
+    verificationActions.classList.remove("hidden");
     planLabel.textContent = "Signed out";
     trialLabel.textContent = "Unavailable";
     subscriptionLabel.textContent = "Unavailable";
     emailStatusLabel.textContent = "Unavailable";
     verificationNote.classList.add("hidden");
     upgradePanel.classList.add("hidden");
+    billingPanel.classList.add("hidden");
     setAccountStatus("Sign in to update your account details.");
     setVerificationStatus("Sign in to manage email verification.");
     updatePlannerActionState();
@@ -660,6 +666,7 @@ function populateAccountForm() {
   metaGrid.classList.remove("hidden");
   verifyCard.classList.remove("hidden");
   primaryActions.classList.remove("hidden");
+  billingPanel.classList.remove("hidden");
   nameInput.disabled = false;
   emailInput.disabled = false;
   saveButton.disabled = false;
@@ -681,9 +688,24 @@ function populateAccountForm() {
   subscriptionLabel.textContent = state.user.subscriptionActive === false ? "Pending" : "Active";
   emailStatusLabel.textContent = state.user.emailVerified ? "Verified" : "Needs verification";
   verificationNote.classList.remove("hidden");
-  verificationNote.textContent = state.config?.emailConfigured
-    ? "We can send a verification code to this email so the account feels more secure and recoverable."
-    : "Email delivery is not connected yet, so verification will stay in app until a provider is added.";
+  if (state.user.emailVerified) {
+    verificationForm.classList.add("hidden");
+    verificationActions.classList.add("hidden");
+    verificationInput.value = "";
+    verificationInput.disabled = true;
+    resendButton.disabled = true;
+    verifyButton.disabled = true;
+    verificationNote.textContent = "Your email is already verified, so you do not need to enter or resend a code.";
+  } else {
+    verificationForm.classList.remove("hidden");
+    verificationActions.classList.remove("hidden");
+    verificationInput.disabled = false;
+    resendButton.disabled = false;
+    verifyButton.disabled = false;
+    verificationNote.textContent = state.config?.emailConfigured
+      ? "We can send a verification code to this email so the account feels more secure and recoverable."
+      : "Email delivery is not connected yet, so verification will stay in app until a provider is added.";
+  }
   if (state.user.plan !== "bundle") {
     upgradePanel.classList.remove("hidden");
     upgradeCopy.textContent = state.user.trialActive
@@ -702,6 +724,8 @@ function populateAccountForm() {
       ? "Your email is verified."
       : "Your email is not verified yet. Send a code, then enter it here."
   );
+  billingButton.classList.toggle("hidden", !state.config?.stripeApiConfigured);
+  billingPanel.classList.toggle("hidden", !state.config?.stripeApiConfigured);
   updatePlannerActionState();
 }
 
@@ -3318,6 +3342,11 @@ function handleUpgrade() {
 function handleManageBilling() {
   if (!state.user) {
     setAuthMessage("Log in before managing billing.");
+    return;
+  }
+
+  if (!state.config?.stripeApiConfigured) {
+    setAccountStatus("Billing is not live yet, so payment updates and cancellation are still unavailable here.");
     return;
   }
 
