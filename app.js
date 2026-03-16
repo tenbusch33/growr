@@ -2006,15 +2006,24 @@ function renderCharts(data) {
     { key: "car", label: "Car", amount: data.carPayment + data.carCosts },
     { key: "leftover", label: "Leftover", amount: Math.max(data.leftover, 0) },
   ];
+  const cashChartScale = Math.max(
+    data.income,
+    data.totalExpenses,
+    ...cashSegments.map((segment) => segment.amount),
+    1
+  );
 
   cashflowChart.innerHTML = cashSegments
     .map((segment) => {
-      const height = Math.max((segment.amount / incomeBase) * 180, 14);
-      const share = percent.format(segment.amount / incomeBase);
+      const height = Math.max(Math.min((segment.amount / cashChartScale) * 180, 180), 12);
+      const shareOfIncome = data.income > 0 ? segment.amount / data.income : 0;
+      const label = data.income > 0 && shareOfIncome <= 1.5
+        ? percent.format(shareOfIncome)
+        : currency.format(segment.amount);
       return `
         <div class="stack-column">
           <div class="stack-segment" style="height:${height}px;background:${chartPalette[segment.key]}">
-            <strong>${share}</strong>
+            <strong>${label}</strong>
           </div>
           <span class="stack-label">${segment.label}</span>
         </div>
@@ -2217,6 +2226,139 @@ function renderSnapshotCommandCenter(summary) {
       ? `At your current pace, retirement may still be about ${currency.format(summary.retirementGap)} per month short of your target.`
       : "Your current retirement pace is covering the monthly income target you entered."
     : "Upgrade to compare your target retirement income with what your current portfolio path may actually support.";
+}
+
+function renderSnapshotFeed(summary) {
+  const changeTitle = document.getElementById("snapshot-change-title");
+  const changeBody = document.getElementById("snapshot-change-body");
+  const spendPace = document.getElementById("snapshot-spend-pace");
+  const recurringDrag = document.getElementById("snapshot-recurring-drag");
+  const nextPayday = document.getElementById("snapshot-next-payday");
+  const topCategory = document.getElementById("snapshot-top-category");
+  const feedList = document.getElementById("snapshot-feed-list");
+  const automation = buildMonthlyAutomationData();
+  const latestMonth = automation.monthlySeries[automation.monthlySeries.length - 1];
+  const priorMonth = automation.monthlySeries[automation.monthlySeries.length - 2];
+  const topCategoryEntry = Object.entries(automation.currentCategorySpend).sort((left, right) => right[1] - left[1])[0];
+  const biggestRecurring = [...state.subscriptions, ...state.recurringBills].sort(
+    (left, right) => Number(right.monthlyEstimate || right.amount || 0) - Number(left.monthlyEstimate || left.amount || 0)
+  )[0];
+  const nextBill = state.recurringBills[0];
+  const nextIncome = state.recurringIncome
+    .slice()
+    .sort((left, right) => {
+      const leftTime = left.nextExpectedDate ? new Date(left.nextExpectedDate).getTime() : Number.MAX_SAFE_INTEGER;
+      const rightTime = right.nextExpectedDate ? new Date(right.nextExpectedDate).getTime() : Number.MAX_SAFE_INTEGER;
+      return leftTime - rightTime;
+    })[0];
+
+  recurringDrag.textContent = currency.format(automation.recurringTotal || 0);
+  nextPayday.textContent = nextIncome
+    ? `${nextIncome.merchant} · ${formatDaysUntil(
+        nextIncome.nextExpectedDate
+          ? Math.round((new Date(nextIncome.nextExpectedDate) - new Date()) / (1000 * 60 * 60 * 24))
+          : null
+      )}`
+    : "Need deposits";
+  topCategory.textContent = topCategoryEntry
+    ? `${topCategoryEntry[0]} · ${currency.format(topCategoryEntry[1])}`
+    : "Waiting on data";
+
+  if (latestMonth && priorMonth) {
+    const spendDifference = latestMonth.spend - priorMonth.spend;
+    const spendDirection = spendDifference > 0 ? "up" : spendDifference < 0 ? "down" : "flat";
+    spendPace.textContent =
+      spendDirection === "flat"
+        ? "Flat vs last month"
+        : `${currency.format(Math.abs(spendDifference))} ${spendDirection}`;
+    changeTitle.textContent =
+      spendDifference > 0
+        ? "Spending picked up compared with last month."
+        : spendDifference < 0
+          ? "Spending cooled down compared with last month."
+          : "This month is tracking close to last month.";
+    changeBody.textContent =
+      spendDifference > 0
+        ? `Growr sees ${currency.format(Math.abs(spendDifference))} more spend than last month so far, so this is a good time to check recurring drag and category spikes.`
+        : spendDifference < 0
+          ? `You are running about ${currency.format(Math.abs(spendDifference))} below last month so far, which gives you a little more room to redirect money intentionally.`
+          : "The month looks steady so far. Use the live feed below to review recurring items, due-soon charges, and the next likely paycheck.";
+  } else {
+    spendPace.textContent = "Need history";
+    changeTitle.textContent = "Growr is watching what changed.";
+    changeBody.textContent =
+      "Connect accounts or add transactions to turn Snapshot into a running monthly story, not just a static set of totals.";
+  }
+
+  const feedItems = [];
+
+  if (topCategoryEntry) {
+    feedItems.push({
+      label: "Biggest pressure point",
+      title: `${topCategoryEntry[0]} is leading the month`,
+      body: `${currency.format(topCategoryEntry[1])} has gone to ${topCategoryEntry[0]} so far.`,
+    });
+  }
+
+  if (biggestRecurring) {
+    feedItems.push({
+      label: "Recurring drag",
+      title: `${biggestRecurring.merchant} is one of the heaviest repeating charges`,
+      body: `${currency.format(biggestRecurring.monthlyEstimate || biggestRecurring.amount || 0)} per month is currently being treated as recurring.`,
+    });
+  }
+
+  if (nextBill) {
+    feedItems.push({
+      label: "Due next",
+      title: `${nextBill.merchant} looks like a recurring bill`,
+      body: nextBill.nextReviewHint
+        ? `${nextBill.nextReviewHint}. Growr is using it as an essential recurring payment.`
+        : "Growr marked it as a recurring essential payment.",
+    });
+  }
+
+  if (nextIncome) {
+    feedItems.push({
+      label: "Income rhythm",
+      title: `${nextIncome.merchant} looks like your next recurring deposit`,
+      body: nextIncome.nextExpectedDate
+        ? `Likely around ${new Date(nextIncome.nextExpectedDate).toLocaleDateString()}. Growr can use this to auto-fill your income baseline.`
+        : nextIncome.nextReviewHint || "Growr sees a repeating paycheck pattern here.",
+    });
+  }
+
+  if (summary.leftover < 0) {
+    feedItems.unshift({
+      label: "Urgent",
+      title: "This month is currently running short",
+      body: `${currency.format(Math.abs(summary.leftover))} short after core monthly costs means trimming recurring spend and checking the biggest category first will matter most.`,
+    });
+  }
+
+  if (!feedItems.length) {
+    feedList.innerHTML = `
+      <article class="feed-item">
+        <span class="feed-kicker">Start here</span>
+        <strong>Add transactions or connect accounts</strong>
+        <p>Once Growr has a little history, Snapshot will explain what changed, what repeats, and what comes next.</p>
+      </article>
+    `;
+    return;
+  }
+
+  feedList.innerHTML = feedItems
+    .slice(0, 4)
+    .map(
+      (item) => `
+        <article class="feed-item">
+          <span class="feed-kicker">${item.label}</span>
+          <strong>${item.title}</strong>
+          <p>${item.body}</p>
+        </article>
+      `
+    )
+    .join("");
 }
 
 function updateDashboard() {
@@ -2536,6 +2678,9 @@ function updateDashboard() {
     cashAssets,
     retirementGap,
     hasInvestmentAccess: hasInvestmentAccess(),
+  });
+  renderSnapshotFeed({
+    leftover,
   });
 
   renderCharts({

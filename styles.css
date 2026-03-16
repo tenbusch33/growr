@@ -493,6 +493,71 @@ select {
   padding: 24px;
 }
 
+.snapshot-live-grid {
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.snapshot-story-card,
+.snapshot-feed-card {
+  padding: 28px;
+}
+
+.snapshot-story-card {
+  background:
+    radial-gradient(circle at top left, rgba(56, 103, 255, 0.09), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+}
+
+.snapshot-highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.snapshot-feed-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.feed-item {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.feed-kicker {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #3867ff;
+}
+
+.feed-item strong,
+.feed-item p {
+  margin: 0;
+}
+
+.feed-item strong {
+  display: block;
+  font-size: 1.04rem;
+  line-height: 1.35;
+}
+
+.feed-item p {
+  margin-top: 8px;
+  color: var(--subtle);
+  line-height: 1.6;
+}
+
 .launch-cta-panel {
   padding: 28px 30px;
 }
@@ -2375,6 +2440,7 @@ select {
   height: 240px;
   align-items: end;
   padding-top: 10px;
+  overflow: hidden;
 }
 
 .stack-column {
@@ -2392,6 +2458,7 @@ select {
   display: grid;
   place-items: start center;
   padding-top: 10px;
+  overflow: hidden;
 }
 
 .stack-segment strong {
@@ -2698,6 +2765,7 @@ select {
   .pricing-grid,
   .planner-grid,
   .snapshot-command-center,
+  .snapshot-live-grid,
   .dashboard-strip,
   .quickstart-grid,
   .subscription-grid,
@@ -2812,6 +2880,10 @@ select {
   .bridge-actions {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .snapshot-highlight-grid {
+    grid-template-columns: 1fr;
   }
 
   .bridge-points {

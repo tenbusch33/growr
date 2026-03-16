@@ -163,28 +163,39 @@
             </div>
           </article>
         </section>
-        <section class="glass quickstart-panel">
-          <div class="section-heading compact">
-            <p class="eyebrow">Quick start</p>
-            <h2>Start here</h2>
-          </div>
-          <div class="info-grid quickstart-grid">
-            <article class="mini-stat">
-              <span>Step 1</span>
-              <strong>Add your monthly numbers</strong>
-              <p>Start with income, bills, debt, and car costs so Growr has a clean baseline.</p>
-            </article>
-            <article class="mini-stat">
-              <span>Step 2</span>
-              <strong>Review your signals and suggestions</strong>
-              <p>Use Snapshot to see what is tight, what is healthy, and what deserves attention first.</p>
-            </article>
-            <article class="mini-stat">
-              <span>Step 3</span>
-              <strong>Connect accounts when you are ready</strong>
-              <p>Link banks and cards later to reduce manual entry once the basics already make sense.</p>
-            </article>
-          </div>
+        <section class="snapshot-live-grid">
+          <article class="glass snapshot-story-card">
+            <div class="section-heading compact">
+              <p class="eyebrow">This month</p>
+              <h2 id="snapshot-change-title">Growr is watching what changed.</h2>
+              <p id="snapshot-change-body" class="page-intro-text">Connect accounts or add transactions to turn Snapshot into a running monthly story, not just a static set of totals.</p>
+            </div>
+            <div class="snapshot-highlight-grid">
+              <div class="command-metric">
+                <span>Spending pace</span>
+                <strong id="snapshot-spend-pace">Need history</strong>
+              </div>
+              <div class="command-metric">
+                <span>Recurring drag</span>
+                <strong id="snapshot-recurring-drag">$0</strong>
+              </div>
+              <div class="command-metric">
+                <span>Next likely payday</span>
+                <strong id="snapshot-next-payday">Need deposits</strong>
+              </div>
+              <div class="command-metric">
+                <span>Biggest category</span>
+                <strong id="snapshot-top-category">Waiting on data</strong>
+              </div>
+            </div>
+          </article>
+          <article class="glass snapshot-feed-card">
+            <div class="section-heading compact">
+              <p class="eyebrow">Live feed</p>
+              <h2>What changed and what comes next</h2>
+            </div>
+            <div id="snapshot-feed-list" class="snapshot-feed-list"></div>
+          </article>
         </section>
         <section class="story-stack" id="story-stack">
           <article class="story-panel story-panel-light">
