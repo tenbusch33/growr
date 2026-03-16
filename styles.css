@@ -1958,11 +1958,11 @@ select {
 }
 
 .ai-widget-panel {
-  width: min(820px, calc(100vw - 32px));
+  width: min(620px, calc(100vw - 32px));
   max-height: min(82vh, 860px);
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 18px;
+  padding: 16px;
   border-radius: 28px;
   box-shadow: 0 30px 70px rgba(17, 17, 17, 0.22);
 }
@@ -1972,12 +1972,12 @@ select {
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .ai-widget-panel-top h2 {
-  margin: 8px 0 0;
-  font-size: 1.3rem;
+  margin: 6px 0 0;
+  font-size: 1.16rem;
 }
 
 .ai-widget-close {
@@ -2072,14 +2072,18 @@ select {
   margin-bottom: 12px;
 }
 
+.ai-starter-row-minimal {
+  margin: 8px 0 10px;
+}
+
 .prompt-chip {
   border: 1px solid var(--line);
   background: #fff;
   color: var(--ink);
   border-radius: 999px;
-  padding: 9px 13px;
+  padding: 6px 10px;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.84rem;
   cursor: pointer;
   transition: background 180ms ease, transform 180ms ease, border-color 180ms ease;
 }
@@ -2098,19 +2102,22 @@ select {
 
 .ai-thread {
   display: grid;
-  gap: 10px;
-  margin-bottom: 14px;
-  min-height: 100px;
+  gap: 8px;
+  margin-bottom: 10px;
+  min-height: 72px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .ai-message {
   max-width: min(620px, 100%);
-  padding: 12px 14px;
-  border-radius: 22px;
+  padding: 10px 12px;
+  border-radius: 18px;
   line-height: 1.55;
   border: 1px solid rgba(16, 16, 16, 0.08);
   background: #fff;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
 }
 
 .ai-message p {
@@ -2143,7 +2150,7 @@ select {
   justify-content: space-between;
   gap: 12px;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .ai-message-header strong,
@@ -2201,19 +2208,19 @@ select {
 
 .ai-form {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .ai-input-wrap {
   display: grid;
-  gap: 8px;
+  gap: 0;
   font-weight: 700;
   font-size: 0.94rem;
 }
 
 .ai-input-wrap textarea {
   width: 100%;
-  padding: 16px 18px;
+  padding: 14px 16px;
   border-radius: 20px;
   border: 1px solid var(--line);
   background: #fafafa;
@@ -2225,18 +2232,18 @@ select {
 #ai-widget-panel #ai-note {
   padding: 14px 16px;
   border-radius: 18px;
-  margin-bottom: 12px;
-  font-size: 0.98rem;
+  margin-bottom: 10px;
+  font-size: 0.92rem;
   line-height: 1.45;
 }
 
 #ai-widget-panel .ai-input-wrap > span {
-  font-size: 0.98rem;
+  display: none;
 }
 
 .ai-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
   align-items: center;
 }

@@ -1851,17 +1851,15 @@
           <div class="ai-layout ai-layout-floating">
             <div class="ai-main-column">
               <div id="ai-note" class="helper-banner hidden"></div>
-              <div class="ai-starter-row">
-                <button type="button" class="prompt-chip" data-ai-question="What is a 401(k)?">What is a 401(k)?</button>
-                <button type="button" class="prompt-chip" data-ai-question="How are Roth IRA and Traditional IRA taxes different?">Roth vs Traditional IRA taxes</button>
-                <button type="button" class="prompt-chip" data-ai-question="Should I pay off my credit card before investing more?">Debt or investing first?</button>
-                <button type="button" class="prompt-chip" data-ai-question="What is an HSA and why do people use it?">What is an HSA?</button>
-              </div>
               <div id="ai-thread" class="ai-thread"></div>
+              <div class="ai-starter-row ai-starter-row-minimal">
+                <button type="button" class="prompt-chip" data-ai-question="What is a 401(k)?">401(k)</button>
+                <button type="button" class="prompt-chip" data-ai-question="How are Roth IRA and Traditional IRA taxes different?">Roth vs Traditional</button>
+                <button type="button" class="prompt-chip" data-ai-question="Should I pay off my credit card before investing more?">Debt or investing?</button>
+              </div>
               <form id="ai-form" class="ai-form">
                 <label class="ai-input-wrap" for="ai-question">
-                  <span>Ask about budgeting, investing, or account types</span>
-                  <textarea id="ai-question" rows="3" placeholder="Example: How is a 401(k) taxed compared with a Roth IRA?"></textarea>
+                  <textarea id="ai-question" rows="2" placeholder="Ask about budgeting, debt, investing, retirement, or taxes"></textarea>
                 </label>
                 <div class="ai-actions">
                   <button type="submit" class="primary-btn" id="ai-send-button">Ask Growr</button>
