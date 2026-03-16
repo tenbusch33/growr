@@ -301,33 +301,34 @@ function getMerchantBadge(value) {
 }
 
 const identityProfiles = [
-  { match: /chase/i, label: "C", bg: "linear-gradient(135deg, #1d4ed8, #60a5fa)", color: "#ffffff" },
-  { match: /bank of america|bofa/i, label: "BofA", bg: "linear-gradient(135deg, #c81e1e, #2563eb)", color: "#ffffff" },
-  { match: /american express|amex/i, label: "Amex", bg: "linear-gradient(135deg, #0f5db8, #37b2ff)", color: "#ffffff" },
-  { match: /capital one/i, label: "CO", bg: "linear-gradient(135deg, #1d4ed8, #ef4444)", color: "#ffffff" },
-  { match: /citi|citibank/i, label: "Citi", bg: "linear-gradient(135deg, #2563eb, #60a5fa)", color: "#ffffff" },
-  { match: /wells fargo/i, label: "WF", bg: "linear-gradient(135deg, #b91c1c, #f59e0b)", color: "#ffffff" },
-  { match: /discover/i, label: "Disc", bg: "linear-gradient(135deg, #111827, #f97316)", color: "#ffffff" },
-  { match: /us bank|u\.s\. bank/i, label: "US", bg: "linear-gradient(135deg, #ef4444, #2563eb)", color: "#ffffff" },
-  { match: /td bank|toronto dominion|\btd\b/i, label: "TD", bg: "linear-gradient(135deg, #16a34a, #84cc16)", color: "#ffffff" },
-  { match: /pnc/i, label: "PNC", bg: "linear-gradient(135deg, #f97316, #fb923c)", color: "#ffffff" },
-  { match: /ally/i, label: "ally", bg: "linear-gradient(135deg, #5b21b6, #7c3aed)", color: "#ffffff" },
-  { match: /sofi/i, label: "SoFi", bg: "linear-gradient(135deg, #0ea5e9, #22d3ee)", color: "#ffffff" },
-  { match: /fidelity/i, label: "F", bg: "linear-gradient(135deg, #15803d, #65a30d)", color: "#ffffff" },
-  { match: /vanguard/i, label: "V", bg: "linear-gradient(135deg, #b91c1c, #ef4444)", color: "#ffffff" },
-  { match: /schwab/i, label: "CS", bg: "linear-gradient(135deg, #0284c7, #38bdf8)", color: "#ffffff" },
-  { match: /robinhood/i, label: "RH", bg: "linear-gradient(135deg, #14532d, #84cc16)", color: "#ffffff" },
-  { match: /paypal/i, label: "PP", bg: "linear-gradient(135deg, #1d4ed8, #0ea5e9)", color: "#ffffff" },
-  { match: /apple/i, label: "Apple", bg: "linear-gradient(135deg, #111827, #374151)", color: "#ffffff" },
-  { match: /starbucks/i, label: "Sb", bg: "linear-gradient(135deg, #047857, #34d399)", color: "#ffffff" },
-  { match: /amazon/i, label: "az", bg: "linear-gradient(135deg, #111827, #f59e0b)", color: "#ffffff" },
-  { match: /whole foods/i, label: "WF", bg: "linear-gradient(135deg, #15803d, #4ade80)", color: "#ffffff" },
-  { match: /netflix/i, label: "N", bg: "linear-gradient(135deg, #7f1d1d, #dc2626)", color: "#ffffff" },
-  { match: /spotify/i, label: "S", bg: "linear-gradient(135deg, #166534, #22c55e)", color: "#ffffff" },
-  { match: /uber/i, label: "U", bg: "linear-gradient(135deg, #111827, #4b5563)", color: "#ffffff" },
-  { match: /lyft/i, label: "Ly", bg: "linear-gradient(135deg, #be185d, #f472b6)", color: "#ffffff" },
-  { match: /adobe/i, label: "Ae", bg: "linear-gradient(135deg, #b91c1c, #ef4444)", color: "#ffffff" },
-  { match: /notion/i, label: "N", bg: "linear-gradient(135deg, #111827, #6b7280)", color: "#ffffff" },
+  { match: /chase/i, label: "C", bg: "#ffffff", color: "#1d4ed8", logo: "https://logo.clearbit.com/chase.com" },
+  { match: /bank of america|bofa/i, label: "BofA", bg: "#ffffff", color: "#c81e1e", logo: "https://logo.clearbit.com/bankofamerica.com" },
+  { match: /american express|amex/i, label: "Amex", bg: "#ffffff", color: "#0f5db8", logo: "https://logo.clearbit.com/americanexpress.com" },
+  { match: /capital one/i, label: "CO", bg: "#ffffff", color: "#1d4ed8", logo: "https://logo.clearbit.com/capitalone.com" },
+  { match: /citi|citibank/i, label: "Citi", bg: "#ffffff", color: "#2563eb", logo: "https://logo.clearbit.com/citi.com" },
+  { match: /wells fargo/i, label: "WF", bg: "#ffffff", color: "#b91c1c", logo: "https://logo.clearbit.com/wellsfargo.com" },
+  { match: /discover/i, label: "Disc", bg: "#ffffff", color: "#f97316", logo: "https://logo.clearbit.com/discover.com" },
+  { match: /us bank|u\.s\. bank/i, label: "US", bg: "#ffffff", color: "#ef4444", logo: "https://logo.clearbit.com/usbank.com" },
+  { match: /td bank|toronto dominion|\btd\b/i, label: "TD", bg: "#ffffff", color: "#16a34a", logo: "https://logo.clearbit.com/td.com" },
+  { match: /pnc/i, label: "PNC", bg: "#ffffff", color: "#f97316", logo: "https://logo.clearbit.com/pnc.com" },
+  { match: /ally/i, label: "ally", bg: "#ffffff", color: "#5b21b6", logo: "https://logo.clearbit.com/ally.com" },
+  { match: /sofi/i, label: "SoFi", bg: "#ffffff", color: "#0ea5e9", logo: "https://logo.clearbit.com/sofi.com" },
+  { match: /fidelity/i, label: "F", bg: "#ffffff", color: "#15803d", logo: "https://logo.clearbit.com/fidelity.com" },
+  { match: /vanguard/i, label: "V", bg: "#ffffff", color: "#b91c1c", logo: "https://logo.clearbit.com/vanguard.com" },
+  { match: /schwab/i, label: "CS", bg: "#ffffff", color: "#0284c7", logo: "https://logo.clearbit.com/schwab.com" },
+  { match: /robinhood/i, label: "RH", bg: "#ffffff", color: "#14532d", logo: "https://logo.clearbit.com/robinhood.com" },
+  { match: /paypal/i, label: "PP", bg: "#ffffff", color: "#1d4ed8", logo: "https://logo.clearbit.com/paypal.com" },
+  { match: /apple/i, label: "Apple", bg: "#ffffff", color: "#111827", logo: "https://logo.clearbit.com/apple.com" },
+  { match: /starbucks/i, label: "Sb", bg: "#ffffff", color: "#047857", logo: "https://logo.clearbit.com/starbucks.com" },
+  { match: /amazon/i, label: "az", bg: "#ffffff", color: "#111827", logo: "https://logo.clearbit.com/amazon.com" },
+  { match: /whole foods/i, label: "WF", bg: "#ffffff", color: "#15803d", logo: "https://logo.clearbit.com/wholefoodsmarket.com" },
+  { match: /netflix/i, label: "N", bg: "#ffffff", color: "#dc2626", logo: "https://logo.clearbit.com/netflix.com" },
+  { match: /spotify/i, label: "S", bg: "#ffffff", color: "#166534", logo: "https://logo.clearbit.com/spotify.com" },
+  { match: /uber/i, label: "U", bg: "#ffffff", color: "#111827", logo: "https://logo.clearbit.com/uber.com" },
+  { match: /lyft/i, label: "Ly", bg: "#ffffff", color: "#be185d", logo: "https://logo.clearbit.com/lyft.com" },
+  { match: /adobe/i, label: "Ae", bg: "#ffffff", color: "#b91c1c", logo: "https://logo.clearbit.com/adobe.com" },
+  { match: /doordash/i, label: "D", bg: "#ffffff", color: "#ea580c", logo: "https://logo.clearbit.com/doordash.com" },
+  { match: /notion/i, label: "N", bg: "#ffffff", color: "#111827", logo: "https://logo.clearbit.com/notion.so" },
 ];
 
 function getIdentityProfile(value) {
@@ -347,7 +348,10 @@ function getIdentityProfile(value) {
 
 function renderIdentityBadge(value, className = "transaction-avatar") {
   const profile = getIdentityProfile(value);
-  return `<div class="${className}" style="--identity-bg:${profile.bg}; --identity-color:${profile.color};">${escapeHtml(profile.label)}</div>`;
+  const logoMarkup = profile.logo
+    ? `<img class="identity-logo" src="${escapeHtml(profile.logo)}" alt="${escapeHtml(formatMerchantName(value || profile.label))} logo" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" /><span class="identity-fallback" style="display:none;">${escapeHtml(profile.label)}</span>`
+    : `<span class="identity-fallback">${escapeHtml(profile.label)}</span>`;
+  return `<div class="${className}" style="--identity-bg:${profile.bg}; --identity-color:${profile.color};">${logoMarkup}</div>`;
 }
 
 function formatTransactionDate(value) {
