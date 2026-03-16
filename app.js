@@ -37,6 +37,7 @@ const state = {
   ai: {
     previousResponseId: null,
     messages: [],
+    isLoading: false,
   },
   transactions: [],
   subscriptions: [],
@@ -1071,12 +1072,12 @@ function renderCouplesExperience({
 
 function renderAiMessages() {
   const thread = document.getElementById("ai-thread");
-  if (!state.ai.messages.length) {
+  if (!state.ai.messages.length && !state.ai.isLoading) {
     thread.innerHTML = getDefaultAiEmptyState();
     return;
   }
 
-  thread.innerHTML = state.ai.messages
+  const messagesMarkup = state.ai.messages
     .map(
       (message) => `
         <article class="ai-message ${message.role}">
@@ -1096,12 +1097,30 @@ function renderAiMessages() {
     )
     .join("");
 
+  const typingMarkup = state.ai.isLoading
+    ? `
+      <article class="ai-message assistant typing">
+        <div class="ai-message-header">
+          <strong>Growr</strong>
+          <span>Typing...</span>
+        </div>
+        <div class="ai-typing-dots" aria-label="Growr is typing">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </article>
+    `
+    : "";
+
+  thread.innerHTML = messagesMarkup + typingMarkup;
   thread.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "end" });
 }
 
 function resetAiCoach() {
   state.ai.previousResponseId = null;
   state.ai.messages = [];
+  state.ai.isLoading = false;
   document.getElementById("ai-question").value = "";
   setAiStatus(
     state.config?.openaiConfigured
@@ -2616,8 +2635,9 @@ function submitAiQuestion(question) {
   }
 
   state.ai.messages.push({ role: "user", text: trimmedQuestion });
+  state.ai.isLoading = true;
   renderAiMessages();
-  setAiStatus(state.user ? "Thinking with your saved plan in mind..." : "Thinking...");
+  setAiStatus(state.user ? "Growr is typing with your saved plan in mind..." : "Growr is typing...");
   input.value = "";
   sendButton.disabled = true;
   resetButton.disabled = true;
@@ -2637,6 +2657,7 @@ function submitAiQuestion(question) {
       }
 
       state.ai.previousResponseId = payload.responseId || null;
+      state.ai.isLoading = false;
       state.ai.messages.push({ role: "assistant", text: payload.answer });
       renderAiMessages();
       setAiStatus(
@@ -2646,6 +2667,7 @@ function submitAiQuestion(question) {
       );
     })
     .catch((error) => {
+      state.ai.isLoading = false;
       state.ai.messages.push({
         role: "assistant",
         text: error.message,
@@ -2654,7 +2676,9 @@ function submitAiQuestion(question) {
       setAiStatus("Ask Growr hit a snag. Try a shorter question.");
     })
     .finally(() => {
+      state.ai.isLoading = false;
       syncAiAvailability();
+      renderAiMessages();
     });
 }
 
