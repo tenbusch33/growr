@@ -79,9 +79,12 @@ select {
 
 .site-footer {
   display: grid;
-  grid-template-columns: minmax(240px, 0.95fr) minmax(0, 1.25fr);
-  gap: 24px 40px;
-  padding: 34px 24px 0;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 28px 56px;
+  align-items: start;
+  max-width: 1440px;
+  margin: 36px auto 0;
+  padding: 34px 24px 12px;
   color: var(--subtle);
   font-size: 0.92rem;
 }
@@ -95,6 +98,7 @@ select {
   display: grid;
   gap: 14px;
   align-content: start;
+  max-width: 360px;
 }
 
 .footer-brand-btn {
@@ -128,13 +132,15 @@ select {
 .footer-link-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px 26px;
+  gap: 18px 36px;
+  align-items: start;
 }
 
 .footer-link-column {
   display: grid;
   align-content: start;
   gap: 10px;
+  justify-items: start;
 }
 
 .footer-link-column strong {
@@ -151,6 +157,8 @@ select {
   text-decoration: underline;
   cursor: pointer;
   padding: 0;
+  text-align: left;
+  justify-self: start;
 }
 
 .helper-banner {
