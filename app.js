@@ -47,6 +47,8 @@ const state = {
   recurringSort: "type",
   spendingPeriod: "month",
   spendingOffset: 0,
+  spendingBreakdownView: "categories",
+  spendingIncludeBills: true,
   transactionFilters: {
     category: "all",
     source: "all",
@@ -1672,6 +1674,7 @@ function renderSpendingOverview() {
   const netIncome = periodIncome - periodSpend;
   const byCategory = filtered
     .filter((entry) => Number(entry.amount || 0) > 0)
+    .filter((entry) => state.spendingIncludeBills || !isBillLikeTransaction(entry))
     .reduce((totals, entry) => {
       const key = entry.category || "other";
       totals[key] = (totals[key] || 0) + Number(entry.amount || 0);
@@ -1679,17 +1682,17 @@ function renderSpendingOverview() {
     }, {});
 
   periodLabel.textContent = formatPeriodLabel();
-  document.getElementById("auto-income-total").textContent = currency.format(periodIncome);
-  document.getElementById("auto-spend-total").textContent = currency.format(periodSpend);
-  document.getElementById("auto-net-total").textContent = currency.format(netIncome);
+  setText("auto-income-total", currency.format(periodIncome));
+  setText("auto-spend-total", currency.format(periodSpend));
+  setText("auto-net-total", currency.format(periodSpend));
 
   const topCategoryEntry = Object.entries(byCategory).sort((left, right) => right[1] - left[1])[0];
-  document.getElementById("auto-pressure-hint").textContent = topCategoryEntry
+  setText("auto-pressure-hint", topCategoryEntry
     ? `${formatCategoryLabel(topCategoryEntry[0])} ${currency.format(topCategoryEntry[1])}`
-    : "Waiting on data";
-  document.getElementById("auto-flex-total").textContent = topCategoryEntry
+    : "Waiting on data");
+  setText("auto-flex-total", topCategoryEntry
     ? `Trim ${formatCategoryLabel(topCategoryEntry[0])}`
-    : "Review top category";
+    : "Review top category");
 
   const priorOffset = state.spendingOffset - 1;
   const priorTransactions = getTransactionsForPeriod(state.spendingPeriod, priorOffset);
@@ -1697,18 +1700,28 @@ function renderSpendingOverview() {
     .filter((entry) => Number(entry.amount || 0) > 0)
     .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
   const spendDifference = periodSpend - priorSpend;
-  document.getElementById("auto-trend-hint").textContent = priorTransactions.length
+  const trendText = priorTransactions.length
     ? spendDifference === 0
       ? "Flat vs last period"
       : `${currency.format(Math.abs(spendDifference))} ${spendDifference > 0 ? "higher" : "lower"}`
     : "Waiting on data";
-
-  document.getElementById("auto-payday-hint").textContent = filtered.length
+  setText("auto-trend-hint", trendText);
+  setText("auto-payday-hint", filtered.length
     ? formatPeriodLabel()
-    : "Need transaction history";
+    : "Need transaction history");
+  setText("spending-comparison-amount", priorTransactions.length ? currency.format(Math.abs(spendDifference)) : "$0");
+  setText(
+    "spending-comparison-copy",
+    priorTransactions.length
+      ? spendDifference === 0
+        ? "same as last period"
+        : `${spendDifference > 0 ? "above" : "below"} last period`
+      : "no prior period yet"
+  );
+  setText("spending-comparison-badge", priorTransactions.length ? (spendDifference > 0 ? "Up" : spendDifference < 0 ? "Down" : "Flat") : "-");
 
   renderSpendingMiniBars(filtered, periodIncome, periodSpend);
-  renderCategoryDonutChart(byCategory, periodSpend);
+  renderCategoryDonut(byCategory);
   updateSpendingPeriodControls();
 }
 
@@ -1770,12 +1783,13 @@ function renderSpendingMiniBars(filteredTransactions, periodIncome, periodSpend)
     1
   );
 
+  const selectedIndex = buckets.length > 1 ? buckets.length - 2 : buckets.length - 1;
   container.innerHTML = buckets
-    .map((bucket) => {
+    .map((bucket, index) => {
       const incomeHeight = Math.max(8, (bucket.income / maxValue) * 86);
       const spendHeight = Math.max(8, (bucket.spend / maxValue) * 86);
       return `
-        <article class="mini-bar-card">
+        <article class="mini-bar-card ${index === selectedIndex ? "is-current" : ""}">
           <div class="mini-bar-columns">
             <span class="mini-bar mini-bar-income" style="height:${incomeHeight}px"></span>
             <span class="mini-bar mini-bar-spend" style="height:${spendHeight}px"></span>
@@ -1785,6 +1799,23 @@ function renderSpendingMiniBars(filteredTransactions, periodIncome, periodSpend)
       `;
     })
     .join("");
+}
+
+function bindSpendingControls() {
+  document.querySelectorAll("[data-spending-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.spendingBreakdownView = button.dataset.spendingView || "categories";
+      document.querySelectorAll("[data-spending-view]").forEach((candidate) => {
+        candidate.classList.toggle("is-active", candidate === button);
+      });
+      renderSpendingOverview();
+    });
+  });
+
+  document.getElementById("spending-include-bills")?.addEventListener("change", (event) => {
+    state.spendingIncludeBills = Boolean(event.target.checked);
+    renderSpendingOverview();
+  });
 }
 
 function updateSpendingPeriodControls() {
@@ -1797,6 +1828,13 @@ function updateSpendingPeriodControls() {
   document.querySelectorAll("[data-spending-period]").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.spendingPeriod === state.spendingPeriod);
   });
+  document.querySelectorAll("[data-spending-view]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.spendingView === state.spendingBreakdownView);
+  });
+  const includeBillsToggle = document.getElementById("spending-include-bills");
+  if (includeBillsToggle) {
+    includeBillsToggle.checked = state.spendingIncludeBills;
+  }
 }
 
 function renderMonthlyTrendChart(series) {
@@ -1804,6 +1842,9 @@ function renderMonthlyTrendChart(series) {
   const label = document.getElementById("monthly-trend-label");
   const note = document.getElementById("monthly-trend-note");
   const insights = document.getElementById("monthly-trend-insights");
+  if (!chart || !label || !note || !insights) {
+    return;
+  }
 
   if (!series.length) {
     chart.innerHTML = "";
@@ -2016,14 +2057,18 @@ function renderCategoryDonut(categorySpend) {
   const label = document.getElementById("category-donut-label");
   const legend = document.getElementById("category-donut-legend");
   const insights = document.getElementById("category-donut-insights");
+  if (!chart || !center || !label || !legend) {
+    return;
+  }
   const entries = Object.entries(categorySpend)
     .filter(([, amount]) => amount > 0)
     .sort((left, right) => right[1] - left[1]);
   const total = entries.reduce((sum, [, amount]) => sum + amount, 0);
+  const periodText = formatPeriodLabel(state.spendingPeriod, state.spendingOffset).replace(/^This\s+/i, "").toLowerCase();
 
   if (!total) {
     chart.style.background = "conic-gradient(#edf1f6 0deg, #edf1f6 360deg)";
-    center.textContent = "$0";
+    center.innerHTML = `<span>Total spend</span><span>in ${periodText}</span><strong>$0</strong>`;
     label.textContent = "$0";
     legend.innerHTML = `<div class="linked-item empty-state"><strong>No category chart yet</strong><p>Add or import transactions to see this month take shape.</p></div>`;
     if (insights) {
@@ -2045,7 +2090,11 @@ function renderCategoryDonut(categorySpend) {
   });
 
   chart.style.background = `conic-gradient(${stops.join(", ")})`;
-  center.textContent = currency.format(total);
+  center.innerHTML = `
+    <span>Total spend</span>
+    <span>in ${periodText}</span>
+    <strong>${currency.format(total)}</strong>
+  `;
   label.textContent = currency.format(total);
   legend.innerHTML = entries
     .map(([key, amount]) => {
@@ -2069,24 +2118,36 @@ function renderCategoryDonut(categorySpend) {
 }
 
 function renderAutomationHub() {
+  const spendTotal = document.getElementById("auto-spend-total");
+  const incomeTotal = document.getElementById("auto-income-total");
+  const recurringTotal = document.getElementById("auto-recurring-total");
+  const flexibleTotal = document.getElementById("auto-flex-total");
+  const paydayHint = document.getElementById("auto-payday-hint");
+  const pressureHint = document.getElementById("auto-pressure-hint");
+  const trendHint = document.getElementById("auto-trend-hint");
+  if (!spendTotal || !incomeTotal || !flexibleTotal || !paydayHint || !pressureHint || !trendHint) {
+    return;
+  }
   const data = buildMonthlyAutomationData();
   const topCategoryEntry = Object.entries(data.currentCategorySpend).sort((left, right) => right[1] - left[1])[0];
   const latestSeries = data.monthlySeries[data.monthlySeries.length - 1];
   const priorSeries = data.monthlySeries[data.monthlySeries.length - 2];
 
-  document.getElementById("auto-spend-total").textContent = currency.format(data.currentMonthSpend);
-  document.getElementById("auto-income-total").textContent = currency.format(data.currentMonthIncome);
-  document.getElementById("auto-recurring-total").textContent = currency.format(data.recurringTotal);
-  document.getElementById("auto-flex-total").textContent = currency.format(data.flexibleSpend);
-  document.getElementById("auto-payday-hint").textContent = data.recurringIncome
+  spendTotal.textContent = currency.format(data.currentMonthSpend);
+  incomeTotal.textContent = currency.format(data.currentMonthIncome);
+  if (recurringTotal) {
+    recurringTotal.textContent = currency.format(data.recurringTotal);
+  }
+  flexibleTotal.textContent = currency.format(data.flexibleSpend);
+  paydayHint.textContent = data.recurringIncome
     ? data.recurringIncome.daysUntil >= 0
       ? `${data.recurringIncome.merchant} likely in ${data.recurringIncome.daysUntil} days`
       : `${data.recurringIncome.merchant} looks like a recurring deposit`
     : "Need linked deposits";
-  document.getElementById("auto-pressure-hint").textContent = topCategoryEntry
+  pressureHint.textContent = topCategoryEntry
     ? `${topCategoryEntry[0]} is leading at ${currency.format(topCategoryEntry[1])}`
     : "Waiting on category data";
-  document.getElementById("auto-trend-hint").textContent =
+  trendHint.textContent =
     latestSeries && priorSeries
       ? latestSeries.spend > priorSeries.spend
         ? "Spending is trending up"
@@ -2132,6 +2193,36 @@ function renderTransactionMonthGroups(transactions) {
       `;
     })
     .join("");
+}
+
+function isBillLikeTransaction(entry) {
+  const category = String(entry?.category || "").toLowerCase();
+  const merchant = String(entry?.merchant || "").toLowerCase();
+  return [
+    "mortgage",
+    "loan",
+    "credit",
+    "utility",
+    "bill",
+    "insurance",
+    "tax",
+    "legal",
+    "medical",
+    "tuition",
+    "education",
+    "rent",
+    "energy",
+    "water",
+    "internet",
+    "phone",
+  ].some((term) => category.includes(term) || merchant.includes(term));
+}
+
+function setText(id, value) {
+  const node = document.getElementById(id);
+  if (node) {
+    node.textContent = value;
+  }
 }
 
 function renderTransactions() {
@@ -4849,6 +4940,7 @@ document.getElementById("subscription-offer-accept-button").addEventListener("cl
 });
 bindTransactionFilters();
 bindRecurringControls();
+bindSpendingControls();
 document.querySelectorAll("[data-ai-question]").forEach((button) => {
   button.addEventListener("click", () => {
     setAiWidgetOpen(true);

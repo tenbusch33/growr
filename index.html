@@ -911,31 +911,12 @@
         </section>
 
         <section class="app-page" data-page="spending">
-        <section class="glass page-intro">
-          <div>
-            <p class="eyebrow">Spending</p>
-            <h2>See income, spending, and what is left over</h2>
-            <p class="page-intro-text">Use one spending dashboard to see money in, money out, net income, category breakdowns, and where the month is drifting.</p>
-          </div>
-          <div class="page-intro-callouts">
-            <span>Income vs spend</span>
-            <span>Category breakdown</span>
-            <span>Weekly to yearly view</span>
+        <section class="glass page-intro spending-screen-intro">
+          <div class="spending-screen-intro-copy">
+            <h2>Spending</h2>
           </div>
         </section>
-        <section class="glass section-bridge">
-          <div>
-            <p class="eyebrow">Spending dashboard</p>
-            <h2>Let Growr organize your spending first, then review what looks off.</h2>
-            <p class="page-intro-text">This page keeps the money story simple: how much came in, how much went out, what category is biggest, and how your current period compares with the last one.</p>
-          </div>
-          <div class="bridge-points">
-            <span>Current period view</span>
-            <span>Net income</span>
-            <span>Pie breakdown</span>
-          </div>
-        </section>
-        <section class="glass spending-period-bar">
+        <section class="glass spending-period-bar spending-rocket-shell">
           <div class="period-toggle-group" id="spending-period-toggle">
             <button type="button" class="period-btn is-active" data-spending-period="week">Week</button>
             <button type="button" class="period-btn" data-spending-period="month">Month</button>
@@ -943,112 +924,83 @@
             <button type="button" class="period-btn" data-spending-period="year">Year</button>
           </div>
           <div class="period-range-controls">
-            <button type="button" class="ghost-btn" id="spending-period-prev">Back</button>
+            <button type="button" class="ghost-btn" id="spending-period-prev" aria-label="Previous period">Back</button>
             <strong id="spending-period-label">This month</strong>
-            <button type="button" class="ghost-btn" id="spending-period-next">Forward</button>
+            <button type="button" class="ghost-btn" id="spending-period-next" aria-label="Next period">Forward</button>
           </div>
-        </section>
-        <section class="glass spending-mobile-strip">
           <div class="spending-mini-bars" id="spending-mini-bars"></div>
           <div class="spending-mini-legend">
             <span><i class="legend-dot income-dot"></i>Income</span>
             <span><i class="legend-dot spend-dot"></i>Total spend</span>
           </div>
         </section>
-        <section class="budget-coach-grid">
-          <article class="glass coach-card">
-            <p class="eyebrow">Income</p>
-            <h3>See what came in</h3>
-            <p>Growr totals deposits and income-like transactions so you can compare them against what left your accounts.</p>
-          </article>
-          <article class="glass coach-card">
-            <p class="eyebrow">Net income</p>
-            <h3>See what is left</h3>
-            <p>Instead of guessing, Growr shows what is left after spending for the period you are reviewing.</p>
-          </article>
-          <article class="glass coach-card">
-            <p class="eyebrow">Start a budget</p>
-            <h3>Use spending to set targets</h3>
-            <p>If a category runs hot here, that is the easiest place to tighten your budget targets next.</p>
-          </article>
-        </section>
-        <section class="glass automation-hub">
-          <div class="section-heading">
-            <p class="eyebrow">Spending overview</p>
-            <h2>See the current period in one clean dashboard</h2>
-            <p class="page-intro-text">Growr groups the current period so you can compare income, total spend, net income, and category breakdowns without digging through transactions first.</p>
-          </div>
-          <div class="automation-summary-grid">
-            <article class="mini-stat">
-              <span>Total spend</span>
+        <section class="glass spending-top-card">
+          <div class="spending-top-card-row">
+            <div class="spending-top-card-copy">
+              <span>Current spend this period</span>
               <strong id="auto-spend-total">$0</strong>
-            </article>
-            <article class="mini-stat">
-              <span>Income</span>
+            </div>
+            <div class="spending-top-card-trend">
+              <span class="spending-top-card-pill" id="spending-comparison-badge">-</span>
+              <strong id="spending-comparison-amount">$0</strong>
+              <p id="spending-comparison-copy">No prior period yet</p>
+            </div>
+          </div>
+          <div class="spending-top-card-summary">
+            <article class="spending-summary-row">
+              <div class="spending-summary-icon">$
+              </div>
+              <div class="spending-summary-copy">
+                <strong>Income</strong>
+              </div>
               <strong id="auto-income-total">$0</strong>
             </article>
-            <article class="mini-stat">
-              <span>Net income</span>
+            <article class="spending-summary-row">
+              <div class="spending-summary-icon spending-summary-icon-spend">$
+              </div>
+              <div class="spending-summary-copy">
+                <strong>Total spend</strong>
+              </div>
               <strong id="auto-net-total">$0</strong>
-            </article>
-            <article class="mini-stat">
-              <span>Start a budget</span>
-              <strong id="auto-flex-total">Review top category</strong>
-            </article>
-          </div>
-          <div class="automation-highlight-row">
-            <div class="automation-highlight-card">
-              <span>Compared with last period</span>
-              <strong id="auto-trend-hint">Waiting on data</strong>
-            </div>
-            <div class="automation-highlight-card">
-              <span>Biggest spending category</span>
-              <strong id="auto-pressure-hint">Waiting on data</strong>
-            </div>
-            <div class="automation-highlight-card">
-              <span>Current period</span>
-              <strong id="auto-payday-hint">Need transaction history</strong>
-            </div>
-          </div>
-          <div class="automation-visual-grid">
-            <article class="chart-card">
-              <div class="chart-card-top">
-                <h3>Spending trend</h3>
-                <strong id="monthly-trend-label">$0</strong>
-              </div>
-              <svg id="monthly-trend-chart" class="line-chart" viewBox="0 0 420 220" preserveAspectRatio="none" aria-label="Monthly spend trend"></svg>
-              <div class="chart-insight-row" id="monthly-trend-insights">
-                <span class="insight-chip">This month: $0</span>
-                <span class="insight-chip">Last month: $0</span>
-                <span class="insight-chip">Trend: Needs data</span>
-              </div>
-              <p id="monthly-trend-note" class="chart-note">Growr compares the last few months to show whether spending is settling down or drifting up.</p>
-            </article>
-            <article class="chart-card">
-              <div class="chart-card-top">
-                <h3>Spending by category</h3>
-                <strong id="category-donut-label">$0</strong>
-              </div>
-              <div class="donut-wrap">
-                <div id="category-donut-chart" class="donut-chart" aria-label="Category share"></div>
-                <div id="category-donut-center" class="donut-center">$0</div>
-              </div>
-              <div id="category-donut-legend" class="legend-list"></div>
-              <div class="chart-insight-row" id="category-donut-insights">
-                <span class="insight-chip">Top category: Waiting on data</span>
-                <span class="insight-chip">Share: 0%</span>
-              </div>
             </article>
           </div>
         </section>
-        <section class="budgeting-grid">
-          <article class="glass budget-workbench">
-            <div class="section-heading">
-              <p class="eyebrow">Budget categories</p>
-              <h2>Turn this into a budget</h2>
-            </div>
+        <section class="spending-breakdown-header">
+          <p>Breakdown</p>
+        </section>
+        <section class="glass spending-breakdown-card">
+          <div class="spending-breakdown-tabs">
+            <button type="button" class="spending-breakdown-tab is-active" data-spending-view="categories">Categories</button>
+            <button type="button" class="spending-breakdown-tab" data-spending-view="tags">Tags</button>
+          </div>
+          <div class="spending-breakdown-toolbar">
+            <label class="spending-switch">
+              <span>Include bills</span>
+              <input type="checkbox" id="spending-include-bills" checked />
+              <span class="spending-switch-track"></span>
+            </label>
+          </div>
+          <div class="donut-wrap spending-donut-wrap">
+            <div id="category-donut-chart" class="donut-chart" aria-label="Category share"></div>
+            <div id="category-donut-center" class="donut-center">$0</div>
+          </div>
+          <strong id="category-donut-label" class="spending-breakdown-label">$0</strong>
+          <div id="category-donut-legend" class="legend-list spending-donut-legend"></div>
+          <div class="chart-insight-row hidden" id="category-donut-insights">
+            <span class="insight-chip">Top category: Waiting on data</span>
+            <span class="insight-chip">Share: 0%</span>
+          </div>
+          <div class="hidden">
+            <strong id="auto-flex-total">Review top category</strong>
+            <strong id="auto-pressure-hint">Waiting on data</strong>
+            <strong id="auto-payday-hint">Need transaction history</strong>
+            <strong id="auto-trend-hint">Waiting on data</strong>
+            <strong id="monthly-trend-label">$0</strong>
+            <svg id="monthly-trend-chart" class="line-chart" viewBox="0 0 420 220" preserveAspectRatio="none" aria-label="Monthly spend trend"></svg>
+            <div id="monthly-trend-insights"></div>
+            <p id="monthly-trend-note"></p>
             <div id="category-progress" class="category-progress"></div>
-          </article>
+          </div>
         </section>
 
         </section>
