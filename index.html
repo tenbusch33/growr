@@ -361,137 +361,117 @@
 
         <section class="app-page" data-page="snapshot">
         <div class="product-page-shell snapshot-page-shell">
-        <section class="product-page-header">
-          <div class="product-page-header-copy">
-            <p class="eyebrow">Snapshot</p>
-            <h1>Know what your money should do next.</h1>
-            <p class="product-page-summary">Growr turns your accounts, spending, debt, and investing into one clear next move you can trust.</p>
-          </div>
-          <button type="button" class="product-inline-action" id="snapshot-connect-callout">
-            <span id="snapshot-priority-label">Connect accounts to unlock automatic tracking</span>
-            <strong id="snapshot-priority-meta">Connect Plaid</strong>
-          </button>
-        </section>
-
-        <section class="snapshot-hero-grid">
-          <article class="glass next-best-move-card product-hero-card">
-            <div class="section-heading compact">
-              <p class="eyebrow">Next Best Move</p>
-              <h2 id="nbm-action">Build your first clear plan</h2>
+        <section class="snapshot-web-hero">
+          <article class="snapshot-recommendation-hero glass" id="snapshot-recommendation-hero">
+            <div class="snapshot-hero-copy">
+              <p class="snapshot-hero-label">Next best move</p>
+              <div class="snapshot-hero-meta">
+                <span class="snapshot-hero-kicker" id="nbm-priority">Start here</span>
+                <span class="snapshot-hero-horizon" id="nbm-time-horizon">This month</span>
+              </div>
+              <h1 id="nbm-action">Build your first clear plan</h1>
+              <p class="snapshot-hero-support" id="nbm-why">Growr needs your monthly income, bills, and debt to calculate the strongest next move.</p>
             </div>
-            <div class="decision-meta-row">
-              <span class="decision-meta-pill" id="nbm-priority">Start here</span>
-              <span class="decision-meta-pill subtle" id="nbm-time-horizon">This month</span>
+            <div class="snapshot-hero-footer">
+              <p class="snapshot-impact-line" id="nbm-impact">Estimated impact: $0 over 3 years</p>
+              <span class="snapshot-confidence-badge" id="nbm-confidence">Low confidence</span>
             </div>
-            <div class="decision-detail-list">
-              <div class="decision-detail">
-                <span>Why</span>
-                <strong id="nbm-why">Growr needs your monthly income, bills, and debt to calculate the strongest next move.</strong>
+            <details class="snapshot-math-details">
+              <summary>See the math and assumptions</summary>
+              <div class="snapshot-detail-copy">
+                <p id="nbm-math">The recommendation math will appear here once Growr has enough data.</p>
+                <p id="nbm-assumptions">Assumptions: Growr needs your monthly income, debt details, and recurring transfers to explain the strongest recommendation confidently.</p>
               </div>
-              <div class="decision-detail">
-                <span>Math</span>
-                <strong id="nbm-math">The recommendation math will appear here once Growr has enough data.</strong>
-              </div>
-              <div class="decision-detail">
-                <span>Estimated impact</span>
-                <strong id="nbm-impact">$0 over 3 years</strong>
-              </div>
-              <div class="decision-detail">
-                <span>Confidence</span>
-                <strong id="nbm-confidence">Low</strong>
-              </div>
-            </div>
-            <p class="decision-support-copy" id="nbm-assumptions">Assumptions: Growr needs your monthly income, debt details, and recurring transfers to explain the strongest recommendation confidently.</p>
+            </details>
           </article>
 
-          <article class="glass grow-score-card product-summary-card">
-            <div class="section-heading compact">
-              <p class="eyebrow">Grow Score</p>
-              <h2>Your money right now</h2>
+          <article class="snapshot-score-panel glass grow-score-card">
+            <div class="snapshot-score-heading">
+              <p class="snapshot-panel-label">Grow Score</p>
+              <strong id="health-label">Getting started</strong>
             </div>
-            <div class="score-wrap">
+            <div class="snapshot-score-body">
               <div class="score-orb" id="score-orb">
                 <strong id="health-score">0</strong>
                 <span>/100</span>
               </div>
-              <div class="score-copy">
-                <h3 id="health-label">Getting started</h3>
-                <p id="health-summary">Enter your numbers to see a clearer picture of stability, debt load, and savings progress.</p>
-                <div class="score-insights" id="score-insights">
-                  <span class="insight-chip">Money left this month: $0</span>
-                  <span class="insight-chip">Debt load: Balanced</span>
-                  <span class="insight-chip">Emergency savings: Needs work</span>
-                </div>
-              </div>
+              <p id="health-summary">Enter your numbers to see a clearer picture of stability, debt load, and savings progress.</p>
+            </div>
+            <div class="score-insights" id="score-insights">
+              <span class="insight-chip">Money left this month: $0</span>
+              <span class="insight-chip">Debt load: Balanced</span>
+              <span class="insight-chip">Emergency savings: Needs work</span>
+            </div>
+            <div class="snapshot-score-signals" aria-hidden="true">
+              <span id="signal-savings">Needs work</span>
+              <span id="signal-debt">Manageable</span>
+              <span id="signal-investing">Not started</span>
             </div>
           </article>
         </section>
 
-        <section class="snapshot-support-grid">
-          <article class="glass support-stat-card">
-            <div class="support-stat-top">
-              <p class="eyebrow">Monthly cash flow</p>
+        <section class="snapshot-condition-row">
+          <article class="snapshot-condition-card glass">
+            <div class="snapshot-condition-top">
+              <p class="snapshot-panel-label">Cash flow</p>
               <span class="support-stat-badge" id="support-cashflow-chip">Stable</span>
             </div>
-            <strong class="support-stat-value" id="support-cashflow-value">$0 left</strong>
-            <p class="support-stat-copy" id="support-cashflow-note">Growr will show whether this month has room or a shortfall.</p>
+            <strong class="snapshot-condition-value" id="support-cashflow-value">$0 left</strong>
+            <p class="snapshot-condition-copy" id="support-cashflow-note">Growr will show whether this month has room or a shortfall.</p>
           </article>
 
-          <article class="glass support-stat-card">
-            <div class="support-stat-top">
-              <p class="eyebrow">Debt pressure</p>
-              <span class="support-stat-badge warning" id="support-debt-chip">Review</span>
+          <article class="snapshot-condition-card glass">
+            <div class="snapshot-condition-top">
+              <p class="snapshot-panel-label">Debt pressure</p>
+              <span class="support-stat-badge" id="support-debt-chip">Review</span>
             </div>
-            <strong class="support-stat-value" id="support-debt-value">Needs details</strong>
-            <p class="support-stat-copy" id="support-debt-note">Growr will surface the debt load that is dragging progress down.</p>
+            <strong class="snapshot-condition-value" id="support-debt-value">Needs details</strong>
+            <p class="snapshot-condition-copy" id="support-debt-note">Growr will surface the debt load that is dragging progress down.</p>
           </article>
 
-          <article class="glass support-stat-card">
-            <div class="support-stat-top">
-              <p class="eyebrow">Emergency fund</p>
-              <span class="support-stat-badge subtle" id="support-emergency-chip">Building</span>
+          <article class="snapshot-condition-card glass">
+            <div class="snapshot-condition-top">
+              <p class="snapshot-panel-label">Emergency fund</p>
+              <span class="support-stat-badge" id="support-emergency-chip">Building</span>
             </div>
-            <strong class="support-stat-value" id="support-emergency-value">0.0 months</strong>
-            <p class="support-stat-copy" id="support-emergency-note">Growr will show how many months of essentials are covered.</p>
+            <strong class="snapshot-condition-value" id="support-emergency-value">0.0 months</strong>
+            <p class="snapshot-condition-copy" id="support-emergency-note">Growr will show how many months of essentials are covered.</p>
           </article>
         </section>
 
-        <section class="snapshot-outlook-grid">
-          <article class="glass investment-forecast-card">
-            <div class="section-heading compact">
-              <p class="eyebrow">Investment forecast</p>
-              <h2>What the current investing path could become</h2>
-            </div>
-            <div class="forecast-value-row">
-              <strong class="forecast-primary-value" id="forecast-balance">$0</strong>
+        <section class="snapshot-feature-row">
+          <article class="snapshot-feature-card glass investment-forecast-card">
+            <div class="snapshot-feature-head">
+              <p class="snapshot-panel-label">Investment outlook</p>
               <span class="support-stat-badge" id="forecast-return">Baseline</span>
             </div>
-            <div class="forecast-meta-grid">
-              <div class="forecast-meta-card">
+            <strong class="snapshot-feature-value" id="forecast-balance">$0</strong>
+            <p class="snapshot-feature-copy" id="forecast-note">Growr will project the current investing path using the engine assumptions.</p>
+            <div class="snapshot-feature-meta">
+              <div>
                 <span>Monthly contributions</span>
                 <strong id="forecast-contribution">$0 / month</strong>
               </div>
-              <div class="forecast-meta-card">
+              <div>
                 <span>Current invested</span>
                 <strong id="forecast-current-balance">$0</strong>
               </div>
             </div>
-            <p class="support-stat-copy" id="forecast-note">Growr will project the current investing path using the engine assumptions.</p>
           </article>
 
-          <article class="glass opportunity-card">
-            <div class="section-heading compact">
-              <p class="eyebrow">What this really costs</p>
-              <h2 id="opportunity-title">Your car is the biggest long-term drag right now.</h2>
+          <article class="snapshot-feature-card glass opportunity-card">
+            <div class="snapshot-feature-head">
+              <p class="snapshot-panel-label">Opportunity cost</p>
             </div>
-            <strong class="opportunity-amount" id="opportunity-amount">$0</strong>
-            <p class="opportunity-copy" id="opportunity-copy">Redirecting one recurring cost into investing can change the future value of your money more than most people expect.</p>
-            <div class="decision-detail-list compact">
-              <div class="decision-detail">
+            <h2 id="opportunity-title">Your car is the biggest long-term drag right now.</h2>
+            <strong class="snapshot-feature-value" id="opportunity-amount">$0</strong>
+            <p class="snapshot-feature-copy" id="opportunity-copy">Redirecting one recurring cost into investing can change the future value of your money more than most people expect.</p>
+            <div class="snapshot-feature-meta">
+              <div>
                 <span>Monthly amount</span>
                 <strong id="opportunity-monthly">$0</strong>
               </div>
-              <div class="decision-detail">
+              <div>
                 <span>Time horizon</span>
                 <strong id="opportunity-horizon">15 years</strong>
               </div>
@@ -499,12 +479,12 @@
           </article>
         </section>
 
-        <section class="snapshot-supporting-grid">
-          <article class="glass scenario-preview-card">
-            <div class="section-heading compact">
-              <p class="eyebrow">Scenario preview</p>
-              <h2 id="scenario-title">Current path vs optimized path</h2>
+        <section class="snapshot-support-row">
+          <article class="snapshot-scenario-block glass scenario-preview-card">
+            <div class="snapshot-feature-head">
+              <p class="snapshot-panel-label">Scenario comparison</p>
             </div>
+            <h2 id="scenario-title">Current path vs better path</h2>
             <div class="scenario-values">
               <div class="scenario-value-card">
                 <span>Current path</span>
@@ -519,95 +499,68 @@
               <span>Difference</span>
               <strong id="scenario-delta">$0</strong>
             </div>
-            <p class="decision-support-copy" id="scenario-copy">Growr will compare your current setup with the move that improves your finances fastest.</p>
+            <p class="snapshot-feature-copy" id="scenario-copy">Growr will compare your current setup with the move that improves your finances fastest.</p>
           </article>
 
-          <article class="glass support-insight-card">
-            <div class="section-heading compact">
-              <p class="eyebrow">Supporting insight</p>
-              <h2 id="support-recurring-title">Recurring drag worth reviewing</h2>
-            </div>
-            <strong class="support-insight-value" id="support-recurring-value">$0 / month</strong>
-            <p class="support-stat-copy" id="support-recurring-note">Growr will show recurring charges and bills that may be competing with better financial moves.</p>
-            <span class="support-stat-badge subtle" id="support-recurring-chip">Needs linked data</span>
-          </article>
-        </section>
-
-        <section class="snapshot-context-grid">
-          <article class="glass snapshot-spend-card">
-            <div class="snapshot-spend-top">
+          <article class="snapshot-support-block glass">
+            <div class="snapshot-support-head">
               <div>
-                <span class="snapshot-card-label">Current spend this month</span>
-                <strong id="snapshot-current-spend">$0</strong>
-              </div>
-              <div class="snapshot-spend-trend">
-                <span id="snapshot-vs-last-icon" class="snapshot-vs-last-icon">•</span>
-                <strong id="snapshot-vs-last">$0 from last month</strong>
-              </div>
-            </div>
-            <svg id="snapshot-mini-trend" class="snapshot-mini-trend" viewBox="0 0 420 180" preserveAspectRatio="none" aria-label="Current spending trend"></svg>
-            <div class="snapshot-payday-row">
-              <div class="snapshot-payday-icon">$</div>
-              <div>
-                <span class="snapshot-payday-label">Next paycheck</span>
-                <strong id="snapshot-payday-card">Need deposits</strong>
-              </div>
-              <button type="button" class="snapshot-inline-link" data-page-target="spending">Details</button>
-            </div>
-          </article>
-          <article class="glass snapshot-accounts-card">
-            <div class="snapshot-accounts-head">
-              <div>
-                <span class="snapshot-card-label">Accounts</span>
-                <strong>Connected balances</strong>
-              </div>
-              <div class="snapshot-account-actions">
-                <button type="button" class="primary-btn" id="snapshot-connect-btn">Connect accounts with Plaid</button>
-                <button type="button" class="ghost-btn" id="snapshot-sync-btn">Refresh connected data</button>
-              </div>
-            </div>
-            <div class="snapshot-accounts-list">
-              <div class="snapshot-account-row">
-                <div class="snapshot-account-copy">
-                  <span class="snapshot-account-icon">🏦</span>
-                  <span>Checking</span>
+                <p class="snapshot-panel-label">Connected accounts</p>
+                <strong>Support and balances</strong>
+                <div class="snapshot-support-status">
+                  <span id="snapshot-priority-label">Connect accounts to unlock automatic tracking</span>
+                  <strong id="snapshot-priority-meta">Connect Plaid</strong>
                 </div>
+              </div>
+              <div class="snapshot-support-actions">
+                <button type="button" class="primary-btn" id="snapshot-connect-btn">Connect accounts with Plaid</button>
+                <button type="button" class="ghost-btn" id="snapshot-connect-callout">Quick connect</button>
+                <button type="button" class="ghost-btn" id="snapshot-sync-btn">Refresh data</button>
+              </div>
+            </div>
+            <div class="snapshot-support-balance-grid">
+              <div class="snapshot-balance-item">
+                <span>Checking</span>
                 <strong id="snapshot-checking-balance">$0</strong>
               </div>
-              <div class="snapshot-account-row">
-                <div class="snapshot-account-copy">
-                  <span class="snapshot-account-icon">💳</span>
-                  <span>Card balance</span>
-                </div>
+              <div class="snapshot-balance-item">
+                <span>Card balance</span>
                 <strong id="snapshot-card-balance">$0</strong>
               </div>
-              <div class="snapshot-account-row">
-                <div class="snapshot-account-copy">
-                  <span class="snapshot-account-icon">💵</span>
-                  <span>Net cash</span>
-                </div>
+              <div class="snapshot-balance-item">
+                <span>Net cash</span>
                 <strong id="snapshot-net-cash">$0</strong>
               </div>
-              <div class="snapshot-account-row">
-                <div class="snapshot-account-copy">
-                  <span class="snapshot-account-icon">🛟</span>
-                  <span>Savings</span>
-                </div>
+              <div class="snapshot-balance-item">
+                <span>Savings</span>
                 <strong id="snapshot-savings-balance">$0</strong>
               </div>
-              <div class="snapshot-account-row">
-                <div class="snapshot-account-copy">
-                  <span class="snapshot-account-icon">📈</span>
-                  <span>Investments</span>
-                </div>
+              <div class="snapshot-balance-item">
+                <span>Investments</span>
                 <strong id="snapshot-investments-balance">$0</strong>
               </div>
-              <div class="snapshot-account-row">
-                <div class="snapshot-account-copy">
-                  <span class="snapshot-account-icon">🏠</span>
-                  <span>Net worth</span>
-                </div>
+              <div class="snapshot-balance-item">
+                <span>Net worth</span>
                 <strong id="snapshot-net-worth-card">$0</strong>
+              </div>
+            </div>
+            <div class="snapshot-support-secondary">
+              <div class="snapshot-spend-support">
+                <div class="snapshot-spend-compact">
+                  <div>
+                    <span class="snapshot-panel-label">Current spend this month</span>
+                    <strong id="snapshot-current-spend">$0</strong>
+                  </div>
+                  <p id="snapshot-vs-last">$0 from last month</p>
+                </div>
+                <svg id="snapshot-mini-trend" class="snapshot-mini-trend" viewBox="0 0 420 180" preserveAspectRatio="none" aria-label="Current spending trend"></svg>
+              </div>
+              <div class="snapshot-payday-support">
+                <span id="snapshot-vs-last-icon" class="snapshot-vs-last-icon">-</span>
+                <div>
+                  <span class="snapshot-panel-label">Next paycheck</span>
+                  <strong id="snapshot-payday-card">Need deposits</strong>
+                </div>
               </div>
             </div>
             <div class="snapshot-sync-row">
