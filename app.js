@@ -1682,6 +1682,17 @@ function renderSpendingOverview() {
     }, {});
 
   periodLabel.textContent = formatPeriodLabel();
+  const currentLabel = document.getElementById("spending-current-label");
+  if (currentLabel) {
+    const periodName = state.spendingPeriod === "week"
+      ? "week"
+      : state.spendingPeriod === "month"
+        ? "month"
+        : state.spendingPeriod === "quarter"
+          ? "quarter"
+          : "year";
+    currentLabel.textContent = `Current spend this ${periodName}`;
+  }
   setText("auto-income-total", currency.format(periodIncome));
   setText("auto-spend-total", currency.format(periodSpend));
   setText("auto-net-total", currency.format(periodSpend));
@@ -2086,7 +2097,11 @@ function renderCategoryDonut(categorySpend) {
 
   if (!total) {
     chart.style.background = "conic-gradient(#edf1f6 0deg, #edf1f6 360deg)";
-    center.innerHTML = `<span>Total spend</span><span>in ${periodText}</span><strong>$0</strong>`;
+    center.innerHTML = `
+      <span class="donut-kicker">Total spend</span>
+      <span class="donut-period">in ${periodText}</span>
+      <strong>$0</strong>
+    `;
     label.textContent = "$0";
     legend.innerHTML = `<div class="linked-item empty-state"><strong>No category chart yet</strong><p>Add or import transactions to see this month take shape.</p></div>`;
     if (insights) {
@@ -2110,7 +2125,7 @@ function renderCategoryDonut(categorySpend) {
   chart.style.background = `conic-gradient(${stops.join(", ")})`;
   center.innerHTML = `
     <span class="donut-kicker">Total spend</span>
-    <span class="donut-period">${periodText}</span>
+    <span class="donut-period">in ${periodText}</span>
     <strong>${currency.format(total)}</strong>
   `;
   label.textContent = currency.format(total);
