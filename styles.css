@@ -7940,3 +7940,554 @@ select {
     width: 100%;
   }
 }
+
+@media (min-width: 1180px) {
+  .app-page[data-page="snapshot"],
+  .app-page[data-page="spending"],
+  .app-page[data-page="recurring"],
+  .app-page[data-page="transactions"],
+  .app-page[data-page="accounts"],
+  .app-page[data-page="account"] {
+    gap: 32px;
+  }
+
+  .app-page[data-page="snapshot"] > .page-intro,
+  .app-page[data-page="spending"] > .page-intro,
+  .app-page[data-page="recurring"] > .page-intro,
+  .app-page[data-page="transactions"] > .page-intro,
+  .app-page[data-page="accounts"] > .page-intro,
+  .app-page[data-page="account"] > .page-intro {
+    max-width: 1480px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 30px 34px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-priority-strip,
+  .app-page[data-page="snapshot"] .snapshot-dashboard-layout,
+  .app-page[data-page="snapshot"] .snapshot-decision-grid,
+  .app-page[data-page="snapshot"] .snapshot-support-grid,
+  .app-page[data-page="snapshot"] .snapshot-outlook-grid,
+  .app-page[data-page="snapshot"] .snapshot-supporting-grid,
+  .app-page[data-page="spending"] .spending-period-bar,
+  .app-page[data-page="spending"] .automation-hub,
+  .app-page[data-page="spending"] .budgeting-grid,
+  .app-page[data-page="recurring"] .recurring-control-strip,
+  .app-page[data-page="recurring"] .recurring-hub,
+  .app-page[data-page="recurring"] .subscription-grid,
+  .app-page[data-page="transactions"] .budget-workbench,
+  .app-page[data-page="transactions"] .budgeting-grid,
+  .app-page[data-page="accounts"] .accounts-health-strip,
+  .app-page[data-page="accounts"] .accounts-intro,
+  .app-page[data-page="accounts"] .linked-grid,
+  .app-page[data-page="account"] .account-grid {
+    max-width: 1480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-dashboard-layout {
+    grid-template-columns: minmax(0, 1.18fr) minmax(420px, 0.82fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-spend-card,
+  .app-page[data-page="snapshot"] .snapshot-accounts-card {
+    min-height: 580px;
+    padding: 34px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-decision-grid {
+    grid-template-columns: minmax(0, 1.52fr) minmax(360px, 0.78fr);
+    gap: 28px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-support-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-outlook-grid,
+  .app-page[data-page="snapshot"] .snapshot-supporting-grid {
+    grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.92fr);
+    gap: 26px;
+  }
+
+  .app-page[data-page="snapshot"] .next-best-move-card {
+    padding: 38px 40px;
+  }
+
+  .app-page[data-page="snapshot"] .decision-detail-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-account-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: auto;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-account-actions > * {
+    width: auto;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-account-row {
+    padding: 18px 20px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-inline-link {
+    font-size: 0.96rem;
+  }
+
+  .app-page[data-page="spending"] .spending-period-bar {
+    padding: 30px 34px 34px;
+    border-radius: 28px;
+  }
+
+  .app-page[data-page="spending"] .spending-screen-title {
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .app-page[data-page="spending"] .spending-screen-title h2 {
+    font-size: clamp(2.2rem, 2.6vw, 3.1rem);
+    letter-spacing: -0.04em;
+  }
+
+  .app-page[data-page="spending"] .period-toggle-group {
+    width: auto;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .app-page[data-page="spending"] .period-toggle {
+    min-width: 112px;
+  }
+
+  .app-page[data-page="spending"] .spending-comparison-strip {
+    width: min(100%, 920px);
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .app-page[data-page="spending"] .automation-hub {
+    padding: 30px 32px 34px;
+  }
+
+  .app-page[data-page="spending"] .budgeting-grid {
+    grid-template-columns: minmax(360px, 0.88fr) minmax(0, 1.12fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  .app-page[data-page="spending"] .spending-breakdown-card,
+  .app-page[data-page="spending"] .chart-card {
+    min-height: 100%;
+  }
+
+  .app-page[data-page="spending"] .spending-breakdown-toolbar {
+    padding: 18px 24px 0;
+  }
+
+  .app-page[data-page="spending"] .spending-donut-panel {
+    grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+    align-items: center;
+    gap: 28px;
+    padding: 22px 24px 28px;
+  }
+
+  .app-page[data-page="spending"] .spending-donut-wrap {
+    width: min(100%, 360px);
+    margin: 0 auto;
+  }
+
+  .app-page[data-page="spending"] .spending-donut-legend {
+    width: 100%;
+    padding: 0;
+  }
+
+  .app-page[data-page="spending"] .spending-category-list {
+    gap: 12px;
+  }
+
+  .app-page[data-page="recurring"] .recurring-control-strip {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.72fr) minmax(240px, 0.44fr);
+    align-items: end;
+    gap: 24px;
+    padding: 24px 28px;
+    background: #ffffff;
+    color: #0f1720;
+    border: 1px solid rgba(15, 23, 32, 0.06);
+    border-radius: 24px;
+    box-shadow: 0 18px 40px rgba(15, 23, 32, 0.06);
+  }
+
+  .app-page[data-page="recurring"] .recurring-view-toggle {
+    background: #f3f7f6;
+    padding: 6px;
+  }
+
+  .app-page[data-page="recurring"] .recurring-view-btn {
+    color: #58677a;
+  }
+
+  .app-page[data-page="recurring"] .recurring-view-btn.is-active {
+    color: #0f1720;
+    box-shadow: 0 10px 20px rgba(15, 23, 32, 0.08);
+  }
+
+  .app-page[data-page="recurring"] .recurring-sort {
+    margin-top: 0;
+    justify-self: end;
+    width: min(100%, 280px);
+  }
+
+  .app-page[data-page="recurring"] .recurring-sort span {
+    color: #68778a;
+  }
+
+  .app-page[data-page="recurring"] .recurring-sort select {
+    background: #ffffff;
+    color: #0f1720;
+    border-color: rgba(15, 23, 32, 0.08);
+  }
+
+  .app-page[data-page="recurring"] .subscription-grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  .app-page[data-page="recurring"] .recurring-hub,
+  .app-page[data-page="recurring"] .recommendations-panel {
+    padding: 28px 30px;
+    border-radius: 24px;
+  }
+
+  .app-page[data-page="recurring"] .recommendations-panel {
+    overflow: visible;
+  }
+
+  .app-page[data-page="recurring"] .subscription-list {
+    gap: 12px;
+  }
+
+  .app-page[data-page="recurring"] .subscription-item {
+    padding: 18px 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 32, 0.06);
+    background: #fbfdfc;
+    box-shadow: none;
+  }
+
+  .app-page[data-page="transactions"] .budget-workbench {
+    padding: 28px 30px;
+  }
+
+  .app-page[data-page="transactions"] .transaction-filters {
+    grid-template-columns: minmax(260px, 1.35fr) repeat(2, minmax(180px, 0.7fr));
+    align-items: end;
+    gap: 16px;
+  }
+
+  .app-page[data-page="transactions"] .transaction-filters label {
+    display: grid;
+  }
+
+  .app-page[data-page="transactions"] .transaction-filters input,
+  .app-page[data-page="transactions"] .transaction-filters select {
+    min-height: 52px;
+    border-radius: 16px;
+  }
+
+  .app-page[data-page="transactions"] .transaction-mobile-summary {
+    display: none;
+  }
+
+  .app-page[data-page="transactions"] .transaction-summary-grid {
+    display: grid;
+  }
+
+  .app-page[data-page="transactions"] .transaction-month-groups {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .app-page[data-page="transactions"] .transaction-month-section {
+    padding: 24px 26px 18px;
+    border-radius: 24px;
+  }
+
+  .app-page[data-page="transactions"] .premium-transaction-item {
+    padding: 16px 18px;
+    border: 1px solid rgba(15, 23, 32, 0.05);
+    border-radius: 16px;
+    background: #fbfdfc;
+    box-shadow: none;
+  }
+
+  .app-page[data-page="transactions"] .premium-transaction-item + .premium-transaction-item {
+    margin-top: 12px;
+  }
+
+  .app-page[data-page="accounts"] .linked-grid {
+    grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1.14fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  .app-page[data-page="accounts"] .linked-card,
+  .app-page[data-page="accounts"] .accounts-intro,
+  .app-page[data-page="accounts"] .accounts-health-strip {
+    padding: 28px 30px;
+    border-radius: 24px;
+  }
+
+  .app-page[data-page="account"] .account-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  .app-page[data-page="account"] .account-panel,
+  .app-page[data-page="account"] .billing-panel {
+    padding: 28px 30px;
+    border-radius: 24px;
+  }
+
+  .app-page[data-page="account"] .account-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .app-page[data-page="snapshot"] .chart-card,
+  .app-page[data-page="spending"] .chart-card,
+  .app-page[data-page="investing"] .chart-card,
+  .app-page[data-page="networth"] .chart-card {
+    padding: 28px 30px 30px;
+  }
+
+  .app-page[data-page="snapshot"] .chart-card-top,
+  .app-page[data-page="spending"] .chart-card-top,
+  .app-page[data-page="investing"] .chart-card-top,
+  .app-page[data-page="networth"] .chart-card-top {
+    margin-bottom: 16px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .app-page[data-page="snapshot"] > .page-intro,
+  .app-page[data-page="spending"] > .page-intro,
+  .app-page[data-page="recurring"] > .page-intro,
+  .app-page[data-page="transactions"] > .page-intro,
+  .app-page[data-page="accounts"] > .page-intro,
+  .app-page[data-page="account"] > .page-intro,
+  .app-page[data-page="snapshot"] .snapshot-priority-strip,
+  .app-page[data-page="snapshot"] .snapshot-dashboard-layout,
+  .app-page[data-page="snapshot"] .snapshot-decision-grid,
+  .app-page[data-page="snapshot"] .snapshot-support-grid,
+  .app-page[data-page="snapshot"] .snapshot-outlook-grid,
+  .app-page[data-page="snapshot"] .snapshot-supporting-grid,
+  .app-page[data-page="spending"] .spending-period-bar,
+  .app-page[data-page="spending"] .automation-hub,
+  .app-page[data-page="spending"] .budgeting-grid,
+  .app-page[data-page="recurring"] .recurring-control-strip,
+  .app-page[data-page="recurring"] .recurring-hub,
+  .app-page[data-page="recurring"] .subscription-grid,
+  .app-page[data-page="transactions"] .budget-workbench,
+  .app-page[data-page="transactions"] .budgeting-grid,
+  .app-page[data-page="accounts"] .accounts-health-strip,
+  .app-page[data-page="accounts"] .accounts-intro,
+  .app-page[data-page="accounts"] .linked-grid,
+  .app-page[data-page="account"] .account-grid {
+    max-width: 1560px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-dashboard-layout {
+    grid-template-columns: minmax(0, 1.22fr) minmax(460px, 0.78fr);
+  }
+
+  .app-page[data-page="spending"] .budgeting-grid,
+  .app-page[data-page="recurring"] .subscription-grid,
+  .app-page[data-page="account"] .account-grid {
+    gap: 32px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .app-page[data-page="snapshot"],
+  .app-page[data-page="spending"],
+  .app-page[data-page="recurring"],
+  .app-page[data-page="transactions"],
+  .app-page[data-page="accounts"],
+  .app-page[data-page="account"] {
+    padding-top: 6px;
+    gap: 36px;
+  }
+
+  .app-page[data-page="snapshot"] > .page-intro,
+  .app-page[data-page="spending"] > .page-intro,
+  .app-page[data-page="recurring"] > .page-intro,
+  .app-page[data-page="transactions"] > .page-intro,
+  .app-page[data-page="accounts"] > .page-intro,
+  .app-page[data-page="account"] > .page-intro {
+    padding: 32px 38px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-priority-strip,
+  .app-page[data-page="snapshot"] .snapshot-dashboard-layout,
+  .app-page[data-page="snapshot"] .snapshot-decision-grid,
+  .app-page[data-page="snapshot"] .snapshot-support-grid,
+  .app-page[data-page="snapshot"] .snapshot-outlook-grid,
+  .app-page[data-page="snapshot"] .snapshot-supporting-grid,
+  .app-page[data-page="spending"] .spending-period-bar,
+  .app-page[data-page="spending"] .automation-hub,
+  .app-page[data-page="spending"] .budgeting-grid,
+  .app-page[data-page="recurring"] .recurring-control-strip,
+  .app-page[data-page="recurring"] .recurring-hub,
+  .app-page[data-page="recurring"] .subscription-grid,
+  .app-page[data-page="transactions"] .budget-workbench,
+  .app-page[data-page="transactions"] .budgeting-grid,
+  .app-page[data-page="accounts"] .accounts-health-strip,
+  .app-page[data-page="accounts"] .accounts-intro,
+  .app-page[data-page="accounts"] .linked-grid,
+  .app-page[data-page="account"] .account-grid {
+    max-width: 1520px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-dashboard-layout,
+  .app-page[data-page="snapshot"] .snapshot-decision-grid,
+  .app-page[data-page="snapshot"] .snapshot-support-grid,
+  .app-page[data-page="snapshot"] .snapshot-outlook-grid,
+  .app-page[data-page="snapshot"] .snapshot-supporting-grid {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-priority-strip {
+    margin-bottom: 4px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-dashboard-layout {
+    grid-template-columns: minmax(0, 1.24fr) minmax(430px, 0.76fr);
+    gap: 32px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-spend-card,
+  .app-page[data-page="snapshot"] .snapshot-accounts-card,
+  .app-page[data-page="snapshot"] .next-best-move-card,
+  .app-page[data-page="snapshot"] .grow-score-card,
+  .app-page[data-page="snapshot"] .support-stat-card,
+  .app-page[data-page="snapshot"] .investment-forecast-card,
+  .app-page[data-page="snapshot"] .opportunity-card,
+  .app-page[data-page="snapshot"] .scenario-preview-card,
+  .app-page[data-page="snapshot"] .support-insight-card {
+    min-height: auto;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-support-grid {
+    gap: 24px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-outlook-grid,
+  .app-page[data-page="snapshot"] .snapshot-supporting-grid {
+    gap: 30px;
+  }
+
+  .app-page[data-page="spending"] .spending-period-bar,
+  .app-page[data-page="spending"] .automation-hub,
+  .app-page[data-page="recurring"] .recurring-control-strip,
+  .app-page[data-page="recurring"] .recurring-hub,
+  .app-page[data-page="recurring"] .recommendations-panel,
+  .app-page[data-page="transactions"] .budget-workbench,
+  .app-page[data-page="transactions"] .transaction-month-section,
+  .app-page[data-page="accounts"] .linked-card,
+  .app-page[data-page="accounts"] .accounts-intro,
+  .app-page[data-page="accounts"] .accounts-health-strip,
+  .app-page[data-page="account"] .account-panel,
+  .app-page[data-page="account"] .billing-panel {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .app-page[data-page="spending"] .budgeting-grid {
+    grid-template-columns: minmax(380px, 0.82fr) minmax(0, 1.18fr);
+    gap: 32px;
+  }
+
+  .app-page[data-page="spending"] .automation-hub {
+    gap: 24px;
+  }
+
+  .app-page[data-page="spending"] .spending-donut-panel {
+    grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+    gap: 34px;
+  }
+
+  .app-page[data-page="recurring"] .subscription-grid {
+    grid-template-columns: minmax(0, 1.22fr) minmax(360px, 0.78fr);
+    gap: 32px;
+  }
+
+  .app-page[data-page="transactions"] .budgeting-grid {
+    gap: 28px;
+  }
+
+  .app-page[data-page="transactions"] .transaction-month-groups {
+    gap: 28px;
+  }
+
+  .app-page[data-page="transactions"] .transaction-month-section {
+    padding-top: 26px;
+    padding-bottom: 20px;
+  }
+
+  .app-page[data-page="accounts"] .linked-grid,
+  .app-page[data-page="account"] .account-grid {
+    gap: 32px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .app-page[data-page="snapshot"] > .page-intro,
+  .app-page[data-page="spending"] > .page-intro,
+  .app-page[data-page="recurring"] > .page-intro,
+  .app-page[data-page="transactions"] > .page-intro,
+  .app-page[data-page="accounts"] > .page-intro,
+  .app-page[data-page="account"] > .page-intro,
+  .app-page[data-page="snapshot"] .snapshot-priority-strip,
+  .app-page[data-page="snapshot"] .snapshot-dashboard-layout,
+  .app-page[data-page="snapshot"] .snapshot-decision-grid,
+  .app-page[data-page="snapshot"] .snapshot-support-grid,
+  .app-page[data-page="snapshot"] .snapshot-outlook-grid,
+  .app-page[data-page="snapshot"] .snapshot-supporting-grid,
+  .app-page[data-page="spending"] .spending-period-bar,
+  .app-page[data-page="spending"] .automation-hub,
+  .app-page[data-page="spending"] .budgeting-grid,
+  .app-page[data-page="recurring"] .recurring-control-strip,
+  .app-page[data-page="recurring"] .recurring-hub,
+  .app-page[data-page="recurring"] .subscription-grid,
+  .app-page[data-page="transactions"] .budget-workbench,
+  .app-page[data-page="transactions"] .budgeting-grid,
+  .app-page[data-page="accounts"] .accounts-health-strip,
+  .app-page[data-page="accounts"] .accounts-intro,
+  .app-page[data-page="accounts"] .linked-grid,
+  .app-page[data-page="account"] .account-grid {
+    max-width: 1640px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-dashboard-layout {
+    grid-template-columns: minmax(0, 1.28fr) minmax(460px, 0.72fr);
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-decision-grid {
+    grid-template-columns: minmax(0, 1.58fr) minmax(380px, 0.72fr);
+  }
+}
