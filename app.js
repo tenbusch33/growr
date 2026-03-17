@@ -2060,9 +2060,27 @@ function renderCategoryDonut(categorySpend) {
   if (!chart || !center || !label || !legend) {
     return;
   }
-  const entries = Object.entries(categorySpend)
+  const rawEntries = Object.entries(categorySpend)
     .filter(([, amount]) => amount > 0)
     .sort((left, right) => right[1] - left[1]);
+  const rawTotal = rawEntries.reduce((sum, [, amount]) => sum + amount, 0);
+  const condensedEntries = [];
+  let otherAmount = 0;
+
+  rawEntries.forEach(([key, amount], index) => {
+    const share = rawTotal ? amount / rawTotal : 0;
+    if (index < 5 && share >= 0.03) {
+      condensedEntries.push([key, amount]);
+    } else {
+      otherAmount += amount;
+    }
+  });
+
+  if (otherAmount > 0) {
+    condensedEntries.push(["other", otherAmount]);
+  }
+
+  const entries = condensedEntries;
   const total = entries.reduce((sum, [, amount]) => sum + amount, 0);
   const periodText = formatPeriodLabel(state.spendingPeriod, state.spendingOffset).replace(/^This\s+/i, "").toLowerCase();
 
@@ -2091,18 +2109,22 @@ function renderCategoryDonut(categorySpend) {
 
   chart.style.background = `conic-gradient(${stops.join(", ")})`;
   center.innerHTML = `
-    <span>Total spend</span>
-    <span>in ${periodText}</span>
+    <span class="donut-kicker">Total spend</span>
+    <span class="donut-period">${periodText}</span>
     <strong>${currency.format(total)}</strong>
   `;
   label.textContent = currency.format(total);
   legend.innerHTML = entries
     .map(([key, amount]) => {
       const color = chartPalette[key] || chartPalette.other;
+      const share = total ? amount / total : 0;
       return `
         <div class="legend-item">
           <span class="legend-dot" style="background:${color}"></span>
-          <p>${key}</p>
+          <div class="legend-copy">
+            <p>${toTitleCase(key)}</p>
+            <span>${percent.format(share)} of spend</span>
+          </div>
           <strong>${currency.format(amount)}</strong>
         </div>
       `;
