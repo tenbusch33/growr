@@ -140,6 +140,67 @@ function futureValue(balance, monthlyContribution, annualReturn, years) {
   return total;
 }
 
+function formatTimeHorizonLabel(value) {
+  const labels = {
+    this_month: "This month",
+    next_3_months: "Next 3 months",
+    next_12_months: "Next 12 months",
+  };
+  return labels[value] || "This month";
+}
+
+function formatConfidenceLabel(value) {
+  const labels = {
+    high: "High confidence",
+    medium: "Medium confidence",
+    low: "Low confidence",
+  };
+  return labels[value] || "Low confidence";
+}
+
+function buildFinancialDecisionBundle(input) {
+  const engines = window.GrowrEngines || {};
+  if (
+    !engines.normalizeFinancialProfile ||
+    !engines.createCashflowSnapshot ||
+    !engines.analyzeDebt ||
+    !engines.analyzeInvestments ||
+    !engines.analyzeOpportunityCost ||
+    !engines.createGrowScore ||
+    !engines.analyzeScenarios ||
+    !engines.buildRecommendations
+  ) {
+    return null;
+  }
+
+  const profile = engines.normalizeFinancialProfile(input);
+  const cashflow = engines.createCashflowSnapshot(profile);
+  const debtAnalysis = engines.analyzeDebt(profile, Math.max(cashflow.freeCashflow * 0.7, 0));
+  const investmentAnalysis = engines.analyzeInvestments(profile);
+  const opportunityCost = engines.analyzeOpportunityCost(profile, cashflow);
+  const scenarios = engines.analyzeScenarios(profile, cashflow, debtAnalysis, investmentAnalysis);
+  const score = engines.createGrowScore(profile, cashflow, debtAnalysis, investmentAnalysis);
+  const recommendationBundle = engines.buildRecommendations(
+    profile,
+    cashflow,
+    debtAnalysis,
+    investmentAnalysis,
+    opportunityCost,
+    scenarios
+  );
+
+  return {
+    profile,
+    cashflow,
+    debtAnalysis,
+    investmentAnalysis,
+    opportunityCost,
+    scenarios,
+    score,
+    recommendationBundle,
+  };
+}
+
 function getAllocation(age) {
   if (age < 30) {
     return {
@@ -2040,6 +2101,7 @@ function renderProjectionLineChart({
   fillColor,
   labelFormatter = currency.format,
   noteText = "",
+  valuePrefix = "",
 }) {
   const chart = document.getElementById(chartId);
   const label = document.getElementById(labelId);
@@ -2067,12 +2129,18 @@ function renderProjectionLineChart({
   const smoothPath = buildSmoothPath(points);
   const areaPath = buildAreaPath(points, baselineY);
   const latestPoint = points[points.length - 1];
+  const firstPoint = points[0];
+  const midPoint = points[Math.floor(points.length / 2)];
 
   chart.innerHTML = `
     <defs>
       <linearGradient id="${chartId}-fill" x1="0%" y1="0%" x2="0%" y2="100%">
         <stop offset="0%" stop-color="${fillColor}" stop-opacity="0.36"></stop>
         <stop offset="100%" stop-color="${fillColor}" stop-opacity="0"></stop>
+      </linearGradient>
+      <linearGradient id="${chartId}-line" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="${lineColor}" stop-opacity="0.82"></stop>
+        <stop offset="100%" stop-color="${lineColor}" stop-opacity="1"></stop>
       </linearGradient>
       <filter id="${chartId}-shadow" x="-20%" y="-20%" width="140%" height="140%">
         <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(45,54,89,0.12)"></feDropShadow>
@@ -2086,7 +2154,8 @@ function renderProjectionLineChart({
       .join("")}
     <path d="${areaPath}" fill="url(#${chartId}-fill)"></path>
     <line x1="${paddingX}" y1="${height - paddingY}" x2="${width - paddingX}" y2="${height - paddingY}" stroke="#d9e0ea" stroke-width="1.5"></line>
-    <path d="${smoothPath}" fill="none" stroke="${lineColor}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#${chartId}-shadow)"></path>
+    <line x1="${latestPoint.x}" y1="${paddingY}" x2="${latestPoint.x}" y2="${height - paddingY}" stroke="${lineColor}" stroke-opacity="0.14" stroke-width="2" stroke-dasharray="4 6"></line>
+    <path d="${smoothPath}" fill="none" stroke="url(#${chartId}-line)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#${chartId}-shadow)"></path>
     ${points
       .map(
         (point) => `
@@ -2096,6 +2165,12 @@ function renderProjectionLineChart({
       )
       .join("")}
     <circle cx="${latestPoint.x}" cy="${latestPoint.y}" r="7" fill="${lineColor}" stroke="#ffffff" stroke-width="3"></circle>
+    <g>
+      <rect x="${Math.max(Math.min(latestPoint.x - 58, width - 118), 8)}" y="${Math.max(latestPoint.y - 48, 8)}" rx="12" ry="12" width="116" height="32" fill="#111827"></rect>
+      <text x="${Math.max(Math.min(latestPoint.x, width - 60), 66)}" y="${Math.max(latestPoint.y - 27, 29)}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">${valuePrefix}${labelFormatter(series[series.length - 1].value)}</text>
+    </g>
+    <text x="${firstPoint.x}" y="${paddingY - 4}" text-anchor="start" fill="#9aa4b6" font-size="11">${valuePrefix}${labelFormatter(series[0].value)}</text>
+    <text x="${midPoint.x}" y="${paddingY - 4}" text-anchor="middle" fill="#9aa4b6" font-size="11">${valuePrefix}${labelFormatter(series[Math.floor(series.length / 2)].value)}</text>
   `;
 
   label.textContent = labelFormatter(series[series.length - 1].value);
@@ -2134,6 +2209,7 @@ function renderCategoryDonut(categorySpend) {
   const entries = condensedEntries;
   const total = entries.reduce((sum, [, amount]) => sum + amount, 0);
   const periodText = formatPeriodLabel(state.spendingPeriod, state.spendingOffset).replace(/^This\s+/i, "").toLowerCase();
+  const topEntry = entries[0];
 
   if (!total) {
     chart.style.background = "conic-gradient(#edf1f6 0deg, #edf1f6 360deg)";
@@ -2179,7 +2255,7 @@ function renderCategoryDonut(categorySpend) {
     <span class="donut-period">in ${periodText}</span>
     <strong>${currency.format(total)}</strong>
   `;
-  label.textContent = currency.format(total);
+  label.textContent = topEntry ? `${toTitleCase(topEntry[0])} leads at ${currency.format(topEntry[1])}` : currency.format(total);
   legend.innerHTML = entries
     .map(([key, amount]) => {
       const color = chartPalette[key] || chartPalette.other;
@@ -2191,7 +2267,10 @@ function renderCategoryDonut(categorySpend) {
             <p>${toTitleCase(key)}</p>
             <span>${percent.format(share)} of spend</span>
           </div>
-          <strong>${currency.format(amount)}</strong>
+          <div class="legend-value-stack">
+            <strong>${currency.format(amount)}</strong>
+            <span>${percent.format(share)}</span>
+          </div>
         </div>
       `;
     })
@@ -3690,50 +3769,67 @@ function buildOpportunityCost(summary) {
   };
 }
 
-function renderDecisionEngine(summary) {
+function renderDecisionEngine(bundle) {
   const nextMoveAction = document.getElementById("nbm-action");
   if (!nextMoveAction) {
     return;
   }
 
-  const nextMove = buildNextBestMove(summary);
-  const opportunity = buildOpportunityCost(summary);
-  const currentPath = summary.netWorthSeries?.[summary.netWorthSeries.length - 1]?.value || summary.netWorth || 0;
-  const optimizedPath = currentPath + Math.max(nextMove.impactValue || 0, 0);
-  const scenarioDelta = Math.max(optimizedPath - currentPath, 0);
+  const nextMove = bundle?.recommendationBundle?.nextBestMove;
+  const opportunity = bundle?.opportunityCost?.biggest;
+  const currentPlan = bundle?.scenarios?.currentPlan;
+  const optimizedPlan = bundle?.scenarios?.optimized;
+  const scenarioDelta = Math.max(
+    (optimizedPlan?.projectedNetWorth10Y || 0) - (currentPlan?.projectedNetWorth10Y || 0),
+    0
+  );
 
-  setText("nbm-action", nextMove.action);
-  setText("nbm-priority", nextMove.priority);
-  setText("nbm-time-horizon", nextMove.timeHorizon);
-  setText("nbm-why", nextMove.why);
-  setText("nbm-impact", nextMove.impactText);
-  setText("nbm-support", nextMove.support);
+  if (!nextMove) {
+    setText("nbm-action", "Connect more real data to unlock the next best move");
+    setText("nbm-priority", "Needs data");
+    setText("nbm-time-horizon", "This month");
+    setText("nbm-why", "Growr needs enough income, debt, and recurring data to rank the highest-impact move.");
+    setText("nbm-math", "Math will appear after Growr can verify cash flow, debt, and recurring transfers.");
+    setText("nbm-impact", "Estimated impact will appear here once the recommendation engine has enough confirmed inputs.");
+    setText("nbm-confidence", "Low confidence");
+    setText("nbm-assumptions", "Assumptions: connect accounts or finish the planner so Growr can model a real next move.");
+  } else {
+    setText("nbm-action", nextMove.action);
+    setText("nbm-priority", nextMove.title);
+    setText("nbm-time-horizon", formatTimeHorizonLabel(nextMove.timeHorizon));
+    setText("nbm-why", nextMove.why);
+    setText("nbm-math", nextMove.mathExplanation.join(" "));
+    setText("nbm-impact", bundle.recommendationBundle.summarizeImpact(nextMove.impact));
+    setText("nbm-confidence", formatConfidenceLabel(nextMove.confidence));
+    setText(
+      "nbm-assumptions",
+      `Assumptions: ${nextMove.assumptions.length ? nextMove.assumptions.join(" ") : "Growr used your saved numbers with no extra assumptions."}`
+    );
+  }
 
-  setText("opportunity-title", opportunity.title);
-  setText("opportunity-amount", currency.format(opportunity.amount));
-  setText("opportunity-copy", opportunity.copy);
-  setText("opportunity-monthly", `${currency.format(opportunity.monthlyAmount)} / month`);
-  setText("opportunity-horizon", opportunity.horizon);
+  setText("opportunity-title", opportunity?.title || "What this really costs");
+  setText("opportunity-amount", currency.format(opportunity?.futureValue || 0));
+  setText(
+    "opportunity-copy",
+    opportunity?.reason ||
+      "Growr will surface the largest long-term tradeoff once it sees a clearer recurring spending pattern."
+  );
+  setText("opportunity-monthly", `${currency.format(opportunity?.monthlyAmount || 0)} / month`);
+  setText("opportunity-horizon", `${opportunity?.horizonYears || 15} years`);
 
-  setText("scenario-title", "Current path vs smarter path");
-  setText("scenario-current", currency.format(currentPath));
-  setText("scenario-optimized", currency.format(optimizedPath));
+  setText("scenario-title", optimizedPlan ? `${optimizedPlan.name} vs current path` : "Current path vs better path");
+  setText("scenario-current", currency.format(currentPlan?.projectedNetWorth10Y || 0));
+  setText("scenario-optimized", currency.format(optimizedPlan?.projectedNetWorth10Y || 0));
   setText("scenario-delta", `+${currency.format(scenarioDelta)}`);
   setText(
     "scenario-copy",
-    scenarioDelta > 0
-      ? `Following Growr's next move could improve your longer-term path by about ${currency.format(scenarioDelta)} if you stick with it.`
+    optimizedPlan
+      ? `The strongest current scenario could improve 10-year net worth by about ${currency.format(scenarioDelta)}. Debt payoff timing: ${optimizedPlan.debtPayoffDate}.`
       : "Growr will show a clearer scenario once it has enough data to compare your current path with a stronger alternative."
   );
 }
 
-function renderHealth(snapshot) {
-  const debtPenalty = Math.min(snapshot.debtRatio * 120, 38);
-  const carPenalty = Math.min(snapshot.carRatio * 100, 22);
-  const emergencyBoost = Math.min(snapshot.emergencyMonths * 8, 24);
-  const leftoverBoost = snapshot.leftover > 0 ? Math.min((snapshot.leftover / snapshot.income) * 120, 22) : -18;
-  const score = Math.max(8, Math.min(100, Math.round(54 - debtPenalty - carPenalty + emergencyBoost + leftoverBoost)));
-
+function renderHealth(bundle) {
   const orb = document.getElementById("score-orb");
   const healthScore = document.getElementById("health-score");
   const healthLabel = document.getElementById("health-label");
@@ -3744,6 +3840,7 @@ function renderHealth(snapshot) {
   if (!orb || !healthScore || !healthLabel || !healthSummary || !signalSavings || !signalDebt || !signalInvesting) {
     return;
   }
+  const score = bundle?.score?.score ?? 0;
   const scoreColor = score >= 75 ? "#00b894" : score >= 50 ? "#ffd33d" : "#ff5a36";
 
   healthScore.textContent = String(score);
@@ -3752,29 +3849,32 @@ function renderHealth(snapshot) {
 
   if (score >= 75) {
     healthLabel.textContent = "Strong footing";
-    healthSummary.textContent = "Your current setup looks reasonably stable. Focus on consistency, growing savings, and gradually raising investing.";
+    healthSummary.textContent = "Cash flow, debt, and savings are working together well. The next gains come from consistency and smart optimization.";
   } else if (score >= 50) {
-    healthLabel.textContent = "Recoverable";
-    healthSummary.textContent = "You have a workable base, but one or two categories are stealing flexibility. Tightening those will improve the whole plan.";
+    healthLabel.textContent = "Progressing";
+    healthSummary.textContent = "You have a workable base, but one or two pressure points are holding you back. The next best move can improve the score quickly.";
   } else {
     healthLabel.textContent = "High pressure";
-    healthSummary.textContent = "Cash flow or debt load is putting the plan under stress. Stabilizing spending and reducing expensive debt should come first.";
+    healthSummary.textContent = "Cash flow, debt, or savings fragility is putting the plan under pressure. Fixing the biggest drag comes first.";
   }
   const scoreInsights = document.getElementById("score-insights");
   if (scoreInsights) {
+    const drags = bundle?.score?.drags || [];
+    const cashflow = bundle?.cashflow;
+    const debtAnalysis = bundle?.debtAnalysis;
     scoreInsights.innerHTML = `
-      <span class="insight-chip">Money left this month: ${currency.format(snapshot.leftover)}</span>
-      <span class="insight-chip">Debt load: ${snapshot.debtRatio > 0.35 ? "High" : snapshot.debtRatio > 0.2 ? "Moderate" : "Balanced"}</span>
-      <span class="insight-chip">Emergency savings: ${snapshot.emergencyMonths >= 3 ? "Strong" : snapshot.emergencyMonths >= 1 ? "Building" : "Needs work"}</span>
+      <span class="insight-chip">Money left this month: ${currency.format(cashflow?.freeCashflow || 0)}</span>
+      <span class="insight-chip">Debt load: ${debtAnalysis?.toxicDebt ? "High APR debt detected" : "No toxic APR detected"}</span>
+      <span class="insight-chip">${drags[0] || "Growr will show the biggest drag here."}</span>
     `;
   }
 
   signalSavings.textContent =
-    snapshot.emergencyMonths >= 3 ? "Strong" : snapshot.emergencyMonths >= 1 ? "Building" : "Needs work";
+    bundle?.cashflow?.emergencyMonths >= 3 ? "Strong" : bundle?.cashflow?.emergencyMonths >= 1 ? "Building" : "Needs work";
   signalDebt.textContent =
-    snapshot.debtRatio > 0.35 ? "High" : snapshot.debtRatio > 0.2 ? "Moderate" : "Balanced";
+    bundle?.debtAnalysis?.toxicDebt ? "APR pressure" : "Manageable";
   signalInvesting.textContent =
-    snapshot.leftover > 500 && snapshot.creditCardBalance === 0 ? "Room to grow" : "Cautious";
+    bundle?.investmentAnalysis?.employerMatch?.shortfall > 0 ? "Below match" : bundle?.investmentAnalysis?.totalRecurringContribution > 0 ? "On track" : "Not started";
 }
 
 function renderSnapshotCommandCenter(summary) {
@@ -4046,17 +4146,36 @@ function renderSnapshotMiniTrend(series) {
 
   const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - paddingBottom} L ${points[0].x} ${height - paddingBottom} Z`;
   const lastPoint = points[points.length - 1];
+  const latestSpend = Number(usableSeries[usableSeries.length - 1].spend || 0);
 
   chart.innerHTML = `
     <defs>
       <linearGradient id="snapshot-mini-fill" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#7d8fff" stop-opacity="0.24"></stop>
-        <stop offset="100%" stop-color="#7d8fff" stop-opacity="0"></stop>
+        <stop offset="0%" stop-color="#8fa7ff" stop-opacity="0.34"></stop>
+        <stop offset="100%" stop-color="#8fa7ff" stop-opacity="0"></stop>
       </linearGradient>
+      <linearGradient id="snapshot-mini-line" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#5f79ff"></stop>
+        <stop offset="100%" stop-color="#7a8fff"></stop>
+      </linearGradient>
+      <filter id="snapshot-mini-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(60,72,128,0.16)"></feDropShadow>
+      </filter>
     </defs>
+    ${[0.3, 0.6, 0.9]
+      .map((ratio) => {
+        const y = height - paddingBottom - ratio * (height - paddingTop - paddingBottom);
+        return `<line x1="${paddingX}" y1="${y}" x2="${width - paddingX}" y2="${y}" stroke="#eef2f8" stroke-width="1"></line>`;
+      })
+      .join("")}
     <path d="${areaPath}" fill="url(#snapshot-mini-fill)"></path>
-    <path d="${linePath}" fill="none" stroke="#6e86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="${linePath}" fill="none" stroke="url(#snapshot-mini-line)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#snapshot-mini-shadow)"></path>
+    <line x1="${lastPoint.x}" y1="${paddingTop}" x2="${lastPoint.x}" y2="${height - paddingBottom}" stroke="#6e86ff" stroke-opacity="0.14" stroke-width="2" stroke-dasharray="4 6"></line>
     <circle cx="${lastPoint.x}" cy="${lastPoint.y}" r="10" fill="#ffffff" stroke="#6e86ff" stroke-width="6"></circle>
+    <g>
+      <rect x="${Math.max(lastPoint.x - 64, 8)}" y="${Math.max(lastPoint.y - 46, 8)}" rx="12" ry="12" width="116" height="30" fill="#111827"></rect>
+      <text x="${Math.max(lastPoint.x - 6, 66)}" y="${Math.max(lastPoint.y - 26, 28)}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">${currency.format(latestSpend)}</text>
+    </g>
   `;
 }
 
@@ -4470,26 +4589,51 @@ function updateDashboard() {
     netWorth,
     netWorthSeries,
   };
-
-  renderRecommendations(
-    buildRecommendations({
-      leftover,
-      debtRatio,
-      carRatio,
-      emergencyMonths,
-      creditCardBalance,
+  const financialDecisionBundle = buildFinancialDecisionBundle({
+    planner: {
+      income,
+      housing,
+      essentials,
       creditCardPayment,
-    })
-  );
-  renderHealth({
-    income,
-    leftover,
-    debtRatio,
-    carRatio,
-    emergencyMonths,
-    creditCardBalance,
+      otherDebt,
+      carPayment,
+      carCosts,
+      emergencyFund,
+      creditCardBalance,
+      cashAssets,
+      mortgageBalance,
+      carLoanBalance,
+      employerMatchRate: 0,
+      employerMatchCap: 0,
+    },
+    linkedSummary: state.linkedSummary,
+    transactions: state.transactions,
+    subscriptions: state.subscriptions,
+    recurringBills: state.recurringBills,
+    recurringIncome: state.recurringIncome,
+    investmentInputs,
+    hasInvestmentAccess: hasInvestmentAccess(),
+    netWorth,
   });
-  renderDecisionEngine(decisionSummary);
+
+  const topRecommendations = financialDecisionBundle?.recommendationBundle?.recommendations?.length
+    ? financialDecisionBundle.recommendationBundle.recommendations.slice(0, 3).map((item) => ({
+        level: item.confidence === "high" ? "alert" : item.confidence === "medium" ? "warn" : "info",
+        title: item.title,
+        body: `${item.action} ${item.why}`,
+      }))
+    : buildRecommendations({
+        leftover,
+        debtRatio,
+        carRatio,
+        emergencyMonths,
+        creditCardBalance,
+        creditCardPayment,
+      });
+
+  renderRecommendations(topRecommendations);
+  renderHealth(financialDecisionBundle);
+  renderDecisionEngine(financialDecisionBundle || decisionSummary);
   renderSnapshotCommandCenter({
     leftover,
     totalExpenses,

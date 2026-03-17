@@ -511,11 +511,19 @@
                 <strong id="nbm-why">Growr needs your monthly income, bills, and debt to calculate the strongest next move.</strong>
               </div>
               <div class="decision-detail">
+                <span>Math</span>
+                <strong id="nbm-math">The recommendation math will appear here once Growr has enough data.</strong>
+              </div>
+              <div class="decision-detail">
                 <span>Estimated impact</span>
                 <strong id="nbm-impact">$0 over 3 years</strong>
               </div>
+              <div class="decision-detail">
+                <span>Confidence</span>
+                <strong id="nbm-confidence">Low</strong>
+              </div>
             </div>
-            <p class="decision-support-copy" id="nbm-support">The best first step is always the one that improves flexibility the fastest.</p>
+            <p class="decision-support-copy" id="nbm-assumptions">Assumptions: Growr needs your monthly income, debt details, and recurring transfers to explain the strongest recommendation confidently.</p>
           </article>
 
           <article class="glass opportunity-card">
@@ -1902,6 +1910,15 @@
       </footer>
     </div>
 
+    <script src="engines/shared.js"></script>
+    <script src="engines/plaidNormalizer.js"></script>
+    <script src="engines/cashflowEngine.js"></script>
+    <script src="engines/debtEngine.js"></script>
+    <script src="engines/investmentEngine.js"></script>
+    <script src="engines/opportunityCostEngine.js"></script>
+    <script src="engines/scoreEngine.js"></script>
+    <script src="engines/scenarioEngine.js"></script>
+    <script src="engines/recommendationEngine.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

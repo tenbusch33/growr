@@ -1,16 +1,19 @@
 # Growr
 
-Colorful budgeting and investment forecasting prototype with:
+Growr is a budgeting + decision engine prototype with:
 
 - monthly budget planning
 - investment projections for `401(k)`, `Roth IRA`, and brokerage
-- recommendation engine for debt, cash flow, and car affordability
+- explainable recommendation engine for debt, cash flow, and investing tradeoffs
+- `Grow Score`, `Next Best Move`, `Opportunity Cost`, and scenario previews on Snapshot
 - local multi-user account signup and login flow
 - planner save/load per signed-in user
 - plan-based feature gating for Budget Core vs Bundle
 - dedicated Couples package for a shared household view
 - Stripe/Supabase-ready configuration hooks
 - Plaid account linking scaffold for balances, liabilities, and investments
+- independent financial engines in `engines/`
+- unit tests for financial calculations in `tests/financial-engines.test.js`
 
 ## Run locally
 
@@ -23,6 +26,12 @@ npm start
 ```
 
 Open `http://localhost:3000`.
+
+Run the financial engine tests:
+
+```bash
+npm test
+```
 
 ## Deploy on Render
 
@@ -156,7 +165,15 @@ The app uses `POST /api/billing/portal` to open a Stripe-hosted customer portal 
 
 ## Suggested next implementation step
 
-1. Add Supabase client signup/login
+1. Improve the inference review flow for APRs, minimum payments, recurring investing, and employer match
 2. Encrypt and store Plaid items per authenticated user
-3. Add Stripe webhook handling and subscription status storage
-4. Save planner data per authenticated user
+3. Move local JSON storage to a real database when scaling beyond prototype stage
+4. Add richer shareable decision cards and scenario deep dives
+
+## Product Direction
+
+The full Growr decision-engine direction is documented in:
+
+```text
+docs/growr-product-spec.md
+```

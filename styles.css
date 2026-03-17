@@ -839,7 +839,7 @@ select {
   display: flex;
   align-items: center;
   gap: 10px;
-  max-width: 220px;
+  max-width: 240px;
   text-align: left;
 }
 
@@ -862,6 +862,7 @@ select {
   height: 180px;
   display: block;
   margin: 10px 0 12px;
+  overflow: visible;
 }
 
 .snapshot-payday-row {
@@ -4056,6 +4057,8 @@ select {
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--line);
   font-size: 1.2rem;
+  text-align: center;
+  padding: 10px;
 }
 
 .transaction-month-groups {
@@ -4606,7 +4609,10 @@ select {
   padding: 22px;
   border-radius: 28px;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  background:
+    radial-gradient(circle at top right, rgba(143, 167, 255, 0.12), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  box-shadow: 0 22px 40px rgba(31, 41, 55, 0.06);
 }
 
 .chart-card-top {
@@ -4698,6 +4704,18 @@ select {
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid rgba(20, 31, 56, 0.06);
   box-shadow: 0 10px 20px rgba(36, 42, 60, 0.04);
+}
+
+.legend-value-stack {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+}
+
+.legend-value-stack span {
+  color: var(--subtle);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .legend-item p,
