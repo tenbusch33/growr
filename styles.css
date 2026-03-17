@@ -116,7 +116,7 @@
 
 .app-page[data-page="snapshot"] .snapshot-decision-grid {
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.78fr);
-  gap: 28px;
+  gap: 32px;
   align-items: stretch;
 }
 
@@ -169,8 +169,8 @@
 }
 
 .app-page[data-page="snapshot"] .next-best-move-card {
-  padding: 34px 36px;
-  gap: 24px;
+  padding: 38px 40px;
+  gap: 28px;
   border-color: rgba(34, 199, 184, 0.22);
   box-shadow: 0 28px 50px rgba(15, 23, 32, 0.08);
 }
@@ -189,7 +189,7 @@
 .app-page[data-page="snapshot"] .next-best-move-card .decision-meta-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
 }
 
 .app-page[data-page="snapshot"] .decision-meta-pill {
@@ -207,18 +207,18 @@
 
 .app-page[data-page="snapshot"] .decision-detail-list {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 18px;
 }
 
 .app-page[data-page="snapshot"] .decision-detail {
-  padding: 18px 18px 20px;
+  padding: 22px 22px 24px;
   background: #f9fbfb;
   border: 1px solid rgba(15, 23, 32, 0.05);
   border-radius: 18px;
 }
 
 .app-page[data-page="snapshot"] .decision-detail span {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   color: #617083;
   font-size: 0.8rem;
   letter-spacing: 0.08em;
@@ -236,20 +236,144 @@
 .app-page[data-page="snapshot"] .decision-support-copy {
   color: #7a8798;
   font-size: 0.94rem;
-  line-height: 1.6;
+  line-height: 1.7;
   max-width: 82ch;
 }
 
+.app-page[data-page="snapshot"] .next-best-move-card {
+  gap: 32px;
+  padding: 42px 44px;
+}
+
+.app-page[data-page="snapshot"] .next-best-move-card .section-heading.compact {
+  display: grid;
+  gap: 14px;
+  max-width: 880px;
+}
+
+.app-page[data-page="snapshot"] .next-best-move-card .section-heading .eyebrow {
+  margin-bottom: 0;
+}
+
+.app-page[data-page="snapshot"] #nbm-action {
+  max-width: 13ch;
+  font-size: clamp(2.8rem, 4.4vw, 4.6rem);
+  line-height: 0.92;
+  letter-spacing: -0.06em;
+  text-wrap: balance;
+}
+
+.app-page[data-page="snapshot"] .next-best-move-card .decision-meta-row {
+  gap: 14px;
+  margin-top: -6px;
+}
+
+.app-page[data-page="snapshot"] .decision-meta-pill {
+  min-height: 42px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.app-page[data-page="snapshot"] .decision-meta-pill:not(.subtle) {
+  background: rgba(34, 199, 184, 0.12);
+  color: #0f1720;
+  border-color: rgba(34, 199, 184, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.app-page[data-page="snapshot"] .decision-detail-list {
+  gap: 20px;
+}
+
+.app-page[data-page="snapshot"] .decision-detail {
+  padding: 24px 24px 26px;
+  border-radius: 20px;
+}
+
+.app-page[data-page="snapshot"] .decision-detail span {
+  margin-bottom: 12px;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+}
+
+.app-page[data-page="snapshot"] .decision-detail strong {
+  font-size: 1.08rem;
+  line-height: 1.55;
+}
+
+.app-page[data-page="snapshot"] .decision-detail[data-kind="impact"] {
+  background: linear-gradient(180deg, rgba(22, 163, 74, 0.08), rgba(255, 255, 255, 0.98));
+  border-color: rgba(22, 163, 74, 0.16);
+  box-shadow: 0 16px 30px rgba(22, 163, 74, 0.08);
+}
+
+.app-page[data-page="snapshot"] .decision-detail[data-kind="impact"] span {
+  color: #166534;
+}
+
+.app-page[data-page="snapshot"] #nbm-impact {
+  font-size: 1.28rem;
+  line-height: 1.35;
+  color: #0f1720;
+}
+
+.app-page[data-page="snapshot"] .decision-detail:has(#nbm-confidence) {
+  background: #fcfdfd;
+  border-color: rgba(15, 23, 32, 0.08);
+}
+
+.app-page[data-page="snapshot"] #nbm-confidence {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid rgba(15, 23, 32, 0.08);
+  background: #f4f7f7;
+}
+
+.app-page[data-page="snapshot"] #nbm-confidence[data-confidence="high"] {
+  background: rgba(22, 163, 74, 0.12);
+  border-color: rgba(22, 163, 74, 0.16);
+  color: #166534;
+}
+
+.app-page[data-page="snapshot"] #nbm-confidence[data-confidence="medium"] {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.18);
+  color: #a16207;
+}
+
+.app-page[data-page="snapshot"] #nbm-confidence[data-confidence="low"] {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.18);
+  color: #b91c1c;
+}
+
+.app-page[data-page="snapshot"] #nbm-assumptions {
+  padding-top: 8px;
+  max-width: 76ch;
+}
+
 .app-page[data-page="snapshot"] .grow-score-card {
-  padding: 30px;
-  gap: 24px;
+  padding: 34px;
+  gap: 28px;
   grid-template-columns: 164px minmax(0, 1fr);
   align-items: start;
 }
 
 .app-page[data-page="snapshot"] .score-copy {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 .app-page[data-page="snapshot"] .score-copy h2 {
@@ -269,7 +393,7 @@
 .app-page[data-page="snapshot"] .score-insights {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
 }
 
 .app-page[data-page="snapshot"] .score-insights .insight-chip,
@@ -283,11 +407,11 @@
 
 .app-page[data-page="snapshot"] .snapshot-support-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 22px;
 }
 
 .app-page[data-page="snapshot"] .support-stat-card {
-  padding: 24px 24px 22px;
+  padding: 28px 28px 26px;
   min-height: 208px;
 }
 
@@ -309,20 +433,20 @@
 .app-page[data-page="snapshot"] .opportunity-copy,
 .app-page[data-page="snapshot"] #scenario-copy {
   color: #617083;
-  line-height: 1.6;
+  line-height: 1.72;
 }
 
 .app-page[data-page="snapshot"] .snapshot-outlook-grid,
 .app-page[data-page="snapshot"] .snapshot-supporting-grid {
   grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
-  gap: 24px;
+  gap: 28px;
 }
 
 .app-page[data-page="snapshot"] .investment-forecast-card,
 .app-page[data-page="snapshot"] .opportunity-card,
 .app-page[data-page="snapshot"] .scenario-preview-card,
 .app-page[data-page="snapshot"] .support-insight-card {
-  padding: 28px;
+  padding: 32px;
 }
 
 .app-page[data-page="snapshot"] .forecast-meta-card,
@@ -346,12 +470,12 @@
 }
 
 .app-page[data-page="snapshot"] .snapshot-dashboard-layout {
-  gap: 24px;
+  gap: 28px;
 }
 
 .app-page[data-page="snapshot"] .snapshot-spend-card,
 .app-page[data-page="snapshot"] .snapshot-accounts-card {
-  padding: 28px;
+  padding: 32px;
 }
 
 .app-page[data-page="snapshot"] .snapshot-spend-card {
