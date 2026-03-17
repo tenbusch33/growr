@@ -43,6 +43,8 @@ const state = {
   subscriptions: [],
   recurringBills: [],
   recurringIncome: [],
+  recurringView: "upcoming",
+  recurringSort: "type",
   spendingPeriod: "month",
   spendingOffset: 0,
   transactionFilters: {
@@ -494,8 +496,7 @@ function setActivePage(page) {
   const nextPage = document.querySelector(`.app-page[data-page="${requestedPage}"]`) ? requestedPage : "snapshot";
   state.currentPage = nextPage;
   document.querySelectorAll(".app-page").forEach((section) => {
-    const isSnapshotAccountsCompanion = nextPage === "snapshot" && section.dataset.page === "accounts";
-    section.classList.toggle("is-active", section.dataset.page === nextPage || isSnapshotAccountsCompanion);
+    section.classList.toggle("is-active", section.dataset.page === nextPage);
   });
   document.querySelectorAll(".tab-btn[data-page-target]").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.pageTarget === nextPage);
@@ -1706,8 +1707,84 @@ function renderSpendingOverview() {
     ? formatPeriodLabel()
     : "Need transaction history";
 
+  renderSpendingMiniBars(filtered, periodIncome, periodSpend);
   renderCategoryDonutChart(byCategory, periodSpend);
   updateSpendingPeriodControls();
+}
+
+function renderSpendingMiniBars(filteredTransactions, periodIncome, periodSpend) {
+  const container = document.getElementById("spending-mini-bars");
+  if (!container) {
+    return;
+  }
+
+  const bucketMap = new Map();
+  filteredTransactions.forEach((transaction) => {
+    const date = new Date(transaction.date);
+    if (Number.isNaN(date.getTime())) {
+      return;
+    }
+    let key = "";
+    let label = "";
+    if (state.spendingPeriod === "week") {
+      key = `${date.getMonth() + 1}/${date.getDate()}`;
+      label = key;
+    } else if (state.spendingPeriod === "month") {
+      const weekOfMonth = Math.min(5, Math.floor((date.getDate() - 1) / 7) + 1);
+      key = `week-${weekOfMonth}`;
+      label = `W${weekOfMonth}`;
+    } else if (state.spendingPeriod === "quarter") {
+      key = `${date.getMonth() + 1}/${date.getDate()}`;
+      label = `${date.getMonth() + 1}/${date.getDate()}`;
+    } else {
+      key = date.toLocaleDateString("en-US", { month: "short" });
+      label = key;
+    }
+    if (!bucketMap.has(key)) {
+      bucketMap.set(key, { label, income: 0, spend: 0 });
+    }
+    const bucket = bucketMap.get(key);
+    const amount = Number(transaction.amount || 0);
+    if (amount < 0) {
+      bucket.income += Math.abs(amount);
+    } else {
+      bucket.spend += amount;
+    }
+  });
+
+  const buckets = Array.from(bucketMap.values()).slice(-7);
+  if (!buckets.length) {
+    container.innerHTML = `
+      <div class="mini-bar-empty">
+        <strong>${currency.format(periodSpend)}</strong>
+        <span>Add or refresh transactions to see the spending pattern here.</span>
+      </div>
+    `;
+    return;
+  }
+
+  const maxValue = Math.max(
+    ...buckets.map((bucket) => Math.max(bucket.income, bucket.spend, 1)),
+    periodIncome,
+    periodSpend,
+    1
+  );
+
+  container.innerHTML = buckets
+    .map((bucket) => {
+      const incomeHeight = Math.max(8, (bucket.income / maxValue) * 86);
+      const spendHeight = Math.max(8, (bucket.spend / maxValue) * 86);
+      return `
+        <article class="mini-bar-card">
+          <div class="mini-bar-columns">
+            <span class="mini-bar mini-bar-income" style="height:${incomeHeight}px"></span>
+            <span class="mini-bar mini-bar-spend" style="height:${spendHeight}px"></span>
+          </div>
+          <strong>${bucket.label}</strong>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function updateSpendingPeriodControls() {
@@ -2084,6 +2161,14 @@ function renderTransactions() {
     updateTransactionSummary(filteredTransactions);
     renderTransactionMonthGroups(state.transactions);
     renderAutomationHub();
+    const monthLabel = document.getElementById("transaction-mobile-month");
+    const monthTotal = document.getElementById("transaction-mobile-total");
+    if (monthLabel) {
+      monthLabel.textContent = formatPeriodLabel();
+    }
+    if (monthTotal) {
+      monthTotal.textContent = "$0 total spend";
+    }
     return;
   }
 
@@ -2176,6 +2261,18 @@ function renderTransactions() {
     })
     .join("");
 
+  const spendTotal = filteredTransactions
+    .filter((transaction) => Number(transaction.amount || 0) > 0)
+    .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+  const monthLabel = document.getElementById("transaction-mobile-month");
+  const monthTotal = document.getElementById("transaction-mobile-total");
+  if (monthLabel) {
+    monthLabel.textContent = Object.keys(groupedTransactions)[0] || formatPeriodLabel();
+  }
+  if (monthTotal) {
+    monthTotal.textContent = `${currency.format(spendTotal)} total spend`;
+  }
+
   container.querySelectorAll("[data-delete-transaction]").forEach((button) => {
     button.addEventListener("click", () => deleteTransaction(button.dataset.deleteTransaction));
   });
@@ -2225,7 +2322,24 @@ function renderSubscriptions() {
     ? formatMerchantName(biggestSubscription.merchant)
     : "Trim extras";
 
-  if (!state.subscriptions.length) {
+  const filteredSubscriptions = state.subscriptions
+    .filter((item) => {
+      if (state.recurringView === "all") {
+        return true;
+      }
+      return /every|about|day|month|annual|weekly/i.test(String(item.nextReviewHint || ""));
+    })
+    .sort((left, right) => {
+      if (state.recurringSort === "amount") {
+        return Number(right.monthlyEstimate || right.amount || 0) - Number(left.monthlyEstimate || left.amount || 0);
+      }
+      if (state.recurringSort === "merchant") {
+        return String(left.merchant || "").localeCompare(String(right.merchant || ""));
+      }
+      return Number(right.monthlyEstimate || right.amount || 0) - Number(left.monthlyEstimate || left.amount || 0);
+    });
+
+  if (!filteredSubscriptions.length) {
     container.innerHTML = `
       <div class="linked-item empty-state">
         <strong>No likely subscriptions yet</strong>
@@ -2235,7 +2349,7 @@ function renderSubscriptions() {
     return;
   }
 
-  container.innerHTML = state.subscriptions
+  container.innerHTML = filteredSubscriptions
     .map(
       (item) => `
         <article class="subscription-item">
@@ -2286,7 +2400,19 @@ function renderBills() {
     ? "Feeds planner"
     : "Waiting on data";
 
-  if (!state.recurringBills.length) {
+  const filteredBills = state.recurringBills
+    .filter((item) => (state.recurringView === "all" ? true : /every|about|day|month|annual|weekly/i.test(String(item.nextReviewHint || ""))))
+    .sort((left, right) => {
+      if (state.recurringSort === "amount") {
+        return Number(right.monthlyEstimate || right.amount || 0) - Number(left.monthlyEstimate || left.amount || 0);
+      }
+      if (state.recurringSort === "merchant") {
+        return String(left.merchant || "").localeCompare(String(right.merchant || ""));
+      }
+      return Number(right.monthlyEstimate || right.amount || 0) - Number(left.monthlyEstimate || left.amount || 0);
+    });
+
+  if (!filteredBills.length) {
     container.innerHTML = `
       <div class="linked-item empty-state">
         <strong>No recurring bills found yet</strong>
@@ -2296,7 +2422,7 @@ function renderBills() {
     return;
   }
 
-  container.innerHTML = state.recurringBills
+  container.innerHTML = filteredBills
     .map(
       (item) => `
         <article class="subscription-item">
@@ -2482,6 +2608,26 @@ function bindTransactionFilters() {
   document.getElementById("transaction-search").addEventListener("input", (event) => {
     state.transactionFilters.search = event.target.value;
     renderTransactions();
+  });
+}
+
+function bindRecurringControls() {
+  document.querySelectorAll("[data-recurring-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.recurringView = button.dataset.recurringView || "upcoming";
+      document.querySelectorAll("[data-recurring-view]").forEach((candidate) => {
+        candidate.classList.toggle("is-active", candidate === button);
+      });
+      renderSubscriptions();
+      renderBills();
+    });
+  });
+
+  const sort = document.getElementById("recurring-sort");
+  sort?.addEventListener("change", (event) => {
+    state.recurringSort = event.target.value;
+    renderSubscriptions();
+    renderBills();
   });
 }
 
@@ -3590,7 +3736,7 @@ function renderSnapshotDashboard(summary, automation) {
     ? summary.leftover < 0
       ? "Review spending"
       : "Refresh data"
-    : "Add account";
+    : "Connect Plaid";
 
   document.getElementById("snapshot-checking-balance").textContent = currency.format(checkingBalance);
   document.getElementById("snapshot-card-balance").textContent = currency.format(cardBalance);
@@ -4665,6 +4811,8 @@ document.querySelectorAll('input[name="accountPlan"], input[name="accountBilling
   input.addEventListener("change", refreshAccountPlanPreview);
 });
 document.getElementById("connect-accounts").addEventListener("click", connectPlaidAccounts);
+document.getElementById("snapshot-connect-btn")?.addEventListener("click", connectPlaidAccounts);
+document.getElementById("snapshot-connect-callout")?.addEventListener("click", connectPlaidAccounts);
 document.getElementById("snapshot-sync-btn")?.addEventListener("click", () => {
   syncConnectedWorkspace();
 });
@@ -4700,6 +4848,7 @@ document.getElementById("subscription-offer-accept-button").addEventListener("cl
   finishSubscriptionCancellation("accept_offer");
 });
 bindTransactionFilters();
+bindRecurringControls();
 document.querySelectorAll("[data-ai-question]").forEach((button) => {
   button.addEventListener("click", () => {
     setAiWidgetOpen(true);

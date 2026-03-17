@@ -36,7 +36,6 @@
               <button class="tab-btn" data-page-target="recurring">Recurring</button>
               <button class="tab-btn" data-page-target="spending">Spending</button>
               <button class="tab-btn" data-page-target="transactions">Transactions</button>
-              <button class="tab-btn" data-page-target="couples">Couples</button>
               <button class="tab-btn" data-page-target="investing">Investing</button>
               <button class="tab-btn" data-page-target="networth">Net Worth</button>
             </div>
@@ -373,7 +372,7 @@
           </div>
         </section>
         <section class="snapshot-priority-strip">
-          <button type="button" class="snapshot-priority-btn" data-scroll="#snapshot-connected-accounts">
+          <button type="button" class="snapshot-priority-btn" id="snapshot-connect-callout">
             <span id="snapshot-priority-label">Connect accounts to unlock automatic tracking</span>
             <strong id="snapshot-priority-meta">Add account</strong>
           </button>
@@ -406,7 +405,10 @@
                 <span class="snapshot-card-label">Accounts</span>
                 <strong>Connected balances</strong>
               </div>
-              <button type="button" class="snapshot-inline-link" data-scroll="#snapshot-connected-accounts">Add account</button>
+              <div class="snapshot-account-actions">
+                <button type="button" class="primary-btn" id="snapshot-connect-btn">Connect accounts with Plaid</button>
+                <button type="button" class="ghost-btn" id="snapshot-sync-btn">Refresh connected data</button>
+              </div>
             </div>
             <div class="snapshot-accounts-list">
               <div class="snapshot-account-row">
@@ -454,7 +456,6 @@
             </div>
             <div class="snapshot-sync-row">
               <span id="snapshot-sync-status">Connect accounts to see balances here.</span>
-              <button type="button" class="ghost-btn" id="snapshot-sync-btn">Refresh connected data</button>
             </div>
           </article>
         </section>
@@ -947,6 +948,13 @@
             <button type="button" class="ghost-btn" id="spending-period-next">Forward</button>
           </div>
         </section>
+        <section class="glass spending-mobile-strip">
+          <div class="spending-mini-bars" id="spending-mini-bars"></div>
+          <div class="spending-mini-legend">
+            <span><i class="legend-dot income-dot"></i>Income</span>
+            <span><i class="legend-dot spend-dot"></i>Total spend</span>
+          </div>
+        </section>
         <section class="budget-coach-grid">
           <article class="glass coach-card">
             <p class="eyebrow">Income</p>
@@ -1096,6 +1104,20 @@
           </div>
           <div id="recurring-insights" class="recurring-insights"></div>
         </section>
+        <section class="glass recurring-control-strip">
+          <div class="recurring-view-toggle" id="recurring-view-toggle">
+            <button type="button" class="recurring-view-btn is-active" data-recurring-view="upcoming">Upcoming</button>
+            <button type="button" class="recurring-view-btn" data-recurring-view="all">All</button>
+          </div>
+          <label class="recurring-sort">
+            <span>Sort by</span>
+            <select id="recurring-sort">
+              <option value="type">Type</option>
+              <option value="amount">Amount</option>
+              <option value="merchant">Name</option>
+            </select>
+          </label>
+        </section>
         <section class="subscription-grid">
           <article class="glass recommendations-panel">
             <div class="section-heading compact">
@@ -1232,6 +1254,10 @@
                   <input type="text" id="transaction-search" placeholder="Search merchant" />
                 </label>
               </div>
+            </div>
+            <div class="transaction-mobile-summary">
+              <span id="transaction-mobile-month">This month</span>
+              <strong id="transaction-mobile-total">$0 total spend</strong>
             </div>
             <div id="transaction-month-groups" class="transaction-month-groups"></div>
             <div id="transaction-list" class="transaction-list"></div>

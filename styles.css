@@ -715,6 +715,21 @@ select {
   cursor: pointer;
 }
 
+.snapshot-account-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.snapshot-account-actions .primary-btn,
+.snapshot-account-actions .ghost-btn {
+  min-height: 44px;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
 .snapshot-accounts-list {
   display: grid;
   gap: 0;
@@ -3182,6 +3197,54 @@ select {
   padding: 28px;
 }
 
+.spending-mobile-strip,
+.recurring-control-strip,
+.transaction-mobile-summary {
+  display: none;
+}
+
+.app-page[data-page="snapshot"] .page-intro,
+.app-page[data-page="spending"] .page-intro,
+.app-page[data-page="spending"] .section-bridge,
+.app-page[data-page="spending"] .budget-coach-grid,
+.app-page[data-page="recurring"] .page-intro,
+.app-page[data-page="recurring"] .section-bridge,
+.app-page[data-page="recurring"] .recurring-hub,
+.app-page[data-page="transactions"] .page-intro {
+  display: none;
+}
+
+.app-page[data-page="snapshot"] .snapshot-command-center,
+.app-page[data-page="snapshot"] .snapshot-live-grid,
+.app-page[data-page="snapshot"] .dashboard-strip,
+.app-page[data-page="snapshot"] .snapshot-investing-bridge,
+.app-page[data-page="snapshot"] .results-grid,
+.app-page[data-page="snapshot"] .charts-panel,
+.app-page[data-page="snapshot"] .guidance-grid {
+  display: none;
+}
+
+.app-page[data-page="snapshot"] .planner-grid,
+.app-page[data-page="spending"] .automation-hub,
+.app-page[data-page="spending"] .budgeting-grid,
+.app-page[data-page="recurring"] .recurring-control-strip,
+.app-page[data-page="recurring"] .subscription-grid,
+.app-page[data-page="transactions"] .budgeting-grid {
+  margin-top: 20px;
+}
+
+.app-page[data-page="spending"] .automation-hub .section-heading,
+.app-page[data-page="recurring"] .recommendations-panel .section-heading,
+.app-page[data-page="transactions"] .budget-workbench .section-heading {
+  margin-bottom: 14px;
+}
+
+.app-page[data-page="spending"] .automation-hub .page-intro-text,
+.app-page[data-page="recurring"] .recommendations-panel .page-intro-text,
+.app-page[data-page="transactions"] .budget-workbench .page-intro-text {
+  display: none;
+}
+
 .automation-summary-grid,
 .automation-highlight-row,
 .automation-visual-grid,
@@ -3400,6 +3463,105 @@ select {
 .subscription-list {
   display: grid;
   gap: 14px;
+}
+
+.spending-mini-bars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 12px;
+}
+
+.mini-bar-card {
+  border-radius: 20px;
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.mini-bar-columns {
+  min-height: 92px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.mini-bar {
+  width: 14px;
+  border-radius: 999px 999px 4px 4px;
+  display: block;
+}
+
+.mini-bar-income {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.mini-bar-spend {
+  background: rgba(255, 255, 255, 0.55);
+  border: 2px dotted rgba(255, 255, 255, 0.72);
+}
+
+.spending-mini-legend {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.92rem;
+  margin-top: 10px;
+}
+
+.spending-mini-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-dot.income-dot {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.legend-dot.spend-dot {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px dotted rgba(255, 255, 255, 0.85);
+}
+
+.mini-bar-empty {
+  display: grid;
+  gap: 6px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.recurring-control-strip {
+  margin: 18px 0 24px;
+  padding: 18px;
+}
+
+.recurring-view-toggle {
+  display: flex;
+  gap: 6px;
+}
+
+.recurring-view-btn {
+  flex: 1 1 0;
+  min-height: 48px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-family: "Sora", sans-serif;
+  font-weight: 600;
+}
+
+.recurring-sort {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.recurring-sort span {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
 }
 
 .transaction-summary-grid {
@@ -4624,6 +4786,22 @@ select {
     font-size: 0.95rem;
   }
 
+  .app-page[data-page="snapshot"] .snapshot-accounts-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-account-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .app-page[data-page="snapshot"] .snapshot-account-actions > * {
+    width: 100%;
+  }
+
   .app-page[data-page="snapshot"] .snapshot-account-row {
     padding: 16px 16px;
   }
@@ -4639,22 +4817,9 @@ select {
     display: none;
   }
 
-  .app-page[data-page="snapshot"] .monarch-strip {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 78%;
-    overflow-x: auto;
-    gap: 14px;
-    padding-bottom: 2px;
-    margin-top: 0;
-    scroll-snap-type: x proximity;
-  }
-
-  .app-page[data-page="snapshot"] .monarch-tile {
-    scroll-snap-align: start;
-    padding: 18px 18px 20px;
-    border-radius: 28px;
-    box-shadow: 0 18px 28px rgba(116, 34, 69, 0.18);
+  .app-page[data-page="snapshot"] .monarch-strip,
+  .app-page[data-page="snapshot"] .snapshot-command-center {
+    display: none;
   }
 
   .app-page[data-page="snapshot"] .snapshot-command-center,
@@ -4722,6 +4887,62 @@ select {
     box-shadow: 0 18px 30px rgba(190, 45, 87, 0.22);
   }
 
+  .app-page[data-page="spending"] .spending-mobile-strip {
+    display: block;
+    margin-top: -10px;
+    padding: 14px 16px 16px;
+    border-radius: 0 0 30px 30px;
+    background: linear-gradient(180deg, #c82b58 0%, #e73f57 100%);
+    color: #fff;
+    box-shadow: 0 18px 30px rgba(190, 45, 87, 0.18);
+  }
+
+  .app-page[data-page="spending"] .page-intro-callouts,
+  .app-page[data-page="spending"] .section-bridge,
+  .app-page[data-page="spending"] .budget-coach-grid,
+  .app-page[data-page="recurring"] .page-intro-callouts,
+  .app-page[data-page="recurring"] .section-bridge,
+  .app-page[data-page="recurring"] .recurring-hub,
+  .app-page[data-page="transactions"] .page-intro-callouts {
+    display: none;
+  }
+
+  .app-page[data-page="spending"] .automation-hub {
+    margin-top: -16px;
+  }
+
+  .app-page[data-page="spending"] .automation-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 8px;
+    gap: 0;
+    box-shadow: 0 18px 30px rgba(53, 57, 78, 0.08);
+  }
+
+  .app-page[data-page="spending"] .automation-summary-grid .mini-stat {
+    background: transparent;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(20, 31, 56, 0.08);
+    min-height: 86px;
+    box-shadow: none;
+  }
+
+  .app-page[data-page="spending"] .automation-summary-grid .mini-stat:last-child,
+  .app-page[data-page="spending"] .automation-summary-grid .mini-stat:nth-last-child(2) {
+    border-bottom: none;
+  }
+
+  .app-page[data-page="spending"] .automation-hub .section-heading,
+  .app-page[data-page="transactions"] .budget-workbench .section-heading {
+    margin-bottom: 12px;
+  }
+
+  .app-page[data-page="spending"] .automation-hub .page-intro-text,
+  .app-page[data-page="transactions"] .budget-workbench .page-intro-text {
+    display: none;
+  }
+
   .app-page[data-page="spending"] .period-toggle-group {
     width: 100%;
     justify-content: space-between;
@@ -4753,13 +4974,16 @@ select {
     background: rgba(255, 255, 255, 0.08);
   }
 
-  .app-page[data-page="spending"] .automation-summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .app-page[data-page="spending"] .automation-highlight-row,
   .app-page[data-page="spending"] .automation-visual-grid {
     grid-template-columns: 1fr;
+  }
+
+  .app-page[data-page="spending"] .automation-highlight-card {
+    border-radius: 24px;
+    padding: 18px;
+    background: #ffffff;
+    box-shadow: 0 16px 28px rgba(53, 57, 78, 0.08);
   }
 
   .app-page[data-page="spending"] .donut-wrap {
@@ -4775,11 +4999,51 @@ select {
   }
 
   .app-page[data-page="transactions"] .transaction-summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: none;
+  }
+
+  .app-page[data-page="transactions"] .transaction-mobile-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 6px 14px;
+    color: #666b78;
+    font-size: 0.96rem;
+  }
+
+  .app-page[data-page="transactions"] .transaction-mobile-summary strong {
+    font-family: "Sora", sans-serif;
+    color: #2b2f38;
   }
 
   .app-page[data-page="transactions"] .transaction-filters {
     grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .app-page[data-page="transactions"] .transaction-filters label:first-child,
+  .app-page[data-page="transactions"] .transaction-filters label:nth-child(2) {
+    display: none;
+  }
+
+  .app-page[data-page="transactions"] .transaction-filters label:last-child {
+    margin: 0;
+  }
+
+  .app-page[data-page="transactions"] .transaction-filters input {
+    min-height: 64px;
+    border-radius: 24px;
+    border: none;
+    background: rgba(87, 15, 42, 0.82);
+    color: #ffffff;
+    font-size: 1.1rem;
+    padding: 0 22px;
+  }
+
+  .app-page[data-page="transactions"] .transaction-filters input::placeholder {
+    color: rgba(255, 255, 255, 0.82);
   }
 
   .app-page[data-page="transactions"] .transaction-month-groups {
@@ -4796,12 +5060,28 @@ select {
   }
 
   .app-page[data-page="transactions"] .premium-transaction-item {
-    border-radius: 26px;
-    padding: 18px;
+    border-radius: 0;
+    padding: 18px 0;
+    border: none;
+    border-bottom: 1px solid rgba(25, 34, 58, 0.08);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .app-page[data-page="transactions"] .transaction-month-section {
+    border-radius: 30px;
+    padding: 0 18px 8px;
+    background: #ffffff;
+    box-shadow: 0 18px 30px rgba(53, 57, 78, 0.08);
   }
 
   .app-page[data-page="transactions"] .transaction-review-row {
     grid-template-columns: 1fr;
+  }
+
+  .app-page[data-page="transactions"] .transaction-review-row,
+  .app-page[data-page="transactions"] .transaction-actions-row {
+    display: none;
   }
 
   .app-page[data-page="transactions"] .transaction-actions-row > .ghost-btn,
@@ -4813,17 +5093,47 @@ select {
     background: linear-gradient(180deg, #ffffff 0%, #fffaf7 100%);
   }
 
-  .app-page[data-page="recurring"] .recurring-summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .app-page[data-page="recurring"] .recurring-control-strip {
+    display: block;
+    margin-top: -14px;
+    padding: 18px;
+    background: linear-gradient(180deg, #be2956 0%, #df3d56 100%);
+    color: #fff;
+    box-shadow: 0 18px 30px rgba(190, 45, 87, 0.22);
   }
 
-  .app-page[data-page="recurring"] .recurring-insights {
-    grid-template-columns: 1fr;
+  .app-page[data-page="recurring"] .recurring-view-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    padding: 6px;
+  }
+
+  .app-page[data-page="recurring"] .recurring-view-btn {
+    color: rgba(255, 255, 255, 0.94);
+  }
+
+  .app-page[data-page="recurring"] .recurring-view-btn.is-active {
+    background: #ffffff;
+    color: #1d1d1f;
+  }
+
+  .app-page[data-page="recurring"] .recurring-sort span {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .app-page[data-page="recurring"] .recurring-sort select {
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .app-page[data-page="recurring"] .subscription-item {
-    border-radius: 26px;
-    padding: 18px;
+    border-radius: 0;
+    padding: 18px 0;
+    border: none;
+    border-bottom: 1px solid rgba(25, 34, 58, 0.08);
+    background: transparent;
+    box-shadow: none;
   }
 
   .app-page[data-page="recurring"] .subscription-top strong {
@@ -4831,7 +5141,22 @@ select {
   }
 
   .app-page[data-page="recurring"] .subscription-list {
-    gap: 12px;
+    gap: 0;
+  }
+
+  .app-page[data-page="recurring"] .recommendations-panel {
+    padding: 0 18px 8px;
+    overflow: hidden;
+  }
+
+  .app-page[data-page="recurring"] .recommendations-panel .section-heading.compact {
+    padding-top: 18px;
+    padding-bottom: 8px;
+  }
+
+  .app-page[data-page="recurring"] .transaction-summary-grid,
+  .app-page[data-page="recurring"] .subscription-actions {
+    display: none;
   }
 
   .app-page[data-page="spending"] .chart-card,
