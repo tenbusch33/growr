@@ -364,6 +364,645 @@
   max-width: 76ch;
 }
 
+/* Signed-in website presentation rebuild */
+.app-page[data-page="snapshot"],
+.app-page[data-page="spending"],
+.app-page[data-page="recurring"],
+.app-page[data-page="transactions"],
+.app-page[data-page="investing"],
+.app-page[data-page="networth"],
+.app-page[data-page="account"],
+.app-page[data-page="accounts"] {
+  background: #f7faf9;
+}
+
+.product-page-shell,
+.app-page[data-page="investing"],
+.app-page[data-page="networth"],
+.app-page[data-page="account"],
+.app-page[data-page="accounts"] {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 32px 96px;
+}
+
+.product-page-shell {
+  display: grid;
+  gap: 32px;
+}
+
+.product-page-header,
+.app-page[data-page="investing"] > .page-intro,
+.app-page[data-page="networth"] > .page-intro,
+.app-page[data-page="account"] > .page-intro,
+.app-page[data-page="accounts"] > .page-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  padding: 0 0 4px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  max-width: none;
+}
+
+.product-page-header-copy,
+.app-page[data-page="investing"] > .page-intro > div:first-child,
+.app-page[data-page="networth"] > .page-intro > div:first-child,
+.app-page[data-page="account"] > .page-intro > div:first-child,
+.app-page[data-page="accounts"] > .page-intro > div:first-child {
+  max-width: 860px;
+}
+
+.product-page-header h1,
+.app-page[data-page="investing"] > .page-intro h2,
+.app-page[data-page="networth"] > .page-intro h2,
+.app-page[data-page="account"] > .page-intro h2,
+.app-page[data-page="accounts"] > .page-intro h2 {
+  margin: 0;
+  color: #0f1720;
+  font-family: "Sora", sans-serif;
+  font-size: clamp(2.6rem, 4vw, 4.4rem);
+  line-height: 0.96;
+  letter-spacing: -0.07em;
+}
+
+.product-page-summary,
+.app-page[data-page="investing"] > .page-intro .page-intro-text,
+.app-page[data-page="networth"] > .page-intro .page-intro-text,
+.app-page[data-page="account"] > .page-intro .page-intro-text,
+.app-page[data-page="accounts"] > .page-intro .page-intro-text {
+  margin: 14px 0 0;
+  max-width: 64ch;
+  color: #5f6b7a;
+  font-size: 1.04rem;
+  line-height: 1.68;
+}
+
+.product-page-header .eyebrow,
+.app-page[data-page="investing"] > .page-intro .eyebrow,
+.app-page[data-page="networth"] > .page-intro .eyebrow,
+.app-page[data-page="account"] > .page-intro .eyebrow,
+.app-page[data-page="accounts"] > .page-intro .eyebrow {
+  margin-bottom: 14px;
+  color: #22c7b8;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.product-inline-action {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  min-width: 280px;
+  padding: 18px 22px;
+  border-radius: 20px;
+  border: 1px solid rgba(15, 23, 32, 0.08);
+  background: #ffffff;
+  box-shadow: 0 18px 36px rgba(15, 23, 32, 0.06);
+  color: #0f1720;
+  text-align: left;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.product-inline-action strong {
+  font-size: 1rem;
+  letter-spacing: -0.03em;
+}
+
+.product-inline-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 24px 44px rgba(15, 23, 32, 0.08);
+  border-color: rgba(34, 199, 184, 0.22);
+}
+
+.app-page[data-page="investing"] > .page-intro .page-intro-callouts,
+.app-page[data-page="networth"] > .page-intro .page-intro-callouts,
+.app-page[data-page="account"] > .page-intro .page-intro-callouts,
+.app-page[data-page="accounts"] > .page-intro .page-intro-callouts,
+.app-page[data-page="investing"] > .section-bridge,
+.app-page[data-page="networth"] > .section-bridge,
+.app-page[data-page="accounts"] > .section-bridge {
+  display: none;
+}
+
+.snapshot-hero-grid,
+.snapshot-support-grid,
+.snapshot-outlook-grid,
+.snapshot-supporting-grid,
+.snapshot-context-grid {
+  display: grid;
+  gap: 28px;
+}
+
+.snapshot-hero-grid {
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.9fr);
+  align-items: stretch;
+}
+
+.snapshot-support-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.snapshot-outlook-grid,
+.snapshot-supporting-grid,
+.snapshot-context-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.product-hero-card,
+.product-summary-card,
+.support-stat-card,
+.investment-forecast-card,
+.opportunity-card,
+.scenario-preview-card,
+.support-insight-card,
+.snapshot-spend-card,
+.snapshot-accounts-card,
+.spending-top-card,
+.spending-breakdown-card,
+.recurring-hub,
+.recurring-control-strip,
+.recommendations-panel,
+.budget-workbench,
+.planner-panel,
+.results-panel,
+.charts-panel,
+.linked-card,
+.accounts-panel,
+.account-verify-card,
+.account-upgrade-panel,
+.account-plan-panel,
+.results-panel,
+.planner-panel,
+.chart-card {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 32, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 18px 40px rgba(15, 23, 32, 0.06);
+}
+
+.product-hero-card,
+.product-summary-card,
+.support-stat-card,
+.investment-forecast-card,
+.opportunity-card,
+.scenario-preview-card,
+.support-insight-card,
+.snapshot-spend-card,
+.snapshot-accounts-card,
+.spending-top-card,
+.spending-breakdown-card,
+.recurring-hub,
+.recommendations-panel,
+.budget-workbench,
+.planner-panel,
+.results-panel,
+.charts-panel {
+  padding: 32px;
+}
+
+.snapshot-spend-card,
+.snapshot-accounts-card {
+  min-height: 100%;
+}
+
+.snapshot-spend-card .snapshot-mini-trend {
+  margin: 12px 0 6px;
+}
+
+.snapshot-accounts-head {
+  gap: 24px;
+}
+
+.snapshot-account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.snapshot-account-row {
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(15, 23, 32, 0.06);
+}
+
+.snapshot-account-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.snapshot-sync-row {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(15, 23, 32, 0.06);
+}
+
+.app-page[data-page="snapshot"] .grow-score-card,
+.app-page[data-page="snapshot"] .next-best-move-card,
+.app-page[data-page="snapshot"] .support-stat-card,
+.app-page[data-page="snapshot"] .investment-forecast-card,
+.app-page[data-page="snapshot"] .opportunity-card,
+.app-page[data-page="snapshot"] .scenario-preview-card,
+.app-page[data-page="snapshot"] .support-insight-card,
+.app-page[data-page="snapshot"] .snapshot-spend-card,
+.app-page[data-page="snapshot"] .snapshot-accounts-card {
+  margin: 0;
+}
+
+.spending-page-shell,
+.recurring-page-shell,
+.transactions-page-shell {
+  gap: 28px;
+}
+
+.product-toolbar-card {
+  padding: 28px 32px;
+}
+
+.spending-period-bar,
+.recurring-control-strip,
+.transaction-dashboard {
+  background: #ffffff;
+}
+
+.spending-top-card {
+  display: grid;
+  gap: 24px;
+}
+
+.spending-top-card-row {
+  align-items: end;
+}
+
+.spending-top-card-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.spending-summary-row {
+  min-height: 112px;
+  padding: 22px 24px;
+  border: 1px solid rgba(15, 23, 32, 0.06);
+  border-radius: 18px;
+  background: #fbfcfc;
+}
+
+.spending-breakdown-header {
+  margin-top: 4px;
+}
+
+.spending-breakdown-header p {
+  margin: 0;
+  color: #0f1720;
+  font-family: "Sora", sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: -0.04em;
+}
+
+.spending-breakdown-card {
+  display: grid;
+  gap: 24px;
+}
+
+.spending-breakdown-tabs {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: fit-content;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  background: #f4f7f7;
+  border: 1px solid rgba(15, 23, 32, 0.06);
+}
+
+.spending-breakdown-tab,
+.period-btn,
+.recurring-view-btn {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  color: #5f6b7a;
+  font-weight: 700;
+}
+
+.spending-breakdown-tab.is-active,
+.period-btn.is-active,
+.recurring-view-btn.is-active {
+  background: #ffffff;
+  color: #0f1720;
+  box-shadow: 0 8px 18px rgba(15, 23, 32, 0.08);
+}
+
+.spending-breakdown-toolbar {
+  justify-content: flex-end;
+}
+
+.spending-donut-wrap {
+  min-height: 360px;
+}
+
+.spending-donut-legend {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.subscription-grid,
+.budgeting-grid,
+.planner-grid,
+.results-grid,
+.charts-grid,
+.linked-columns {
+  display: grid;
+  gap: 28px;
+}
+
+.subscription-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.budgeting-grid {
+  grid-template-columns: minmax(320px, 0.78fr) minmax(0, 1.22fr);
+  align-items: start;
+}
+
+.planner-grid,
+.results-grid,
+.charts-grid,
+.linked-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.recurring-hub {
+  display: grid;
+  gap: 24px;
+}
+
+.recurring-summary-grid,
+.transaction-summary-grid,
+.account-meta-grid,
+.metric-grid,
+.live-summary-grid {
+  gap: 16px;
+}
+
+.recurring-control-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 28px;
+}
+
+.recurring-view-toggle {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  background: #f4f7f7;
+  border: 1px solid rgba(15, 23, 32, 0.06);
+}
+
+.recommendations-panel .section-heading,
+.planner-panel .section-heading,
+.results-panel .section-heading,
+.charts-panel .section-heading,
+.budget-workbench .section-heading,
+.recurring-hub .section-heading {
+  margin-bottom: 22px;
+}
+
+.subscription-list,
+.transaction-list,
+.linked-list {
+  display: grid;
+  gap: 12px;
+}
+
+.subscription-item,
+.transaction-item,
+.linked-item {
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 32, 0.06);
+  background: #fbfcfc;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.subscription-item:hover,
+.transaction-item:hover,
+.linked-item:hover {
+  border-color: rgba(34, 199, 184, 0.18);
+  box-shadow: 0 14px 30px rgba(15, 23, 32, 0.06);
+  transform: translateY(-1px);
+}
+
+.transaction-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.transaction-filters label,
+.transaction-form label,
+.planner-form label,
+.account-verify-form label {
+  display: grid;
+  gap: 8px;
+  color: #5f6b7a;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.transaction-filters input,
+.transaction-filters select,
+.transaction-form input,
+.transaction-form select,
+.planner-form input,
+.planner-form select,
+.account-verify-form input,
+#accountEmail,
+#accountFullName {
+  min-height: 50px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 32, 0.1);
+  background: #ffffff;
+  color: #0f1720;
+}
+
+.transaction-mobile-summary {
+  display: none;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metric-card,
+.mini-stat,
+.forecast-meta-card,
+.scenario-value-card,
+.signal-card,
+.category-card,
+.linked-card,
+.integration-chip {
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: #fbfcfc;
+  border: 1px solid rgba(15, 23, 32, 0.06);
+}
+
+.metric-card strong,
+.mini-stat strong,
+.scenario-value-card strong,
+.support-stat-value,
+.forecast-primary-value,
+.opportunity-amount,
+.support-insight-value {
+  letter-spacing: -0.05em;
+}
+
+.metric-card-wide {
+  grid-column: span 3;
+}
+
+.app-page[data-page="account"] > .page-intro .page-intro-callouts {
+  display: none;
+}
+
+.app-page[data-page="account"] .planner-grid {
+  margin-top: 24px;
+  align-items: start;
+}
+
+.app-page[data-page="investing"] > .planner-grid,
+.app-page[data-page="investing"] > .results-grid,
+.app-page[data-page="investing"] > .charts-panel,
+.app-page[data-page="networth"] > .planner-grid,
+.app-page[data-page="networth"] > .charts-panel,
+.app-page[data-page="account"] > .planner-grid,
+.app-page[data-page="accounts"] > .accounts-panel {
+  margin-top: 28px;
+}
+
+.app-page[data-page="account"] .planner-panel,
+.app-page[data-page="account"] .results-panel {
+  padding: 32px;
+}
+
+.app-page[data-page="account"] .auth-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.billing-interval-toggle,
+.account-plan-options {
+  gap: 14px;
+}
+
+.helper-banner,
+.status-message,
+.chart-note,
+.metric-note {
+  color: #5f6b7a;
+}
+
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.snapshot-inline-link,
+.product-inline-action,
+.text-link-btn {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.primary-btn:hover,
+.secondary-btn:hover,
+.ghost-btn:hover,
+.snapshot-inline-link:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1180px) {
+  .snapshot-hero-grid,
+  .snapshot-outlook-grid,
+  .snapshot-supporting-grid,
+  .snapshot-context-grid,
+  .planner-grid,
+  .results-grid,
+  .charts-grid,
+  .budgeting-grid,
+  .subscription-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .snapshot-support-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .product-page-shell,
+  .app-page[data-page="investing"],
+  .app-page[data-page="networth"],
+  .app-page[data-page="account"],
+  .app-page[data-page="accounts"] {
+    padding: 28px 20px 72px;
+  }
+
+  .product-page-header,
+  .app-page[data-page="investing"] > .page-intro,
+  .app-page[data-page="networth"] > .page-intro,
+  .app-page[data-page="account"] > .page-intro,
+  .app-page[data-page="accounts"] > .page-intro {
+    grid-template-columns: 1fr;
+  }
+
+  .snapshot-support-grid,
+  .metric-grid,
+  .transaction-filters,
+  .spending-top-card-summary,
+  .spending-donut-legend {
+    grid-template-columns: 1fr;
+  }
+
+  .product-toolbar-card,
+  .product-hero-card,
+  .product-summary-card,
+  .support-stat-card,
+  .investment-forecast-card,
+  .opportunity-card,
+  .scenario-preview-card,
+  .support-insight-card,
+  .snapshot-spend-card,
+  .snapshot-accounts-card,
+  .spending-top-card,
+  .spending-breakdown-card,
+  .recurring-hub,
+  .recommendations-panel,
+  .budget-workbench,
+  .planner-panel,
+  .results-panel,
+  .charts-panel {
+    padding: 24px;
+  }
+
+  .metric-card-wide {
+    grid-column: auto;
+  }
+}
+
 .app-page[data-page="snapshot"] .grow-score-card {
   padding: 34px;
   gap: 28px;
