@@ -39,7 +39,6 @@
               <button class="tab-btn" data-page-target="couples">Couples</button>
               <button class="tab-btn" data-page-target="investing">Investing</button>
               <button class="tab-btn" data-page-target="networth">Net Worth</button>
-              <button class="tab-btn" data-page-target="accounts">Connect Accounts</button>
             </div>
             <div class="topbar-auth">
               <button type="button" class="nav-login-btn" data-auth-target="login" id="login-nav-button">Log in</button>
@@ -374,7 +373,7 @@
           </div>
         </section>
         <section class="snapshot-priority-strip">
-          <button type="button" class="snapshot-priority-btn" data-page-target="accounts">
+          <button type="button" class="snapshot-priority-btn" data-scroll="#snapshot-connected-accounts">
             <span id="snapshot-priority-label">Connect accounts to unlock automatic tracking</span>
             <strong id="snapshot-priority-meta">Add account</strong>
           </button>
@@ -407,7 +406,7 @@
                 <span class="snapshot-card-label">Accounts</span>
                 <strong>Connected balances</strong>
               </div>
-              <button type="button" class="snapshot-inline-link" data-page-target="accounts">Add account</button>
+              <button type="button" class="snapshot-inline-link" data-scroll="#snapshot-connected-accounts">Add account</button>
             </div>
             <div class="snapshot-accounts-list">
               <div class="snapshot-account-row">
@@ -1359,12 +1358,12 @@
 
         </section>
 
-        <section class="app-page" data-page="accounts">
+        <section class="app-page" data-page="accounts" id="snapshot-connected-accounts">
         <section class="glass page-intro">
           <div>
-            <p class="eyebrow">Connect Accounts</p>
-            <h2>Link banks, cards, loans, and investments</h2>
-            <p class="page-intro-text">Bring in balances automatically so Growr can become more accurate and less manual.</p>
+            <p class="eyebrow">Connected accounts</p>
+            <h2>Link banks, cards, loans, and investments from Snapshot</h2>
+            <p class="page-intro-text">Bring in balances automatically so Growr can organize your dashboard without a separate account-linking tab.</p>
           </div>
           <div class="page-intro-callouts">
             <span>Plaid-powered</span>
@@ -2057,7 +2056,6 @@
             <strong>Planning</strong>
             <button type="button" class="footer-link" data-page-target="investing">Investing</button>
             <button type="button" class="footer-link" data-page-target="networth">Net Worth</button>
-            <button type="button" class="footer-link" data-page-target="accounts">Connect Accounts</button>
             <button type="button" class="footer-link" data-page-target="account">Account</button>
           </div>
           <div class="footer-link-column">

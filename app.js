@@ -490,10 +490,12 @@ function updateMobileAppChrome() {
 }
 
 function setActivePage(page) {
-  const nextPage = document.querySelector(`.app-page[data-page="${page}"]`) ? page : "snapshot";
+  const requestedPage = page === "accounts" ? "snapshot" : page;
+  const nextPage = document.querySelector(`.app-page[data-page="${requestedPage}"]`) ? requestedPage : "snapshot";
   state.currentPage = nextPage;
   document.querySelectorAll(".app-page").forEach((section) => {
-    section.classList.toggle("is-active", section.dataset.page === nextPage);
+    const isSnapshotAccountsCompanion = nextPage === "snapshot" && section.dataset.page === "accounts";
+    section.classList.toggle("is-active", section.dataset.page === nextPage || isSnapshotAccountsCompanion);
   });
   document.querySelectorAll(".tab-btn[data-page-target]").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.pageTarget === nextPage);
@@ -4618,7 +4620,8 @@ document.querySelectorAll("[data-scroll]").forEach((button) => {
   button.addEventListener("click", () => {
     const target = document.querySelector(button.dataset.scroll);
     if (target) {
-      setActivePage("home");
+      const pageParent = target.closest(".app-page");
+      setActivePage(pageParent?.dataset.page || "home");
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   });
