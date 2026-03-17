@@ -3714,6 +3714,203 @@ select {
   display: none;
 }
 
+@media (min-width: 641px) {
+  .app-page[data-page="spending"] {
+    gap: 20px;
+  }
+
+  .app-page[data-page="spending"] > .page-intro {
+    margin-bottom: 4px;
+  }
+
+  .app-page[data-page="spending"] .spending-period-bar {
+    max-width: none;
+    margin: 0;
+    padding: 26px 30px;
+    border: 1px solid rgba(20, 31, 56, 0.08);
+    border-radius: 32px;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+    box-shadow: 0 18px 32px rgba(53, 57, 78, 0.08);
+  }
+
+  .app-page[data-page="spending"] .spending-screen-title {
+    justify-content: flex-start;
+    padding: 0 0 18px;
+  }
+
+  .app-page[data-page="spending"] .spending-screen-title h2 {
+    color: #171717;
+    font-size: clamp(1.9rem, 2.2vw, 2.5rem);
+  }
+
+  .app-page[data-page="spending"] .period-toggle-group {
+    width: fit-content;
+    justify-content: flex-start;
+    padding: 6px;
+    gap: 8px;
+    border-radius: 999px;
+    background: #f4f6fb;
+    border: 1px solid rgba(20, 31, 56, 0.06);
+  }
+
+  .app-page[data-page="spending"] .period-btn {
+    min-width: 96px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: #70778a;
+    font-size: 0.98rem;
+    font-weight: 700;
+  }
+
+  .app-page[data-page="spending"] .period-btn.is-active {
+    background: #ffffff;
+    color: #171717;
+    box-shadow: 0 10px 20px rgba(34, 39, 58, 0.08);
+  }
+
+  .app-page[data-page="spending"] .period-range-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .app-page[data-page="spending"] .spending-mini-bars {
+    margin-top: 20px;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .app-page[data-page="spending"] .mini-bar-card {
+    min-height: 148px;
+    background: #f7f9fc;
+    border: 1px solid rgba(20, 31, 56, 0.08);
+    box-shadow: none;
+  }
+
+  .app-page[data-page="spending"] .mini-bar-card strong,
+  .app-page[data-page="spending"] .mini-bar-card span {
+    color: #171717;
+  }
+
+  .app-page[data-page="spending"] .mini-bar-income {
+    background: #7ca9ff;
+  }
+
+  .app-page[data-page="spending"] .mini-bar-spend {
+    background:
+      radial-gradient(circle, rgba(255, 255, 255, 0.65) 18%, transparent 22%) 0 0 / 6px 6px,
+      #ff8d76;
+    border: none;
+  }
+
+  .app-page[data-page="spending"] .spending-mini-legend {
+    justify-content: flex-start;
+    margin-top: 14px;
+    color: #666b78;
+  }
+
+  .app-page[data-page="spending"] .spending-top-card,
+  .app-page[data-page="spending"] .spending-breakdown-card {
+    max-width: none;
+    margin: 0;
+  }
+
+  .app-page[data-page="spending"] .spending-top-card-row {
+    align-items: center;
+  }
+
+  .app-page[data-page="spending"] .spending-top-card-copy strong {
+    font-size: clamp(2.6rem, 4vw, 3.5rem);
+  }
+
+  .app-page[data-page="spending"] .spending-top-card-trend {
+    justify-items: end;
+    text-align: right;
+  }
+
+  .app-page[data-page="spending"] .spending-breakdown-card {
+    padding-bottom: 28px;
+  }
+
+  .app-page[data-page="spending"] .spending-breakdown-toolbar {
+    padding: 18px 26px 0;
+    justify-content: flex-end;
+  }
+
+  .app-page[data-page="spending"] .spending-donut-wrap {
+    width: min(100%, 360px);
+    margin: 16px auto 10px;
+  }
+
+  .app-page[data-page="spending"] .spending-donut-wrap .donut-chart {
+    width: min(320px, 100%);
+    max-width: 320px;
+  }
+
+  .app-page[data-page="spending"] .spending-donut-wrap .donut-center strong {
+    font-size: clamp(2rem, 2.8vw, 2.6rem);
+  }
+
+  .app-page[data-page="spending"] .spending-donut-legend {
+    width: min(100%, 820px);
+    margin: 0 auto;
+  }
+
+  .app-page[data-page="spending"] .spending-breakdown-tabs {
+    padding-inline: 26px;
+  }
+
+  .app-page[data-page="spending"] .spending-breakdown-header {
+    margin-top: 4px;
+  }
+
+  .app-page[data-page="spending"] .spending-breakdown-header p {
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .app-page[data-page="spending"] .spending-breakdown-label {
+    display: block;
+    text-align: center;
+    margin: 6px auto 14px;
+    font-size: 1rem;
+  }
+
+  .app-page[data-page="spending"] .legend-list.spending-donut-legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .app-page[data-page="spending"] .legend-list.spending-donut-legend .legend-row {
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: #f7f9fc;
+    border: 1px solid rgba(20, 31, 56, 0.06);
+    box-shadow: none;
+  }
+
+  .app-page[data-page="spending"] .spending-summary-row {
+    min-height: 88px;
+  }
+
+  .app-page[data-page="spending"] .spending-summary-copy strong,
+  .app-page[data-page="spending"] .spending-summary-row > strong {
+    font-size: 1.7rem;
+  }
+
+  .app-page[data-page="spending"] .spending-period-bar.spending-rocket-shell::before,
+  .app-page[data-page="spending"] .spending-period-bar.spending-rocket-shell::after {
+    display: none;
+  }
+}
+
 .app-page[data-page="snapshot"] .page-intro,
 .app-page[data-page="spending"] .section-bridge,
 .app-page[data-page="spending"] .budget-coach-grid,
