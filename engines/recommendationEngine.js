@@ -40,26 +40,55 @@
     return "Review the math before changing the plan.";
   }
 
+  function formatTopFlexibleCategories(profile) {
+    const topCategories = Array.isArray(profile.monthlyDiscretionaryBreakdown)
+      ? profile.monthlyDiscretionaryBreakdown.slice(0, 3)
+      : [];
+
+    if (!topCategories.length) {
+      return null;
+    }
+
+    return topCategories
+      .map(
+        (entry) =>
+          `${String(entry.category || "other")
+            .replace(/\b\w/g, (letter) => letter.toUpperCase())}: $${Math.round(entry.monthlyAmount).toLocaleString()}`
+      )
+      .join(" • ");
+  }
+
   function buildRecommendations(profile, cashflow, debtAnalysis, investmentAnalysis, opportunityCost, scenarios) {
     const recommendations = [];
     const toxicDebt = debtAnalysis.toxicDebt;
 
     if (cashflow.freeCashflow < 0) {
+      const shortfall = Math.abs(cashflow.freeCashflow);
+      const flexibleCategories = formatTopFlexibleCategories(profile);
+      const canCloseMostlyFromFlexibleSpend = cashflow.discretionarySpend >= shortfall * 0.8;
       recommendations.push(
         createRecommendation({
           id: "negative-cashflow",
           title: "Close the monthly shortfall first",
-          action: `Cut at least $${Math.round(Math.abs(cashflow.freeCashflow)).toLocaleString()} of flexible spending this month`,
-          why: `Your current monthly cash flow is negative by about $${Math.round(Math.abs(cashflow.freeCashflow)).toLocaleString()}, so every other goal is fighting a monthly deficit.`,
+          action: canCloseMostlyFromFlexibleSpend
+            ? `Reduce about $${Math.round(shortfall).toLocaleString()} of flexible spending this month`
+            : `Reduce flexible spending first, then review fixed costs because the shortfall is about $${Math.round(shortfall).toLocaleString()} this month`,
+          why: `Your current monthly cash flow is negative by about $${Math.round(shortfall).toLocaleString()}, so Growr needs to close the monthly deficit before recommending any bigger investing or payoff move.`,
           mathExplanation: [
             `Monthly income: $${Math.round(cashflow.monthlyIncomeNet).toLocaleString()}`,
             `Essential spend + debt minimums + investing: $${Math.round(cashflow.essentialSpend + cashflow.debtMinimums + cashflow.recurringInvestments).toLocaleString()}`,
             `Discretionary spend: $${Math.round(cashflow.discretionarySpend).toLocaleString()}`,
+            ...(flexibleCategories ? [`Largest flexible categories: ${flexibleCategories}`] : []),
           ],
-          impact: { monthlyCashflowDelta: Math.abs(cashflow.freeCashflow) },
+          impact: { monthlyCashflowDelta: shortfall },
           timeHorizon: "this_month",
-          confidence: "high",
-          assumptions: ["Assumes the last month of transactions reflects a normal month."],
+          confidence: profile.assumptions?.transactionCoverage === "high" ? "high" : "medium",
+          assumptions: [
+            "Assumes the recent transaction window reflects a normal month.",
+            ...(profile.assumptions?.transactionCoverage === "low"
+              ? ["Transaction coverage is limited, so this estimate may move after more linked data comes in."]
+              : []),
+          ],
           priorityScore: 100,
         })
       );

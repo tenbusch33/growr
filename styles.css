@@ -944,11 +944,11 @@ select {
   order: 2;
 }
 
-.app-page[data-page="snapshot"] .snapshot-decision-grid {
+.app-page[data-page="snapshot"] .snapshot-dashboard-layout {
   order: 3;
 }
 
-.app-page[data-page="snapshot"] .snapshot-dashboard-layout {
+.app-page[data-page="snapshot"] .snapshot-decision-grid {
   order: 4;
 }
 

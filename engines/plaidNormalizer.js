@@ -69,6 +69,125 @@
     return { type: "discretionary", amount };
   }
 
+  function getTransactionDate(entry) {
+    const rawValue =
+      entry?.date || entry?.authorizedDate || entry?.authorized_date || entry?.postedDate || entry?.transactionDate;
+    const date = rawValue ? new Date(rawValue) : null;
+    return date && !Number.isNaN(date.getTime()) ? date : null;
+  }
+
+  function getRecentTransactions(transactions) {
+    const datedTransactions = transactions
+      .map((entry) => ({ entry, date: getTransactionDate(entry) }))
+      .filter((item) => item.date);
+
+    if (!datedTransactions.length) {
+      return {
+        transactions,
+        observedDays: 30,
+        coverage: "low",
+      };
+    }
+
+    const latestTimestamp = Math.max(...datedTransactions.map((item) => item.date.getTime()));
+    const earliestAllowed = latestTimestamp - 34 * 24 * 60 * 60 * 1000;
+    const windowed = datedTransactions.filter((item) => item.date.getTime() >= earliestAllowed);
+    const timestamps = windowed.map((item) => item.date.getTime());
+    const observedDays = Math.max(
+      1,
+      Math.round((Math.max(...timestamps) - Math.min(...timestamps)) / (24 * 60 * 60 * 1000)) + 1
+    );
+    const coverage =
+      windowed.length >= 8 && observedDays >= 21
+        ? "high"
+        : windowed.length >= 4 && observedDays >= 14
+          ? "medium"
+          : "low";
+
+    return {
+      transactions: windowed.map((item) => item.entry),
+      observedDays,
+      coverage,
+    };
+  }
+
+  function createMonthlyizedTransactionBuckets(transactions) {
+    const recentWindow = getRecentTransactions(transactions);
+    const discretionaryBreakdown = {};
+    const monthTotals = new Map();
+
+    recentWindow.transactions.forEach((entry) => {
+      const date = getTransactionDate(entry);
+      const monthKey = date
+        ? `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`
+        : "unknown";
+      if (!monthTotals.has(monthKey)) {
+        monthTotals.set(monthKey, {
+          income: 0,
+          essential: 0,
+          debt: 0,
+          discretionary: 0,
+          discretionaryBreakdown: {},
+        });
+      }
+
+      const result = classifyTransaction(entry);
+      if (!result) {
+        return;
+      }
+
+      const bucket = monthTotals.get(monthKey);
+      bucket[result.type] += result.amount;
+
+      if (result.type === "discretionary") {
+        const categoryKey = normalizeCategory(entry.category) || "other";
+        bucket.discretionaryBreakdown[categoryKey] =
+          (bucket.discretionaryBreakdown[categoryKey] || 0) + result.amount;
+      }
+    });
+
+    const observedMonths = Math.max(monthTotals.size, 1);
+    monthTotals.forEach((bucket) => {
+      Object.entries(bucket.discretionaryBreakdown).forEach(([categoryKey, amount]) => {
+        discretionaryBreakdown[categoryKey] = (discretionaryBreakdown[categoryKey] || 0) + amount;
+      });
+    });
+
+    const rawBuckets = Array.from(monthTotals.values()).reduce(
+      (accumulator, bucket) => ({
+        monthlyIncomeNet: accumulator.monthlyIncomeNet + bucket.income / observedMonths,
+        monthlyEssentialSpend: accumulator.monthlyEssentialSpend + bucket.essential / observedMonths,
+        monthlyDebtPayments: accumulator.monthlyDebtPayments + bucket.debt / observedMonths,
+        monthlyDiscretionarySpend:
+          accumulator.monthlyDiscretionarySpend + bucket.discretionary / observedMonths,
+      }),
+      {
+        monthlyIncomeNet: 0,
+        monthlyEssentialSpend: 0,
+        monthlyDiscretionarySpend: 0,
+        monthlyDebtPayments: 0,
+      }
+    );
+
+    const monthlyDiscretionaryBreakdown = Object.entries(discretionaryBreakdown)
+      .map(([category, amount]) => ({
+        category,
+        monthlyAmount: shared.roundCurrency(amount / observedMonths),
+      }))
+      .filter((entry) => entry.monthlyAmount > 0)
+      .sort((left, right) => right.monthlyAmount - left.monthlyAmount);
+
+    return {
+      monthlyIncomeNet: shared.roundCurrency(rawBuckets.monthlyIncomeNet),
+      monthlyEssentialSpend: shared.roundCurrency(rawBuckets.monthlyEssentialSpend),
+      monthlyDiscretionarySpend: shared.roundCurrency(rawBuckets.monthlyDiscretionarySpend),
+      monthlyDebtPayments: shared.roundCurrency(rawBuckets.monthlyDebtPayments),
+      monthlyDiscretionaryBreakdown,
+      observedDays: recentWindow.observedDays,
+      coverage: recentWindow.coverage,
+    };
+  }
+
   function inferRecurringTransfers(investmentInputs) {
     return [
       {
@@ -124,30 +243,7 @@
     const investmentInputs = input.investmentInputs || {};
     const hasInvestmentAccess = Boolean(input.hasInvestmentAccess);
 
-    const transactionBuckets = transactions.reduce(
-      (accumulator, entry) => {
-        const result = classifyTransaction(entry);
-        if (!result) {
-          return accumulator;
-        }
-        if (result.type === "income") {
-          accumulator.monthlyIncomeNet += result.amount;
-        } else if (result.type === "essential") {
-          accumulator.monthlyEssentialSpend += result.amount;
-        } else if (result.type === "debt") {
-          accumulator.monthlyDebtMinimums += result.amount;
-        } else {
-          accumulator.monthlyDiscretionarySpend += result.amount;
-        }
-        return accumulator;
-      },
-      {
-        monthlyIncomeNet: 0,
-        monthlyEssentialSpend: 0,
-        monthlyDiscretionarySpend: 0,
-        monthlyDebtMinimums: 0,
-      }
-    );
+    const transactionBuckets = createMonthlyizedTransactionBuckets(transactions);
 
     const plannerIncome = shared.safeNumber(planner.income);
     const plannerEssential = shared.safeNumber(planner.housing) + shared.safeNumber(planner.essentials) + shared.safeNumber(planner.carCosts);
@@ -155,11 +251,6 @@
       shared.safeNumber(planner.creditCardPayment) +
       shared.safeNumber(planner.otherDebt) +
       shared.safeNumber(planner.carPayment);
-
-    const monthlyIncomeNet =
-      recurringIncome.reduce((sum, entry) => sum + shared.safeNumber(entry.estimatedMonthlyIncome), 0) ||
-      transactionBuckets.monthlyIncomeNet ||
-      plannerIncome;
 
     const monthlySubscriptions = subscriptions.reduce(
       (sum, entry) => sum + shared.safeNumber(entry.monthlyEstimate || entry.amount),
@@ -260,11 +351,37 @@
       });
     });
 
+    const recurringIncomeEstimate = recurringIncome.reduce(
+      (sum, entry) => sum + shared.safeNumber(entry.estimatedMonthlyIncome),
+      0
+    );
+    const linkedDebtMinimums = debts.reduce(
+      (sum, debt) => sum + shared.safeNumber(debt.minimumPayment),
+      0
+    );
+    const transactionCoverageStrong = transactionBuckets.coverage === "high";
+    const transactionCoverageUsable = transactionBuckets.coverage !== "low";
+    const monthlyIncomeNet = Math.max(
+      recurringIncomeEstimate,
+      transactionCoverageUsable ? transactionBuckets.monthlyIncomeNet : 0,
+      plannerIncome
+    );
+    const monthlyEssentialSpend = transactionCoverageStrong
+      ? transactionBuckets.monthlyEssentialSpend
+      : Math.max(transactionBuckets.monthlyEssentialSpend, plannerEssential, monthlyBills);
+    const monthlyDiscretionarySpend = transactionCoverageUsable
+      ? transactionBuckets.monthlyDiscretionarySpend
+      : Math.max(monthlySubscriptions, 0);
+    const monthlyDebtMinimums =
+      plannerDebtMinimums ||
+      linkedDebtMinimums ||
+      (transactionCoverageUsable ? transactionBuckets.monthlyDebtPayments : 0);
+
     return {
       monthlyIncomeNet,
-      monthlyEssentialSpend: transactionBuckets.monthlyEssentialSpend || plannerEssential || monthlyBills,
-      monthlyDiscretionarySpend: transactionBuckets.monthlyDiscretionarySpend || Math.max(monthlySubscriptions, 0),
-      monthlyDebtMinimums: transactionBuckets.monthlyDebtMinimums || plannerDebtMinimums,
+      monthlyEssentialSpend,
+      monthlyDiscretionarySpend,
+      monthlyDebtMinimums,
       monthlyRecurringInvestments: investments.reduce(
         (sum, account) => sum + shared.safeNumber(account.recurringContribution),
         0
@@ -283,6 +400,7 @@
       subscriptions,
       recurringBills,
       transactions,
+      monthlyDiscretionaryBreakdown: transactionBuckets.monthlyDiscretionaryBreakdown,
       linkedAccounts: linkedSummary.accounts || [],
       netWorth: shared.safeNumber(input.netWorth),
       assumptions: {
@@ -293,6 +411,8 @@
         retirementAge: shared.safeNumber(investmentInputs.retirementAge),
         retirementMonthlyGoal: shared.safeNumber(investmentInputs.retirementMonthlyGoal),
         retirementIncomeOther: shared.safeNumber(investmentInputs.retirementIncomeOther),
+        transactionWindowDays: transactionBuckets.observedDays,
+        transactionCoverage: transactionBuckets.coverage,
       },
     };
   }

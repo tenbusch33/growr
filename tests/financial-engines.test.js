@@ -76,6 +76,26 @@ function createProfile(overrides = {}) {
 }
 
 {
+  const profile = createProfile({
+    transactions: [
+      { merchant: "Employer Payroll", amount: -3100, category: "income", date: "2026-02-01" },
+      { merchant: "Employer Payroll", amount: -3100, category: "income", date: "2026-02-15" },
+      { merchant: "Employer Payroll", amount: -3100, category: "income", date: "2026-03-01" },
+      { merchant: "Employer Payroll", amount: -3100, category: "income", date: "2026-03-15" },
+      { merchant: "Rent", amount: 1800, category: "housing", date: "2026-02-03" },
+      { merchant: "Rent", amount: 1800, category: "housing", date: "2026-03-03" },
+      { merchant: "Dining", amount: 250, category: "dining and drinks", date: "2026-03-10" },
+      { merchant: "Shopping", amount: 200, category: "shopping", date: "2026-03-12" },
+    ],
+    recurringIncome: [],
+  });
+
+  assert.equal(profile.monthlyIncomeNet, 6200);
+  assert.ok(profile.monthlyDiscretionarySpend < 1000);
+  assert.ok(profile.monthlyDiscretionaryBreakdown.length > 0);
+}
+
+{
   const profile = createProfile();
   const cashflow = createCashflowSnapshot(profile);
   const debt = analyzeDebt(
