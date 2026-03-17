@@ -9,15 +9,6 @@ const percent = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-const returns = {
-  k401: 0.1,
-  roth: 0.1,
-  traditionalIra: 0.1,
-  hsa: 0.09,
-  college529: 0.08,
-  brokerage: 0.08,
-};
-
 const state = {
   config: null,
   currentPage: "home",
@@ -77,35 +68,39 @@ const budgetDefaults = {
 };
 
 const chartPalette = {
-  housing: "linear-gradient(180deg, #3867ff, #6c8cff)",
-  essentials: "linear-gradient(180deg, #00b894, #44d7b6)",
-  debt: "linear-gradient(180deg, #ff5a36, #ff8b70)",
-  car: "linear-gradient(180deg, #ff4fa1, #ff82bd)",
-  leftover: "linear-gradient(180deg, #ffd33d, #ffe27e)",
-  k401: "linear-gradient(90deg, #3867ff, #6c8cff)",
-  roth: "linear-gradient(90deg, #00b894, #60e0c6)",
-  traditionalIra: "linear-gradient(90deg, #14b8ff, #74d7ff)",
-  hsa: "linear-gradient(90deg, #7c4dff, #a281ff)",
-  college529: "linear-gradient(90deg, #ff9f1c, #ffd166)",
-  brokerage: "linear-gradient(90deg, #ff4fa1, #ff8cc4)",
-  fun: "linear-gradient(180deg, #7c4dff, #a281ff)",
-  other: "linear-gradient(180deg, #64748b, #94a3b8)",
+  housing: "linear-gradient(180deg, #0ea5e9, #66c2f5)",
+  essentials: "linear-gradient(180deg, #22c7b8, #7fe5dc)",
+  debt: "linear-gradient(180deg, #ef4444, #f69090)",
+  car: "linear-gradient(180deg, #f59e0b, #ffd27d)",
+  leftover: "linear-gradient(180deg, #16a34a, #7ad99a)",
+  k401: "linear-gradient(90deg, #22c7b8, #7fe5dc)",
+  roth: "linear-gradient(90deg, #0ea5e9, #7bcffa)",
+  traditionalIra: "linear-gradient(90deg, #8bd5ff, #c6ecff)",
+  hsa: "linear-gradient(90deg, #16a34a, #86d7a4)",
+  college529: "linear-gradient(90deg, #f59e0b, #ffd27d)",
+  brokerage: "linear-gradient(90deg, #0f1720, #415066)",
+  discretionary: "linear-gradient(180deg, #f59e0b, #ffd27d)",
+  investing: "linear-gradient(180deg, #22c7b8, #7fe5dc)",
+  fun: "linear-gradient(180deg, #0ea5e9, #8bd5ff)",
+  other: "linear-gradient(180deg, #94a3b8, #cbd5e1)",
 };
 
 const chartSolidPalette = {
-  housing: "#3867ff",
-  essentials: "#00b894",
-  debt: "#ff5a36",
-  car: "#ff4fa1",
-  leftover: "#ffd33d",
-  k401: "#3867ff",
-  roth: "#00b894",
-  traditionalIra: "#14b8ff",
-  hsa: "#7c4dff",
-  college529: "#ff9f1c",
-  brokerage: "#ff4fa1",
-  fun: "#7c4dff",
-  other: "#64748b",
+  housing: "#0ea5e9",
+  essentials: "#22c7b8",
+  debt: "#ef4444",
+  car: "#f59e0b",
+  leftover: "#16a34a",
+  k401: "#22c7b8",
+  roth: "#0ea5e9",
+  traditionalIra: "#8bd5ff",
+  hsa: "#16a34a",
+  college529: "#f59e0b",
+  brokerage: "#0f1720",
+  discretionary: "#f59e0b",
+  investing: "#22c7b8",
+  fun: "#0ea5e9",
+  other: "#94a3b8",
 };
 
 const categoryTargets = [
@@ -126,18 +121,6 @@ function setValue(id, value) {
   if (input) {
     input.value = value;
   }
-}
-
-function futureValue(balance, monthlyContribution, annualReturn, years) {
-  const monthlyRate = annualReturn / 12;
-  const months = years * 12;
-  let total = balance;
-
-  for (let index = 0; index < months; index += 1) {
-    total = total * (1 + monthlyRate) + monthlyContribution;
-  }
-
-  return total;
 }
 
 function formatTimeHorizonLabel(value) {
@@ -176,7 +159,17 @@ function buildFinancialDecisionBundle(input) {
   const profile = engines.normalizeFinancialProfile(input);
   const cashflow = engines.createCashflowSnapshot(profile);
   const debtAnalysis = engines.analyzeDebt(profile, Math.max(cashflow.freeCashflow * 0.7, 0));
-  const investmentAnalysis = engines.analyzeInvestments(profile);
+  const forecastYears = Math.max(1, Number(input?.investmentInputs?.forecastYears || 10));
+  const retirementYears = Math.max(
+    Number(profile?.assumptions?.retirementAge || 0) - Number(profile?.assumptions?.age || 0),
+    0
+  );
+  const investmentHorizons = Array.from(
+    new Set([1, 3, 5, 10, 20, 30, forecastYears, retirementYears].filter((year) => Number.isFinite(year) && year > 0))
+  ).sort((left, right) => left - right);
+  const investmentAnalysis = engines.analyzeInvestments(profile, {
+    horizons: investmentHorizons.length ? investmentHorizons : undefined,
+  });
   const opportunityCost = engines.analyzeOpportunityCost(profile, cashflow);
   const scenarios = engines.analyzeScenarios(profile, cashflow, debtAnalysis, investmentAnalysis);
   const score = engines.createGrowScore(profile, cashflow, debtAnalysis, investmentAnalysis);
@@ -198,6 +191,119 @@ function buildFinancialDecisionBundle(input) {
     scenarios,
     score,
     recommendationBundle,
+  };
+}
+
+function getInvestmentProjectionForYear(investmentAnalysis, year) {
+  if (!Number.isFinite(year) || year <= 0) {
+    return Number(investmentAnalysis?.totalBalance || 0);
+  }
+
+  return (investmentAnalysis?.accounts || []).reduce(
+    (sum, account) => sum + Number(account?.projections?.[year] || 0),
+    0
+  );
+}
+
+function getRetirementSnapshot(bundle) {
+  const profile = bundle?.profile || {};
+  const investmentAnalysis = bundle?.investmentAnalysis || {};
+  const hasAccess = hasInvestmentAccess();
+  const age = Number(profile?.assumptions?.age || 0);
+  const retirementAge = Number(profile?.assumptions?.retirementAge || 0);
+  const retirementYears = Math.max(retirementAge - age, 0);
+  const retirementMonthlyGoal = Number(profile?.assumptions?.retirementMonthlyGoal || 0);
+  const retirementIncomeOther = Number(profile?.assumptions?.retirementIncomeOther || 0);
+  const projectedPortfolio = hasAccess ? getInvestmentProjectionForYear(investmentAnalysis, retirementYears) : 0;
+  const monthlySupportFromPortfolio = hasAccess ? (projectedPortfolio * 0.04) / 12 : 0;
+  const totalMonthlySupport = monthlySupportFromPortfolio + retirementIncomeOther;
+  const retirementGap = hasAccess && retirementMonthlyGoal
+    ? retirementMonthlyGoal - totalMonthlySupport
+    : null;
+
+  return {
+    age,
+    retirementAge,
+    retirementYears,
+    retirementMonthlyGoal,
+    retirementIncomeOther,
+    projectedPortfolio,
+    monthlySupportFromPortfolio,
+    totalMonthlySupport,
+    retirementGap,
+  };
+}
+
+function buildChartDataFromDecisionBundle(bundle, options = {}) {
+  const cashflow = bundle?.cashflow || {};
+  const profile = bundle?.profile || {};
+  const debtAnalysis = bundle?.debtAnalysis || {};
+  const investmentAnalysis = bundle?.investmentAnalysis || {};
+  const opportunityCost = bundle?.opportunityCost || {};
+  const scenarios = bundle?.scenarios || {};
+  const forecastYears = Math.max(1, Number(options.forecastYears || 10));
+  const retirement = getRetirementSnapshot(bundle);
+  const investmentAccess = hasInvestmentAccess();
+
+  const cashSegments = [
+    { key: "essentials", label: "Essentials", amount: Number(cashflow.essentialSpend || 0) },
+    { key: "discretionary", label: "Flexible", amount: Number(cashflow.discretionarySpend || 0) },
+    { key: "debt", label: "Debt", amount: Number(cashflow.debtMinimums || 0) },
+    { key: "investing", label: "Investing", amount: Number(cashflow.recurringInvestments || 0) },
+    { key: "leftover", label: "Leftover", amount: Math.max(Number(cashflow.freeCashflow || 0), 0) },
+  ];
+
+  const investmentRows = (investmentAnalysis.accounts || []).map((account) => ({
+    key: account.accountType === "401k" ? "k401" : account.accountType,
+    label: account.label,
+    amount: Number(account?.projections?.[forecastYears] || 0),
+  }));
+
+  const availableProjectionYears = Array.from(
+    new Set(
+      (investmentAnalysis.accounts || [])
+        .flatMap((account) => Object.keys(account?.projections || {}).map((year) => Number(year)))
+        .filter((year) => Number.isFinite(year) && year > 0)
+    )
+  ).sort((left, right) => left - right);
+
+  const netWorthProjectionYears = Array.from(new Set([0, ...availableProjectionYears.filter((year) => [1, 3, 5, 10, 20, 30, forecastYears].includes(year))]))
+    .sort((left, right) => left - right);
+  const nonInvestmentNetWorth = Number(profile.netWorth || 0) - Number(investmentAnalysis.totalBalance || 0);
+  const netWorthSeries = netWorthProjectionYears.map((year) => ({
+    label: year === 0 ? "Now" : `${year}Y`,
+    value: Math.max(nonInvestmentNetWorth + getInvestmentProjectionForYear(investmentAnalysis, year), 0),
+  }));
+
+  const retirementYearsForSeries = Array.from(new Set([0, ...availableProjectionYears.filter((year) => year <= retirement.retirementYears)]))
+    .sort((left, right) => left - right);
+  const retirementSeries = retirementYearsForSeries.map((year) => ({
+    label: year === 0 ? "Now" : `${year}Y`,
+    value: getInvestmentProjectionForYear(investmentAnalysis, year),
+  }));
+
+  return {
+    income: Number(cashflow.monthlyIncomeNet || 0),
+    leftover: Number(cashflow.freeCashflow || 0),
+    cashSegments,
+    totalExpenses:
+      Number(cashflow.essentialSpend || 0) +
+      Number(cashflow.discretionarySpend || 0) +
+      Number(cashflow.debtMinimums || 0) +
+      Number(cashflow.recurringInvestments || 0),
+    investmentRows,
+    totalFuture: investmentAccess ? getInvestmentProjectionForYear(investmentAnalysis, forecastYears) : 0,
+    years: forecastYears,
+    netWorthSeries,
+    retirementSeries,
+    retirementGap: investmentAccess ? retirement.retirementGap : null,
+    retirementMonthlyGoal: retirement.retirementMonthlyGoal,
+    retirementMonthlySupport: retirement.totalMonthlySupport,
+    opportunityCost,
+    scenarios,
+    debtAnalysis,
+    profile,
+    investmentAnalysis,
   };
 }
 
@@ -241,64 +347,6 @@ function getAllocation(age) {
   };
 }
 
-function buildRecommendations(snapshot) {
-  const items = [];
-
-  if (snapshot.leftover < 0) {
-    items.push({
-      level: "alert",
-      title: "Spending is above monthly income",
-      body: "Cut discretionary spending immediately and consider pausing brokerage contributions until monthly cash flow turns positive.",
-    });
-  }
-
-  if (
-    snapshot.creditCardBalance > 0 &&
-    snapshot.leftover > 0 &&
-    snapshot.creditCardPayment < snapshot.creditCardBalance * 0.03
-  ) {
-    items.push({
-      level: "alert",
-      title: "Credit card payoff is moving too slowly",
-      body: "Redirect some investing toward the credit card balance first. High-interest debt usually beats market returns in urgency.",
-    });
-  }
-
-  if (snapshot.carRatio > 0.18) {
-    items.push({
-      level: "warn",
-      title: "Car costs look heavy for this income",
-      body: "A large car payment plus operating costs can crowd out debt payoff and savings. Consider refinancing, selling, or choosing a lower-cost vehicle path.",
-    });
-  }
-
-  if (snapshot.emergencyMonths < 1) {
-    items.push({
-      level: "warn",
-      title: "Emergency savings is thin",
-      body: "Build at least one month of essential expenses before pushing extra money into a taxable brokerage account.",
-    });
-  }
-
-  if (snapshot.leftover > 500 && snapshot.creditCardBalance === 0) {
-    items.push({
-      level: "good",
-      title: "Cash flow can support stronger investing",
-    body: "If you still have money left each month and no credit card balance, consider increasing retirement contributions toward 15% of income.",
-    });
-  }
-
-  if (items.length === 0) {
-    items.push({
-      level: "good",
-      title: "Plan looks reasonably stable",
-      body: "Keep refining spending categories and raise investing gradually as income grows or debts shrink.",
-    });
-  }
-
-  return items;
-}
-
 function renderRecommendations(items) {
   const container = document.getElementById("recommendations");
   if (!container) {
@@ -307,9 +355,10 @@ function renderRecommendations(items) {
   container.innerHTML = items
     .map(
       (item) => `
-        <article class="recommendation-item ${item.level}">
+        <article class="recommendation-item ${item.confidence || "low"}">
           <h3>${item.title}</h3>
-          <p>${item.body}</p>
+          <p>${item.action}</p>
+          <small>${item.why}</small>
         </article>
       `
     )
@@ -1126,13 +1175,7 @@ function getDefaultAiEmptyState() {
   `;
 }
 
-function renderAiCoachHighlights({
-  debtRatio = 0,
-  leftover = 0,
-  recurringTotal = 0,
-  retirementGap = null,
-  hasInvestmentAccess: investmentAccess = false,
-} = {}) {
+function renderAiCoachHighlights(bundle = {}) {
   const mode = document.getElementById("ai-highlight-mode");
   const pressure = document.getElementById("ai-highlight-pressure");
   const recurring = document.getElementById("ai-highlight-recurring");
@@ -1148,6 +1191,18 @@ function renderAiCoachHighlights({
       : "Coach UI ready"
     : "General money explainer";
 
+  const cashflow = bundle?.cashflow || {};
+  const debtAnalysis = bundle?.debtAnalysis || {};
+  const profile = bundle?.profile || {};
+  const investmentAnalysis = bundle?.investmentAnalysis || {};
+  const investmentAccess = hasInvestmentAccess();
+  const leftover = Number(cashflow.freeCashflow || 0);
+  const debtRatio = cashflow.monthlyIncomeNet
+    ? Number(debtAnalysis.totalMinimums || 0) / Number(cashflow.monthlyIncomeNet || 1)
+    : 0;
+  const recurringTotal = Number(profile.monthlySubscriptions || 0) + Number(profile.monthlyBills || 0);
+  const retirementSnapshot = getRetirementSnapshot(bundle);
+
   if (leftover < 0) {
     pressure.textContent = "Monthly shortfall";
   } else if (debtRatio > 0.35) {
@@ -1162,10 +1217,14 @@ function renderAiCoachHighlights({
 
   if (!investmentAccess) {
     retirement.textContent = "Bundle feature";
-  } else if (retirementGap === null || Number.isNaN(retirementGap)) {
+  } else if (
+    retirementSnapshot.retirementGap === null ||
+    Number.isNaN(retirementSnapshot.retirementGap) ||
+    !Number(investmentAnalysis.totalBalance || 0)
+  ) {
     retirement.textContent = "Needs setup";
-  } else if (retirementGap > 0) {
-    retirement.textContent = `${currency.format(retirementGap)} short`;
+  } else if (retirementSnapshot.retirementGap > 0) {
+    retirement.textContent = `${currency.format(retirementSnapshot.retirementGap)} short`;
   } else {
     retirement.textContent = "On track";
   }
@@ -3438,13 +3497,7 @@ function renderCharts(data) {
   }
 
   const incomeBase = Math.max(data.income, 1);
-  const cashSegments = [
-    { key: "housing", label: "Housing", amount: data.housing },
-    { key: "essentials", label: "Essentials", amount: data.essentials },
-    { key: "debt", label: "Debt", amount: data.creditCardPayment + data.otherDebt },
-    { key: "car", label: "Car", amount: data.carPayment + data.carCosts },
-    { key: "leftover", label: "Leftover", amount: Math.max(data.leftover, 0) },
-  ];
+  const cashSegments = data.cashSegments || [];
   const cashChartScale = Math.max(
     data.income,
     data.totalExpenses,
@@ -3506,23 +3559,8 @@ function renderCharts(data) {
     )
     .join("");
 
-  const investMax = Math.max(
-    data.k401Future,
-    data.rothFuture,
-    data.traditionalIraFuture,
-    data.hsaFuture,
-    data.college529Future,
-    data.brokerageFuture,
-    1
-  );
-  const investmentRows = [
-    { key: "k401", label: "401(k)", amount: data.k401Future },
-    { key: "roth", label: "Roth IRA", amount: data.rothFuture },
-    { key: "traditionalIra", label: "Traditional IRA", amount: data.traditionalIraFuture },
-    { key: "hsa", label: "HSA", amount: data.hsaFuture },
-    { key: "college529", label: "529", amount: data.college529Future },
-    { key: "brokerage", label: "Brokerage", amount: data.brokerageFuture },
-  ];
+  const investmentRows = data.investmentRows || [];
+  const investMax = Math.max(...investmentRows.map((row) => row.amount), 1);
 
   investmentBars.innerHTML = hasInvestmentAccess()
     ? investmentRows
@@ -3546,11 +3584,11 @@ function renderCharts(data) {
   investGrowthLabel.textContent = hasInvestmentAccess() ? currency.format(data.totalFuture) : "Locked";
   cashflowNote.textContent =
     data.leftover >= 0
-      ? `${currency.format(data.leftover)} is left after core monthly spending.`
-      : `${currency.format(Math.abs(data.leftover))} short each month before extra spending.`;
+      ? `${currency.format(data.leftover)} is left after recurring monthly obligations.`
+      : `${currency.format(Math.abs(data.leftover))} short each month after recurring monthly obligations.`;
   const largestExpense = cashSegments
     .filter((segment) => segment.key !== "leftover")
-    .sort((first, second) => second.amount - first.amount)[0];
+    .sort((first, second) => second.amount - first.amount)[0] || { label: "Spending", amount: 0 };
   expenseNote.textContent = `${largestExpense.label} is currently the biggest monthly cost.`;
   if (cashflowInsights) {
     cashflowInsights.innerHTML = `
@@ -3563,10 +3601,12 @@ function renderCharts(data) {
     const rankedExpenses = cashSegments
       .filter((segment) => segment.key !== "leftover")
       .sort((first, second) => second.amount - first.amount);
-    const secondExpense = rankedExpenses[1] || rankedExpenses[0];
+    const topExpense = rankedExpenses[0] || { label: "Spending" };
+    const secondExpense = rankedExpenses[1] || topExpense;
     expenseInsights.innerHTML = `
-      <span class="insight-chip">Largest category: ${rankedExpenses[0].label}</span>
+      <span class="insight-chip">Largest category: ${topExpense.label}</span>
       <span class="insight-chip">Second largest: ${secondExpense.label}</span>
+      <span class="insight-chip">${data.opportunityCost?.biggest?.title || "What this really costs"}: ${currency.format(data.opportunityCost?.biggest?.futureValue || 0)}</span>
     `;
   }
   investNote.textContent = hasInvestmentAccess()
@@ -3576,8 +3616,9 @@ function renderCharts(data) {
     const biggestInvestment = investmentRows.slice().sort((a, b) => b.amount - a.amount)[0];
     investmentInsights.innerHTML = hasInvestmentAccess()
       ? `
-        <span class="insight-chip">Largest account: ${biggestInvestment.label}</span>
+        <span class="insight-chip">Largest account: ${biggestInvestment?.label || "No linked investment data"}</span>
         <span class="insight-chip">10-year total: ${currency.format(data.totalFuture)}</span>
+        <span class="insight-chip">Best scenario delta: +${currency.format(Math.max((data.scenarios?.optimized?.projectedNetWorth10Y || 0) - (data.scenarios?.currentPlan?.projectedNetWorth10Y || 0), 0))}</span>
       `
       : `
         <span class="insight-chip">Largest account: Locked</span>
@@ -3590,12 +3631,12 @@ function renderCharts(data) {
     labelId: "networth-trend-label",
     noteId: "networth-trend-note",
     series: data.netWorthSeries,
-    lineColor: "#3867ff",
-    fillColor: "#8cb0ff",
-    noteText:
-      data.netWorthSeries.length > 1
-        ? `Estimated net worth grows from ${currency.format(data.netWorthSeries[0].value)} to ${currency.format(data.netWorthSeries[data.netWorthSeries.length - 1].value)} across the projection path.`
-        : "Growr will project net worth once it has enough inputs.",
+    lineColor: "#0ea5e9",
+    fillColor: "#8bd5ff",
+      noteText:
+        data.netWorthSeries.length > 1
+          ? `Estimated net worth grows from ${currency.format(data.netWorthSeries[0].value)} to ${currency.format(data.netWorthSeries[data.netWorthSeries.length - 1].value)} across the projection path.`
+          : "Growr will project net worth once it has enough inputs.",
   });
   if (networthInsights) {
     networthInsights.innerHTML = `
@@ -3610,8 +3651,8 @@ function renderCharts(data) {
       labelId: "retirement-runway-label",
       noteId: "retirement-runway-note",
       series: data.retirementSeries,
-      lineColor: "#00b894",
-      fillColor: "#8af0d7",
+      lineColor: "#22c7b8",
+      fillColor: "#9cebe4",
       noteText:
         data.retirementGap > 0
           ? `Current pace may still leave about ${currency.format(data.retirementGap)} per month uncovered at retirement.`
@@ -3640,140 +3681,18 @@ function renderCharts(data) {
   }
 }
 
-function buildNextBestMove(summary) {
-  const monthlyBuffer = Math.max(summary.leftover, 0);
-  const debtAttackAmount = Math.max(Math.round(monthlyBuffer * 0.75), 150);
-  const debtImpact = debtAttackAmount * 12 * 5 * 0.32;
-  const emergencyTargetMonths = Math.max(1, Math.min(3, summary.emergencyMonths < 1 ? 1 : 3));
-  const emergencyNeeded = Math.max(summary.essentialsBase * emergencyTargetMonths - summary.emergencyFund, 0);
-  const emergencyImpact = Math.min(emergencyNeeded, monthlyBuffer * 12 || emergencyNeeded);
-  const carMonthly = summary.carPayment + summary.carCosts;
-  const carImpact = futureValue(0, Math.max(carMonthly * 0.4, 100), returns.brokerage, 10);
-  const retirementBoost = Math.max(Math.round(monthlyBuffer * 0.6), 100);
-  const retirementImpact = futureValue(0, retirementBoost, returns.k401, 10);
-
-  if (summary.leftover < 0) {
-    return {
-      action: `Close the ${currency.format(Math.abs(summary.leftover))} monthly shortfall first`,
-      priority: "Urgent right now",
-      timeHorizon: "This month",
-      why: "You are spending more than the plan can support, so every other goal stays harder until the gap is closed.",
-      impactText: `Stabilizing the month protects about ${currency.format(Math.abs(summary.leftover) * 12)} per year from falling behind.`,
-      support: "Pause optional investing, trim flexible spending, and reduce repeating charges until money left this month turns positive.",
-      impactValue: Math.abs(summary.leftover) * 12,
-    };
-  }
-
-  if (summary.creditCardBalance > 0 && summary.debtRatio > 0.12) {
-    return {
-      action: `Send about ${currency.format(debtAttackAmount)} extra to credit card debt`,
-      priority: "Highest impact move",
-      timeHorizon: "Next 3-6 months",
-      why: "High-interest card debt usually grows faster than long-term investing, so paying it down improves flexibility and net worth faster.",
-      impactText: `This could improve your path by about ${currency.format(debtImpact)} over the next 5 years.`,
-      support: "Keep retirement contributions at least to any employer match, then use the rest of your extra monthly room to attack the highest-interest balance.",
-      impactValue: debtImpact,
-    };
-  }
-
-  if (summary.emergencyMonths < 1) {
-    return {
-      action: `Build your first month of emergency savings`,
-      priority: "Safety first",
-      timeHorizon: "Next 2-4 months",
-      why: "A cash buffer keeps normal surprises from turning into more debt and protects the progress you are already making.",
-      impactText: `Reaching one month of essentials means roughly ${currency.format(summary.essentialsBase)} is safely set aside.`,
-      support: `You need about ${currency.format(emergencyNeeded)} more to reach the first-month cushion.`,
-      impactValue: emergencyImpact,
-    };
-  }
-
-  if (summary.carRatio > 0.18) {
-    return {
-      action: "Reduce the drag from your car costs",
-      priority: "Biggest pressure point",
-      timeHorizon: "Next 6-12 months",
-      why: "Your car is taking a large share of income, which makes saving, investing, and debt payoff slower every month.",
-      impactText: `Redirecting part of that money could change long-term wealth by about ${currency.format(carImpact)} over 10 years.`,
-      support: "Compare keeping the car with refinancing, downgrading, or selling and investing the difference.",
-      impactValue: carImpact,
-    };
-  }
-
-  if (summary.hasInvestmentAccess && summary.retirementGap > 0 && monthlyBuffer > 0) {
-    return {
-      action: `Raise retirement investing by about ${currency.format(retirementBoost)} per month`,
-      priority: "Grow the future",
-      timeHorizon: "Next 10 years",
-      why: "Your current path still falls short of the retirement income target you entered, so increasing contributions now has time to compound.",
-      impactText: `That increase could grow to about ${currency.format(retirementImpact)} over 10 years.`,
-      support: "Start with 401(k) match money first, then grow Roth IRA or brokerage contributions once the month still feels comfortable.",
-      impactValue: retirementImpact,
-    };
-  }
-
-  const stableImpact = futureValue(0, Math.max(monthlyBuffer * 0.5, 100), returns.brokerage, 10);
-  return {
-    action: `Put about ${currency.format(Math.max(monthlyBuffer * 0.5, 100))} on autopilot each month`,
-    priority: "Keep momentum",
-    timeHorizon: "Next 12 months",
-    why: "You already have room in the plan, so the best move is turning that room into something automatic before lifestyle creep eats it.",
-    impactText: `Staying consistent at that pace could add about ${currency.format(stableImpact)} over 10 years.`,
-    support: "Split the money between emergency savings, retirement, and debt cleanup so progress keeps happening without extra effort.",
-    impactValue: stableImpact,
-  };
-}
-
-function buildOpportunityCost(summary) {
-  const candidates = [
-    {
-      key: "car",
-      title: "What your car costs long-term",
-      monthlyAmount: summary.carPayment + summary.carCosts,
-      horizonYears: 20,
-      copy: "This is money that could be redirected into investing if you ever reduce the payment, insurance, fuel, or maintenance load.",
-    },
-    {
-      key: "recurring",
-      title: "What recurring charges cost long-term",
-      monthlyAmount: summary.recurringTotal,
-      horizonYears: 15,
-      copy: "Recurring bills and subscriptions feel small month to month, but they add up quickly when you project them forward.",
-    },
-    {
-      key: "creditCard",
-      title: "What interest drag can cost you",
-      monthlyAmount: summary.creditCardPayment,
-      horizonYears: 10,
-      copy: "If high-interest debt is still around, every extra payment you keep making is money that cannot compound somewhere else.",
-    },
-  ].filter((candidate) => candidate.monthlyAmount > 0);
-
-  const winner = candidates.sort((left, right) => right.monthlyAmount - left.monthlyAmount)[0];
-  if (!winner) {
-    return {
-      title: "What this really costs",
-      amount: 0,
-      monthlyAmount: 0,
-      horizon: "15 years",
-      copy: "Connect more data or fill in more of the plan to see the strongest long-term tradeoff Growr can find.",
-    };
-  }
-
-  return {
-    title: winner.title,
-    amount: futureValue(0, winner.monthlyAmount, returns.brokerage, winner.horizonYears),
-    monthlyAmount: winner.monthlyAmount,
-    horizon: `${winner.horizonYears} years`,
-    copy: winner.copy,
-  };
-}
-
 function renderDecisionEngine(bundle) {
   const nextMoveAction = document.getElementById("nbm-action");
   if (!nextMoveAction) {
     return;
   }
+
+  const nextMoveCard = nextMoveAction.closest(".next-best-move-card");
+  const confidenceEl = document.getElementById("nbm-confidence");
+  const assumptionsEl = document.getElementById("nbm-assumptions");
+  const whyEl = document.getElementById("nbm-why");
+  const mathEl = document.getElementById("nbm-math");
+  const impactEl = document.getElementById("nbm-impact");
 
   const nextMove = bundle?.recommendationBundle?.nextBestMove;
   const opportunity = bundle?.opportunityCost?.biggest;
@@ -3788,11 +3707,21 @@ function renderDecisionEngine(bundle) {
     setText("nbm-action", "Connect more real data to unlock the next best move");
     setText("nbm-priority", "Needs data");
     setText("nbm-time-horizon", "This month");
-    setText("nbm-why", "Growr needs enough income, debt, and recurring data to rank the highest-impact move.");
-    setText("nbm-math", "Math will appear after Growr can verify cash flow, debt, and recurring transfers.");
-    setText("nbm-impact", "Estimated impact will appear here once the recommendation engine has enough confirmed inputs.");
+    setText("nbm-why", "Growr needs verified income, recurring, and debt data before it can rank the highest-impact move confidently.");
+    setText("nbm-math", "Math will appear after Growr can confirm the monthly cash flow and any debt or recurring transfers behind the recommendation.");
+    setText("nbm-impact", "Estimated impact will appear here once the recommendation engine has enough confirmed inputs to model a real outcome.");
     setText("nbm-confidence", "Low confidence");
-    setText("nbm-assumptions", "Assumptions: connect accounts or finish the planner so Growr can model a real next move.");
+    setText("nbm-assumptions", "Assumptions: connect accounts or finish the planner so Growr can verify the recommendation instead of inferring it.");
+    if (nextMoveCard) {
+      nextMoveCard.dataset.confidence = "low";
+    }
+    if (confidenceEl) {
+      confidenceEl.dataset.confidence = "low";
+      const confidenceDetail = confidenceEl.closest(".decision-detail");
+      if (confidenceDetail) {
+        confidenceDetail.dataset.confidence = "low";
+      }
+    }
   } else {
     setText("nbm-action", nextMove.action);
     setText("nbm-priority", nextMove.title);
@@ -3805,6 +3734,38 @@ function renderDecisionEngine(bundle) {
       "nbm-assumptions",
       `Assumptions: ${nextMove.assumptions.length ? nextMove.assumptions.join(" ") : "Growr used your saved numbers with no extra assumptions."}`
     );
+    if (nextMoveCard) {
+      nextMoveCard.dataset.confidence = nextMove.confidence || "low";
+    }
+    if (confidenceEl) {
+      confidenceEl.dataset.confidence = nextMove.confidence || "low";
+      const confidenceDetail = confidenceEl.closest(".decision-detail");
+      if (confidenceDetail) {
+        confidenceDetail.dataset.confidence = nextMove.confidence || "low";
+      }
+    }
+  }
+
+  if (whyEl) {
+    const whyDetail = whyEl.closest(".decision-detail");
+    if (whyDetail) {
+      whyDetail.dataset.kind = "why";
+    }
+  }
+  if (mathEl) {
+    const mathDetail = mathEl.closest(".decision-detail");
+    if (mathDetail) {
+      mathDetail.dataset.kind = "math";
+    }
+  }
+  if (impactEl) {
+    const impactDetail = impactEl.closest(".decision-detail");
+    if (impactDetail) {
+      impactDetail.dataset.kind = "impact";
+    }
+  }
+  if (assumptionsEl) {
+    assumptionsEl.dataset.state = nextMove ? "verified" : "inferred";
   }
 
   setText("opportunity-title", opportunity?.title || "What this really costs");
@@ -3841,7 +3802,7 @@ function renderHealth(bundle) {
     return;
   }
   const score = bundle?.score?.score ?? 0;
-  const scoreColor = score >= 75 ? "#00b894" : score >= 50 ? "#ffd33d" : "#ff5a36";
+  const scoreColor = score >= 75 ? "#16a34a" : score >= 50 ? "#f59e0b" : "#ef4444";
 
   healthScore.textContent = String(score);
   orb.style.setProperty("--score-angle", `${score * 3.6}deg`);
@@ -3877,7 +3838,135 @@ function renderHealth(bundle) {
     bundle?.investmentAnalysis?.employerMatch?.shortfall > 0 ? "Below match" : bundle?.investmentAnalysis?.totalRecurringContribution > 0 ? "On track" : "Not started";
 }
 
-function renderSnapshotCommandCenter(summary) {
+function renderSnapshotSupportCards(bundle) {
+  const cashflow = bundle?.cashflow || {};
+  const debtAnalysis = bundle?.debtAnalysis || {};
+  const investmentAnalysis = bundle?.investmentAnalysis || {};
+  const profile = bundle?.profile || {};
+  const recurringMonthly =
+    Number(profile.monthlySubscriptions || 0) + Number(profile.monthlyBills || 0);
+  const emergencyMonths = Number(cashflow.emergencyMonths || 0);
+  const toxicDebt = debtAnalysis?.toxicDebt;
+
+  setText(
+    "support-cashflow-value",
+    cashflow.freeCashflow >= 0
+      ? `${currency.format(cashflow.freeCashflow)} left`
+      : `${currency.format(Math.abs(cashflow.freeCashflow))} short`
+  );
+  setText(
+    "support-cashflow-note",
+    `Income ${currency.format(cashflow.monthlyIncomeNet || 0)} vs fixed obligations ${currency.format(
+      (cashflow.fixedObligations || 0) + (cashflow.recurringInvestments || 0)
+    )}.`
+  );
+  setText(
+    "support-cashflow-chip",
+    cashflow.freeCashflow >= 0 ? "Positive month" : "Negative month"
+  );
+  const cashflowChip = document.getElementById("support-cashflow-chip");
+  if (cashflowChip) {
+    cashflowChip.dataset.tone = cashflow.freeCashflow >= 0 ? "positive" : "danger";
+  }
+
+  setText(
+    "support-debt-value",
+    toxicDebt
+      ? `${Math.round((toxicDebt.apr || 0) * 100)}% APR risk`
+      : debtAnalysis.missingAprDebts?.length
+        ? "Needs APR details"
+        : debtAnalysis.totalBalance > 0
+          ? "Manageable"
+          : "No debt pressure"
+  );
+  setText(
+    "support-debt-note",
+    toxicDebt
+      ? `${toxicDebt.name} has the highest known APR on ${currency.format(toxicDebt.balance || 0)}.`
+      : debtAnalysis.totalBalance > 0
+        ? `${currency.format(debtAnalysis.totalBalance || 0)} total debt with ${currency.format(
+            debtAnalysis.totalMinimums || 0
+          )} in monthly minimums.`
+        : "No high-pressure debt was detected in the current profile."
+  );
+  setText(
+    "support-debt-chip",
+    toxicDebt ? "Highest urgency" : debtAnalysis.missingAprDebts?.length ? "Low confidence" : "In range"
+  );
+  const debtChip = document.getElementById("support-debt-chip");
+  if (debtChip) {
+    debtChip.dataset.tone = toxicDebt ? "danger" : debtAnalysis.missingAprDebts?.length ? "warning" : "positive";
+  }
+
+  setText("support-emergency-value", `${emergencyMonths.toFixed(1)} months`);
+  setText(
+    "support-emergency-note",
+    `${currency.format(profile.emergencyCash || 0)} in cash against ${currency.format(
+      (cashflow.essentialSpend || 0) + (cashflow.debtMinimums || 0)
+    )} of monthly essentials and minimums.`
+  );
+  setText(
+    "support-emergency-chip",
+    emergencyMonths >= 3 ? "Comfortable" : emergencyMonths >= 1 ? "Building" : "Thin buffer"
+  );
+  const emergencyChip = document.getElementById("support-emergency-chip");
+  if (emergencyChip) {
+    emergencyChip.dataset.tone = emergencyMonths >= 3 ? "positive" : emergencyMonths >= 1 ? "warning" : "danger";
+  }
+
+  setText(
+    "forecast-balance",
+    currency.format(investmentAnalysis.totalProjection10Y || investmentAnalysis.totalBalance || 0)
+  );
+  setText(
+    "forecast-contribution",
+    `${currency.format(investmentAnalysis.totalRecurringContribution || 0)} / month`
+  );
+  setText(
+    "forecast-current-balance",
+    currency.format(investmentAnalysis.totalBalance || 0)
+  );
+  setText(
+    "forecast-return",
+    investmentAnalysis.totalRecurringContribution > 0 ? "10-year view" : "Needs setup"
+  );
+  const forecastChip = document.getElementById("forecast-return");
+  if (forecastChip) {
+    forecastChip.dataset.tone =
+      investmentAnalysis.totalRecurringContribution > 0 || investmentAnalysis.totalBalance > 0 ? "info" : "warning";
+  }
+  setText(
+    "forecast-note",
+    investmentAnalysis.totalRecurringContribution > 0 || investmentAnalysis.totalBalance > 0
+      ? "Projection uses the current engine assumptions and your detected recurring investing pattern."
+      : "Add investing balances or recurring contributions to unlock a clearer long-term forecast."
+  );
+
+  setText(
+    "support-recurring-title",
+    recurringMonthly > 0 ? "Recurring drag worth reviewing" : "Recurring charges need review"
+  );
+  setText(
+    "support-recurring-value",
+    `${currency.format(recurringMonthly)} / month`
+  );
+  setText(
+    "support-recurring-note",
+    recurringMonthly > 0
+      ? `${state.subscriptions.length} subscriptions and ${state.recurringBills.length} bills are contributing to the recurring monthly load.`
+      : "Link more recurring activity so Growr can show which repeating charges are competing with better moves."
+  );
+  setText(
+    "support-recurring-chip",
+    recurringMonthly > 0 ? "Review leaks" : "Needs linked data"
+  );
+  const recurringChip = document.getElementById("support-recurring-chip");
+  if (recurringChip) {
+    recurringChip.dataset.tone = recurringMonthly > 0 ? "warning" : "subtle";
+  }
+}
+
+function renderSnapshotCommandCenter(bundle) {
   const badge = document.getElementById("snapshot-badge");
   const headline = document.getElementById("snapshot-headline");
   const summaryCopy = document.getElementById("snapshot-summary-copy");
@@ -3891,37 +3980,59 @@ function renderSnapshotCommandCenter(summary) {
     return;
   }
 
-  setText("snapshot-leftover", currency.format(summary.leftover));
-  setText("snapshot-burn", currency.format(summary.totalExpenses));
+  const cashflow = bundle?.cashflow;
+  const debtAnalysis = bundle?.debtAnalysis;
+  const investmentAnalysis = bundle?.investmentAnalysis;
+  const profile = bundle?.profile;
+  const score = bundle?.score;
+  const netRetirementNeed = Math.max(
+    Number(profile?.assumptions?.retirementMonthlyGoal || 0) - Number(profile?.assumptions?.retirementIncomeOther || 0),
+    0
+  );
+  const retirementProjection = investmentAnalysis?.accounts?.reduce((sum, account) => {
+    return sum + Number(account?.projections?.[Number(profile?.assumptions?.retirementAge || 0) - Number(profile?.assumptions?.age || 0)] || 0);
+  }, 0);
+  const retirementGap =
+    netRetirementNeed && retirementProjection
+      ? netRetirementNeed - (retirementProjection * 0.04) / 12
+      : null;
+  const totalExpenses =
+    Number(cashflow?.essentialSpend || 0) +
+    Number(cashflow?.discretionarySpend || 0) +
+    Number(cashflow?.debtMinimums || 0) +
+    Number(cashflow?.recurringInvestments || 0);
+
+  setText("snapshot-leftover", currency.format(cashflow?.freeCashflow || 0));
+  setText("snapshot-burn", currency.format(totalExpenses));
   setText(
     "snapshot-runway",
-    summary.totalExpenses > 0
-      ? `${(summary.cashAssets / summary.totalExpenses).toFixed(1)} months`
+    totalExpenses > 0
+      ? `${(Number(profile?.emergencyCash || 0) / totalExpenses).toFixed(1)} months`
       : "0 months"
   );
   setText(
     "snapshot-retirement-pace",
-    summary.hasInvestmentAccess
-    ? summary.retirementGap > 0
-      ? `${currency.format(summary.retirementGap)} short`
+    investmentAnalysis?.accounts?.length
+    ? retirementGap > 0
+      ? `${currency.format(retirementGap)} short`
       : "On track"
     : "Locked"
   );
 
-  if (summary.leftover < 0) {
+  if ((cashflow?.freeCashflow || 0) < 0) {
     badge.textContent = "Pressure";
     badge.className = "command-badge danger";
     headline.textContent = "Your monthly plan is running short right now.";
-    summaryCopy.textContent = `Growr estimates you're about ${currency.format(Math.abs(summary.leftover))} short each month after core bills and debt payments.`;
+    summaryCopy.textContent = `Growr estimates you're about ${currency.format(Math.abs(cashflow?.freeCashflow || 0))} short each month after core bills and debt payments.`;
     nextTitle.textContent = "Cut cash leakage first";
     nextBody.textContent = "Trim flexible spending and pause optional investing until the monthly plan gets back above zero.";
     secondTitle.textContent = "Attack high-interest debt";
     secondBody.textContent = "Credit card balances will keep making the month tighter until they stop eating your margin.";
-  } else if (summary.debtRatio > 0.3) {
+  } else if (cashflow?.monthlyIncomeNet && Number(debtAnalysis?.totalMinimums || 0) / cashflow.monthlyIncomeNet > 0.3) {
     badge.textContent = "Tight";
     badge.className = "command-badge warn";
     headline.textContent = "You still have money left, but debt is eating flexibility.";
-    summaryCopy.textContent = `You have ${currency.format(summary.leftover)} left each month, but debt is still high enough to slow everything else down.`;
+    summaryCopy.textContent = `You have ${currency.format(cashflow?.freeCashflow || 0)} left each month, but debt is still high enough to slow everything else down.`;
     nextTitle.textContent = "Use your extra money on purpose";
     nextBody.textContent = "Put part of the money left this month toward your most expensive debt before raising lifestyle spending.";
     secondTitle.textContent = "Watch the car and debt stack";
@@ -3930,24 +4041,24 @@ function renderSnapshotCommandCenter(summary) {
     badge.textContent = "Stable";
     badge.className = "command-badge good";
     headline.textContent = "You still have room to work with this month.";
-    summaryCopy.textContent = `Growr estimates ${currency.format(summary.leftover)} left after your core monthly plan, which gives you room to save, invest, or speed up debt payoff.`;
+    summaryCopy.textContent = `Growr estimates ${currency.format(cashflow?.freeCashflow || 0)} left after your core monthly plan, which gives you room to save, invest, or speed up debt payoff.`;
     nextTitle.textContent = "Protect the money you still have left";
     nextBody.textContent = "Keep fixed costs from creeping up so this extra room does not quietly disappear.";
     secondTitle.textContent = "Make progress automatically";
     secondBody.textContent = "Use some of the extra room each month for emergency savings, retirement contributions, or faster debt payoff.";
   }
 
-  thirdTitle.textContent = summary.hasInvestmentAccess
+  thirdTitle.textContent = investmentAnalysis?.accounts?.length
     ? "Check whether retirement still looks on track"
     : "Unlock retirement planning";
-  thirdBody.textContent = summary.hasInvestmentAccess
-    ? summary.retirementGap > 0
-      ? `At your current pace, retirement may still be about ${currency.format(summary.retirementGap)} per month short of your target.`
+  thirdBody.textContent = investmentAnalysis?.accounts?.length
+    ? retirementGap > 0
+      ? `At your current pace, retirement may still be about ${currency.format(retirementGap)} per month short of your target.`
       : "Your current saving pace is covering the monthly retirement income target you entered."
     : "Upgrade to compare your retirement income goal with what your current accounts may actually support.";
 }
 
-function renderSnapshotFeed(summary) {
+function renderSnapshotFeed(bundle) {
   const changeTitle = document.getElementById("snapshot-change-title");
   const changeBody = document.getElementById("snapshot-change-body");
   const spendPace = document.getElementById("snapshot-spend-pace");
@@ -3958,6 +4069,7 @@ function renderSnapshotFeed(summary) {
   if (!changeTitle || !changeBody || !spendPace || !recurringDrag || !nextPayday || !topCategory || !feedList) {
     return;
   }
+  const cashflow = bundle?.cashflow;
   const automation = buildMonthlyAutomationData();
   const latestMonth = automation.monthlySeries[automation.monthlySeries.length - 1];
   const priorMonth = automation.monthlySeries[automation.monthlySeries.length - 2];
@@ -4031,7 +4143,7 @@ function renderSnapshotFeed(summary) {
       label: "Biggest cost right now",
       title: `${formatCategoryLabel(topCategoryEntry[0])} is leading the month`,
       body: `${currency.format(topCategoryEntry[1])} has gone to ${formatCategoryLabel(topCategoryEntry[0]).toLowerCase()} so far.`,
-      tone: topCategoryEntry[1] > Math.max(summary.leftover, 0) ? "warn" : "",
+      tone: topCategoryEntry[1] > Math.max(cashflow?.freeCashflow || 0, 0) ? "warn" : "",
     });
   }
 
@@ -4066,18 +4178,18 @@ function renderSnapshotFeed(summary) {
     });
   }
 
-  if (summary.leftover < 0) {
+  if ((cashflow?.freeCashflow || 0) < 0) {
     feedItems.unshift({
       label: "Urgent",
       title: "This month is currently running short",
-      body: `${currency.format(Math.abs(summary.leftover))} short after core monthly costs means cutting repeating charges and checking the biggest spending category first will matter most.`,
+      body: `${currency.format(Math.abs(cashflow?.freeCashflow || 0))} short after core monthly costs means cutting repeating charges and checking the biggest spending category first will matter most.`,
       tone: "danger",
     });
-  } else if (summary.leftover > 0 && automation.recurringTotal > 0) {
+  } else if ((cashflow?.freeCashflow || 0) > 0 && automation.recurringTotal > 0) {
     feedItems.push({
       label: "What to do first",
       title: "Protect the money you still have left",
-      body: `You still have ${currency.format(summary.leftover)} left, but repeating charges are already taking ${currency.format(automation.recurringTotal)} per month. That is the cleanest place to review first.`,
+      body: `You still have ${currency.format(cashflow?.freeCashflow || 0)} left, but repeating charges are already taking ${currency.format(automation.recurringTotal)} per month. That is the cleanest place to review first.`,
       tone: "good",
     });
   }
@@ -4180,6 +4292,9 @@ function renderSnapshotMiniTrend(series) {
 }
 
 function renderSnapshotDashboard(summary, automation) {
+  const profile = summary?.profile || {};
+  const cashflow = summary?.cashflow || {};
+  const investmentAnalysis = summary?.investmentAnalysis || {};
   const accounts = state.linkedSummary.accounts || [];
   const accountMatcher = (patterns) =>
     accounts.reduce((sum, account) => {
@@ -4191,9 +4306,9 @@ function renderSnapshotDashboard(summary, automation) {
   const checkingBalance = accountMatcher(["checking"]);
   const savingsBalance = accountMatcher(["savings"]);
   const cardBalance = Number(state.linkedSummary.creditCardDebt || 0);
-  const netCash = Number(state.linkedSummary.cashTotal || summary.cashAssets || 0) - cardBalance;
+  const netCash = Number(state.linkedSummary.cashTotal || profile.emergencyCash || 0) - cardBalance;
   const investmentsBalance = hasInvestmentAccess()
-    ? Math.max(Number(state.linkedSummary.investmentsTotal || 0), Number(summary.currentInvestmentAssets || 0))
+    ? Math.max(Number(state.linkedSummary.investmentsTotal || 0), Number(investmentAnalysis.totalBalance || 0))
     : 0;
   const linkedCount = accounts.length;
   const latestMonth = automation.monthlySeries[automation.monthlySeries.length - 1];
@@ -4232,12 +4347,12 @@ function renderSnapshotDashboard(summary, automation) {
     : "Need linked deposits";
 
   document.getElementById("snapshot-priority-label").textContent = linkedCount
-    ? summary.leftover < 0
+    ? Number(cashflow.freeCashflow || 0) < 0
       ? "This month needs attention first"
       : "Your connected accounts are ready"
     : "Connect accounts to unlock automatic tracking";
   document.getElementById("snapshot-priority-meta").textContent = linkedCount
-    ? summary.leftover < 0
+    ? Number(cashflow.freeCashflow || 0) < 0
       ? "Review spending"
       : "Refresh data"
     : "Connect Plaid";
@@ -4249,7 +4364,7 @@ function renderSnapshotDashboard(summary, automation) {
   document.getElementById("snapshot-investments-balance").textContent = hasInvestmentAccess()
     ? currency.format(investmentsBalance)
     : "Locked";
-  document.getElementById("snapshot-net-worth-card").textContent = currency.format(summary.netWorth || 0);
+  document.getElementById("snapshot-net-worth-card").textContent = currency.format(profile.netWorth || 0);
   document.getElementById("snapshot-sync-status").textContent = linkedCount
     ? `Showing ${linkedCount} connected account${linkedCount === 1 ? "" : "s"}.`
     : "Connect accounts to see balances here.";
@@ -4258,6 +4373,8 @@ function renderSnapshotDashboard(summary, automation) {
 }
 
 function renderHouseholdOverview(summary) {
+  const profile = summary?.profile || {};
+  const investmentAnalysis = summary?.investmentAnalysis || {};
   const householdCash = document.getElementById("snapshot-household-cash");
   if (!householdCash) {
     return;
@@ -4265,13 +4382,13 @@ function renderHouseholdOverview(summary) {
   const recurringTotal =
     state.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0) +
     state.recurringBills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0);
-  const cashTotal = state.linkedSummary.cashTotal || summary.cashAssets || 0;
+  const cashTotal = state.linkedSummary.cashTotal || profile.emergencyCash || 0;
   const investingTotal = hasInvestmentAccess()
-    ? Math.max(state.linkedSummary.investmentsTotal || 0, summary.currentInvestmentAssets || 0)
+    ? Math.max(state.linkedSummary.investmentsTotal || 0, investmentAnalysis.totalBalance || 0)
     : 0;
 
   householdCash.textContent = currency.format(cashTotal);
-  setText("snapshot-household-networth", currency.format(summary.netWorth || 0));
+  setText("snapshot-household-networth", currency.format(profile.netWorth || 0));
   setText("snapshot-household-recurring", currency.format(recurringTotal));
   setText("snapshot-household-investing", hasInvestmentAccess() ? currency.format(investingTotal) : "Locked");
 }
@@ -4295,115 +4412,6 @@ function updateDashboard() {
   const otherLiabilities = getValue("otherLiabilities");
   const investmentInputs = getInvestmentInputs();
   const years = investmentInputs.forecastYears;
-  const retirementYears = Math.max(investmentInputs.retirementAge - investmentInputs.age, 0);
-  const retirementMonthlyGoal = investmentInputs.retirementMonthlyGoal;
-  const retirementIncomeOther = investmentInputs.retirementIncomeOther;
-
-  const totalExpenses =
-    housing + essentials + creditCardPayment + otherDebt + carPayment + carCosts;
-  const leftover = income - totalExpenses;
-  const debtRatio = income ? (creditCardPayment + otherDebt + carPayment) / income : 0;
-  const carRatio = income ? (carPayment + carCosts) / income : 0;
-  const essentialsBase = housing + essentials;
-  const emergencyMonths = essentialsBase ? emergencyFund / essentialsBase : 0;
-
-  const k401Future = futureValue(
-    investmentInputs.k401Balance,
-    investmentInputs.k401Contribution,
-    returns.k401,
-    years
-  );
-  const rothFuture = futureValue(
-    investmentInputs.rothBalance,
-    investmentInputs.rothContribution,
-    returns.roth,
-    years
-  );
-  const traditionalIraFuture = futureValue(
-    investmentInputs.traditionalIraBalance,
-    investmentInputs.traditionalIraContribution,
-    returns.traditionalIra,
-    years
-  );
-  const hsaFuture = futureValue(
-    investmentInputs.hsaBalance,
-    investmentInputs.hsaContribution,
-    returns.hsa,
-    years
-  );
-  const college529Future = futureValue(
-    investmentInputs.college529Balance,
-    investmentInputs.college529Contribution,
-    returns.college529,
-    years
-  );
-  const brokerageFuture = futureValue(
-    investmentInputs.brokerageBalance,
-    investmentInputs.brokerageContribution,
-    returns.brokerage,
-    years
-  );
-  const retirementK401Future = futureValue(
-    investmentInputs.k401Balance,
-    investmentInputs.k401Contribution,
-    returns.k401,
-    retirementYears
-  );
-  const retirementRothFuture = futureValue(
-    investmentInputs.rothBalance,
-    investmentInputs.rothContribution,
-    returns.roth,
-    retirementYears
-  );
-  const retirementTraditionalIraFuture = futureValue(
-    investmentInputs.traditionalIraBalance,
-    investmentInputs.traditionalIraContribution,
-    returns.traditionalIra,
-    retirementYears
-  );
-  const retirementHsaFuture = futureValue(
-    investmentInputs.hsaBalance,
-    investmentInputs.hsaContribution,
-    returns.hsa,
-    retirementYears
-  );
-  const retirementCollege529Future = futureValue(
-    investmentInputs.college529Balance,
-    investmentInputs.college529Contribution,
-    returns.college529,
-    retirementYears
-  );
-  const retirementBrokerageFuture = futureValue(
-    investmentInputs.brokerageBalance,
-    investmentInputs.brokerageContribution,
-    returns.brokerage,
-    retirementYears
-  );
-  const totalFuture = hasInvestmentAccess()
-    ? k401Future + rothFuture + traditionalIraFuture + hsaFuture + college529Future + brokerageFuture
-    : 0;
-  const retirementProjectedPortfolio = hasInvestmentAccess()
-    ? retirementK401Future +
-      retirementRothFuture +
-      retirementTraditionalIraFuture +
-      retirementHsaFuture +
-      retirementCollege529Future +
-      retirementBrokerageFuture
-    : 0;
-  const retirementMonthlyNeedFromPortfolio = Math.max(
-    retirementMonthlyGoal - retirementIncomeOther,
-    0
-  );
-  const retirementNestEgg = retirementMonthlyNeedFromPortfolio * 12 * 25;
-  const retirementPortfolioIncome = hasInvestmentAccess()
-    ? (retirementProjectedPortfolio * 0.04) / 12
-    : 0;
-  const retirementTotalIncome = hasInvestmentAccess()
-    ? retirementPortfolioIncome + retirementIncomeOther
-    : 0;
-  const retirementGap = hasInvestmentAccess()
-    ? retirementMonthlyGoal - retirementTotalIncome
-    : 0;
   const currentInvestmentAssets = hasInvestmentAccess()
     ? investmentInputs.k401Balance +
       investmentInputs.rothBalance +
@@ -4418,177 +4426,6 @@ function updateDashboard() {
   const totalLiabilities =
     mortgageBalance + carLoanBalance + creditCardBalance + otherDebt + otherLiabilities;
   const netWorth = totalAssets - totalLiabilities;
-  const projectionMarks = Array.from(new Set([0, 2, 5, years].filter((value) => value <= years))).sort(
-    (left, right) => left - right
-  );
-  const netWorthSeries = projectionMarks.map((mark) => {
-    const projectedInvestments = hasInvestmentAccess()
-      ? futureValue(investmentInputs.k401Balance, investmentInputs.k401Contribution, returns.k401, mark) +
-        futureValue(investmentInputs.rothBalance, investmentInputs.rothContribution, returns.roth, mark) +
-        futureValue(
-          investmentInputs.traditionalIraBalance,
-          investmentInputs.traditionalIraContribution,
-          returns.traditionalIra,
-          mark
-        ) +
-        futureValue(investmentInputs.hsaBalance, investmentInputs.hsaContribution, returns.hsa, mark) +
-        futureValue(
-          investmentInputs.college529Balance,
-          investmentInputs.college529Contribution,
-          returns.college529,
-          mark
-        ) +
-        futureValue(
-          investmentInputs.brokerageBalance,
-          investmentInputs.brokerageContribution,
-          returns.brokerage,
-          mark
-        )
-      : 0;
-    const projectedEmergency = emergencyFund + Math.max(leftover, 0) * 12 * mark * 0.28;
-    const projectedDebtDrop = Math.min(
-      creditCardBalance + otherDebt,
-      (creditCardPayment + otherDebt) * 12 * mark * 0.4
-    );
-    return {
-      label: mark === 0 ? "Now" : `${mark}Y`,
-      value: Math.max(
-        0,
-        homeEquity + carEquity + otherAssets + projectedEmergency + projectedInvestments -
-          otherLiabilities - Math.max(creditCardBalance + otherDebt - projectedDebtDrop, 0)
-      ),
-    };
-  });
-  const retirementMarks = Array.from(
-    new Set([0, Math.max(Math.round(retirementYears / 3), 1), Math.max(Math.round((retirementYears * 2) / 3), 1), retirementYears])
-  )
-    .filter((value) => value <= retirementYears)
-    .sort((left, right) => left - right);
-  const retirementSeries = retirementMarks.map((mark) => {
-    const portfolioAtMark = hasInvestmentAccess()
-      ? futureValue(investmentInputs.k401Balance, investmentInputs.k401Contribution, returns.k401, mark) +
-        futureValue(investmentInputs.rothBalance, investmentInputs.rothContribution, returns.roth, mark) +
-        futureValue(
-          investmentInputs.traditionalIraBalance,
-          investmentInputs.traditionalIraContribution,
-          returns.traditionalIra,
-          mark
-        ) +
-        futureValue(investmentInputs.hsaBalance, investmentInputs.hsaContribution, returns.hsa, mark) +
-        futureValue(
-          investmentInputs.college529Balance,
-          investmentInputs.college529Contribution,
-          returns.college529,
-          mark
-        ) +
-        futureValue(
-          investmentInputs.brokerageBalance,
-          investmentInputs.brokerageContribution,
-          returns.brokerage,
-          mark
-        )
-      : 0;
-    return {
-      label: mark === 0 ? "Now" : `${mark}Y`,
-      value: portfolioAtMark,
-    };
-  });
-
-  setText("leftover", currency.format(leftover));
-  setText("debtRatio", percent.format(debtRatio));
-  setText("carRatio", percent.format(carRatio));
-  setText("emergencyMonths", emergencyMonths.toFixed(1));
-
-  document.getElementById("k401Future").textContent = hasInvestmentAccess() ? currency.format(k401Future) : "Locked";
-  document.getElementById("rothFuture").textContent = hasInvestmentAccess() ? currency.format(rothFuture) : "Locked";
-  document.getElementById("traditionalIraFuture").textContent = hasInvestmentAccess()
-    ? currency.format(traditionalIraFuture)
-    : "Locked";
-  document.getElementById("hsaFuture").textContent = hasInvestmentAccess() ? currency.format(hsaFuture) : "Locked";
-  document.getElementById("college529Future").textContent = hasInvestmentAccess()
-    ? currency.format(college529Future)
-    : "Locked";
-  document.getElementById("brokerageFuture").textContent = hasInvestmentAccess() ? currency.format(brokerageFuture) : "Locked";
-  document.getElementById("totalFuture").textContent = hasInvestmentAccess() ? currency.format(totalFuture) : "Locked";
-
-  document.getElementById("hero-leftover").textContent = currency.format(leftover);
-  document.getElementById("hero-growth").textContent = hasInvestmentAccess() ? currency.format(totalFuture) : "Upgrade";
-  document.getElementById("hero-debt-pressure").textContent =
-    debtRatio > 0.35 ? "High" : debtRatio > 0.2 ? "Moderate" : "Balanced";
-  document.getElementById("retirementAgeDisplay").textContent = hasInvestmentAccess()
-    ? `${investmentInputs.retirementAge}`
-    : "Locked";
-  document.getElementById("retirementYearsLeft").textContent = hasInvestmentAccess()
-    ? `${retirementYears.toFixed(0)}`
-    : "Locked";
-  document.getElementById("retirementMonthlyNeed").textContent = hasInvestmentAccess()
-    ? currency.format(retirementMonthlyGoal)
-    : "Locked";
-  document.getElementById("retirementNestEgg").textContent = hasInvestmentAccess()
-    ? currency.format(retirementNestEgg)
-    : "Locked";
-  document.getElementById("retirementProjectedPortfolio").textContent = hasInvestmentAccess()
-    ? currency.format(retirementProjectedPortfolio)
-    : "Locked";
-  document.getElementById("retirementPortfolioIncome").textContent = hasInvestmentAccess()
-    ? currency.format(retirementPortfolioIncome)
-    : "Locked";
-  document.getElementById("retirementTotalIncome").textContent = hasInvestmentAccess()
-    ? currency.format(retirementTotalIncome)
-    : "Locked";
-  document.getElementById("retirementGap").textContent = hasInvestmentAccess()
-    ? (retirementGap > 0 ? currency.format(retirementGap) : "On track")
-    : "Locked";
-  document.getElementById("retirementNote").textContent = hasInvestmentAccess()
-    ? retirementGap > 0
-      ? `You may still be about ${currency.format(retirementGap)} per month short of your target. Uses a simple 4% withdrawal rule for an educational estimate.`
-      : `At this pace, your projected retirement income covers your target with about ${currency.format(Math.abs(retirementGap))} per month of cushion. Uses a simple 4% withdrawal rule for an educational estimate.`
-    : "Upgrade to compare your retirement target against what your portfolio may actually support each month.";
-  document.getElementById("homeEquity").textContent = currency.format(homeEquity);
-  document.getElementById("carEquity").textContent = currency.format(carEquity);
-  document.getElementById("totalAssets").textContent = currency.format(totalAssets);
-  document.getElementById("totalLiabilities").textContent = currency.format(totalLiabilities);
-  document.getElementById("netWorth").textContent = currency.format(netWorth);
-  document.getElementById("homeNetLabel").textContent = currency.format(homeEquity);
-  document.getElementById("carNetLabel").textContent = currency.format(carEquity);
-  document.getElementById("liquidNetLabel").textContent = currency.format(
-    cashAssets + currentInvestmentAssets + otherAssets - otherLiabilities
-  );
-
-  const allocation = getAllocation(investmentInputs.age);
-  document.getElementById("allocation").innerHTML = hasInvestmentAccess()
-    ? `
-      <h3>${allocation.title}</h3>
-      <p>${allocation.stocks}% stocks / ${allocation.bonds}% bonds</p>
-      <p>${allocation.note}</p>
-      <ul>${allocation.funds.map((fund) => `<li>${fund}</li>`).join("")}</ul>
-    `
-    : `
-      <h3>Bundle required</h3>
-      <p>Upgrade to unlock age-based allocation guidance for retirement investing.</p>
-    `;
-
-  const decisionSummary = {
-    income,
-    leftover,
-    debtRatio,
-    carRatio,
-    emergencyMonths,
-    creditCardBalance,
-    creditCardPayment,
-    carPayment,
-    carCosts,
-    cashAssets,
-    emergencyFund,
-    essentialsBase,
-    recurringTotal:
-      state.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0) +
-      state.recurringBills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0),
-    retirementGap,
-    hasInvestmentAccess: hasInvestmentAccess(),
-    netWorth,
-    netWorthSeries,
-  };
   const financialDecisionBundle = buildFinancialDecisionBundle({
     planner: {
       income,
@@ -4615,98 +4452,127 @@ function updateDashboard() {
     hasInvestmentAccess: hasInvestmentAccess(),
     netWorth,
   });
-
-  const topRecommendations = financialDecisionBundle?.recommendationBundle?.recommendations?.length
-    ? financialDecisionBundle.recommendationBundle.recommendations.slice(0, 3).map((item) => ({
-        level: item.confidence === "high" ? "alert" : item.confidence === "medium" ? "warn" : "info",
-        title: item.title,
-        body: `${item.action} ${item.why}`,
-      }))
-    : buildRecommendations({
-        leftover,
-        debtRatio,
-        carRatio,
-        emergencyMonths,
-        creditCardBalance,
-        creditCardPayment,
-      });
-
-  renderRecommendations(topRecommendations);
-  renderHealth(financialDecisionBundle);
-  renderDecisionEngine(financialDecisionBundle || decisionSummary);
-  renderSnapshotCommandCenter({
-    leftover,
-    totalExpenses,
-    debtRatio,
-    cashAssets,
-    retirementGap,
-    hasInvestmentAccess: hasInvestmentAccess(),
+  const cashflow = financialDecisionBundle?.cashflow || {};
+  const debtAnalysis = financialDecisionBundle?.debtAnalysis || {};
+  const investmentAnalysis = financialDecisionBundle?.investmentAnalysis || {};
+  const profile = financialDecisionBundle?.profile || {};
+  const retirementSnapshot = getRetirementSnapshot(financialDecisionBundle);
+  const chartData = buildChartDataFromDecisionBundle(financialDecisionBundle, {
+    forecastYears: years,
   });
+  const debtRatio = cashflow.monthlyIncomeNet
+    ? Number(debtAnalysis.totalMinimums || 0) / Number(cashflow.monthlyIncomeNet || 1)
+    : 0;
+  const carRatio = cashflow.monthlyIncomeNet ? (carPayment + carCosts) / cashflow.monthlyIncomeNet : 0;
+  const emergencyMonths = Number(cashflow.emergencyMonths || 0);
+  const projectionByType = new Map(
+    (investmentAnalysis.accounts || []).map((account) => [account.accountType, Number(account?.projections?.[years] || 0)])
+  );
+  const totalFuture = Number(chartData.totalFuture || 0);
+
+  setText("leftover", currency.format(cashflow.freeCashflow || 0));
+  setText("debtRatio", percent.format(debtRatio));
+  setText("carRatio", percent.format(carRatio));
+  setText("emergencyMonths", emergencyMonths.toFixed(1));
+
+  document.getElementById("k401Future").textContent = hasInvestmentAccess()
+    ? currency.format(projectionByType.get("401k") || 0)
+    : "Locked";
+  document.getElementById("rothFuture").textContent = hasInvestmentAccess()
+    ? currency.format(projectionByType.get("roth") || 0)
+    : "Locked";
+  document.getElementById("traditionalIraFuture").textContent = hasInvestmentAccess()
+    ? currency.format(projectionByType.get("traditionalIra") || 0)
+    : "Locked";
+  document.getElementById("hsaFuture").textContent = hasInvestmentAccess()
+    ? currency.format(projectionByType.get("hsa") || 0)
+    : "Locked";
+  document.getElementById("college529Future").textContent = hasInvestmentAccess()
+    ? currency.format(projectionByType.get("college529") || 0)
+    : "Locked";
+  document.getElementById("brokerageFuture").textContent = hasInvestmentAccess()
+    ? currency.format(projectionByType.get("brokerage") || 0)
+    : "Locked";
+  document.getElementById("totalFuture").textContent = hasInvestmentAccess() ? currency.format(totalFuture) : "Locked";
+
+  document.getElementById("hero-leftover").textContent = currency.format(cashflow.freeCashflow || 0);
+  document.getElementById("hero-growth").textContent = hasInvestmentAccess() ? currency.format(totalFuture) : "Upgrade";
+  document.getElementById("hero-debt-pressure").textContent =
+    debtRatio > 0.35 ? "High" : debtRatio > 0.2 ? "Moderate" : "Balanced";
+  document.getElementById("retirementAgeDisplay").textContent = hasInvestmentAccess()
+    ? `${retirementSnapshot.retirementAge || investmentInputs.retirementAge}`
+    : "Locked";
+  document.getElementById("retirementYearsLeft").textContent = hasInvestmentAccess()
+    ? `${retirementSnapshot.retirementYears.toFixed(0)}`
+    : "Locked";
+  document.getElementById("retirementMonthlyNeed").textContent = hasInvestmentAccess()
+    ? currency.format(retirementSnapshot.retirementMonthlyGoal)
+    : "Locked";
+  document.getElementById("retirementNestEgg").textContent = hasInvestmentAccess()
+    ? currency.format(Math.max(retirementSnapshot.retirementMonthlyGoal - retirementSnapshot.retirementIncomeOther, 0) * 12 * 25)
+    : "Locked";
+  document.getElementById("retirementProjectedPortfolio").textContent = hasInvestmentAccess()
+    ? currency.format(retirementSnapshot.projectedPortfolio)
+    : "Locked";
+  document.getElementById("retirementPortfolioIncome").textContent = hasInvestmentAccess()
+    ? currency.format(retirementSnapshot.monthlySupportFromPortfolio)
+    : "Locked";
+  document.getElementById("retirementTotalIncome").textContent = hasInvestmentAccess()
+    ? currency.format(retirementSnapshot.totalMonthlySupport)
+    : "Locked";
+  document.getElementById("retirementGap").textContent = hasInvestmentAccess()
+    ? (retirementSnapshot.retirementGap > 0 ? currency.format(retirementSnapshot.retirementGap) : "On track")
+    : "Locked";
+  document.getElementById("retirementNote").textContent = hasInvestmentAccess()
+    ? retirementSnapshot.retirementGap > 0
+      ? `You may still be about ${currency.format(retirementSnapshot.retirementGap)} per month short of your target. Uses a simple 4% withdrawal rule for an educational estimate.`
+      : `At this pace, your projected retirement income covers your target with about ${currency.format(Math.abs(retirementSnapshot.retirementGap || 0))} per month of cushion. Uses a simple 4% withdrawal rule for an educational estimate.`
+    : "Upgrade to compare your retirement target against what your portfolio may actually support each month.";
+  document.getElementById("homeEquity").textContent = currency.format(homeEquity);
+  document.getElementById("carEquity").textContent = currency.format(carEquity);
+  document.getElementById("totalAssets").textContent = currency.format(totalAssets);
+  document.getElementById("totalLiabilities").textContent = currency.format(totalLiabilities);
+  document.getElementById("netWorth").textContent = currency.format(profile.netWorth || netWorth);
+  document.getElementById("homeNetLabel").textContent = currency.format(homeEquity);
+  document.getElementById("carNetLabel").textContent = currency.format(carEquity);
+  document.getElementById("liquidNetLabel").textContent = currency.format(
+    cashAssets + Number(investmentAnalysis.totalBalance || currentInvestmentAssets) + otherAssets - otherLiabilities
+  );
+
+  const allocation = getAllocation(investmentInputs.age);
+  document.getElementById("allocation").innerHTML = hasInvestmentAccess()
+    ? `
+      <h3>${allocation.title}</h3>
+      <p>${allocation.stocks}% stocks / ${allocation.bonds}% bonds</p>
+      <p>${allocation.note}</p>
+      <ul>${allocation.funds.map((fund) => `<li>${fund}</li>`).join("")}</ul>
+    `
+    : `
+      <h3>Bundle required</h3>
+      <p>Upgrade to unlock age-based allocation guidance for retirement investing.</p>
+    `;
+
+  renderRecommendations(financialDecisionBundle?.recommendationBundle?.recommendations || []);
+  renderHealth(financialDecisionBundle);
+  renderDecisionEngine(financialDecisionBundle);
+  renderSnapshotSupportCards(financialDecisionBundle);
+  renderSnapshotCommandCenter(financialDecisionBundle);
   renderSnapshotDashboard(
-    {
-      leftover,
-      cashAssets,
-      currentInvestmentAssets,
-      netWorth,
-    },
+    financialDecisionBundle,
     buildMonthlyAutomationData()
   );
-  renderHouseholdOverview({
-    cashAssets,
-    currentInvestmentAssets,
-    netWorth,
-  });
-  renderAiCoachHighlights({
-    debtRatio,
-    leftover,
-    recurringTotal:
-      state.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0) +
-      state.recurringBills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0),
-    retirementGap: hasInvestmentAccess() ? retirementGap : null,
-    hasInvestmentAccess: hasInvestmentAccess(),
-  });
-  renderSnapshotFeed({
-    leftover,
-  });
+  renderHouseholdOverview(financialDecisionBundle);
+  renderAiCoachHighlights(financialDecisionBundle);
+  renderSnapshotFeed(financialDecisionBundle);
   renderCouplesExperience({
-    householdCash: cashAssets + Number(state.linkedSummary.cashTotal || 0),
-    householdNetWorth: netWorth,
-    recurringLoad:
-      state.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0) +
-      state.recurringBills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0),
-    householdInvesting: currentInvestmentAssets + Number(state.linkedSummary.investmentsTotal || 0),
-    nextMove:
-      leftover < 0
-    ? "Trim repeating charges"
-        : debtRatio > 0.28
-          ? "Review debt together"
-          : emergencyMonths < 2
-            ? "Rebuild cushion"
-    : "Put the money left this month to work",
+    householdCash: Math.max(Number(profile.emergencyCash || 0), cashAssets + Number(state.linkedSummary.cashTotal || 0)),
+    householdNetWorth: Number(profile.netWorth || netWorth),
+    recurringLoad: Number(profile.monthlySubscriptions || 0) + Number(profile.monthlyBills || 0),
+    householdInvesting: Number(investmentAnalysis.totalBalance || 0),
+    nextMove: financialDecisionBundle?.recommendationBundle?.nextBestMove?.title || "Review shared priorities",
   });
 
-  renderCharts({
-    income,
-    housing,
-    essentials,
-    creditCardPayment,
-    otherDebt,
-    carPayment,
-    carCosts,
-    leftover,
-    totalExpenses,
-    k401Future,
-    rothFuture,
-    traditionalIraFuture,
-    hsaFuture,
-    college529Future,
-    brokerageFuture,
-    totalFuture,
-    years,
-    netWorthSeries,
-    retirementSeries,
-    retirementGap,
-  });
+  renderCharts(chartData);
 }
 
 function handleSignup(event) {

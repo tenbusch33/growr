@@ -525,6 +525,59 @@
             </div>
             <p class="decision-support-copy" id="nbm-assumptions">Assumptions: Growr needs your monthly income, debt details, and recurring transfers to explain the strongest recommendation confidently.</p>
           </article>
+        </section>
+
+        <section class="snapshot-support-grid">
+          <article class="glass support-stat-card">
+            <div class="support-stat-top">
+              <p class="eyebrow">Monthly cash flow</p>
+              <span class="support-stat-badge" id="support-cashflow-chip">Stable</span>
+            </div>
+            <strong class="support-stat-value" id="support-cashflow-value">$0 left</strong>
+            <p class="support-stat-copy" id="support-cashflow-note">Growr will show whether this month has room or a shortfall.</p>
+          </article>
+
+          <article class="glass support-stat-card">
+            <div class="support-stat-top">
+              <p class="eyebrow">Debt pressure</p>
+              <span class="support-stat-badge warning" id="support-debt-chip">Review</span>
+            </div>
+            <strong class="support-stat-value" id="support-debt-value">Needs details</strong>
+            <p class="support-stat-copy" id="support-debt-note">Growr will surface the debt load that is dragging progress down.</p>
+          </article>
+
+          <article class="glass support-stat-card">
+            <div class="support-stat-top">
+              <p class="eyebrow">Emergency fund</p>
+              <span class="support-stat-badge subtle" id="support-emergency-chip">Building</span>
+            </div>
+            <strong class="support-stat-value" id="support-emergency-value">0.0 months</strong>
+            <p class="support-stat-copy" id="support-emergency-note">Growr will show how many months of essentials are covered.</p>
+          </article>
+        </section>
+
+        <section class="snapshot-outlook-grid">
+          <article class="glass investment-forecast-card">
+            <div class="section-heading compact">
+              <p class="eyebrow">Investment forecast</p>
+              <h2>What the current investing path could become</h2>
+            </div>
+            <div class="forecast-value-row">
+              <strong class="forecast-primary-value" id="forecast-balance">$0</strong>
+              <span class="support-stat-badge" id="forecast-return">Baseline</span>
+            </div>
+            <div class="forecast-meta-grid">
+              <div class="forecast-meta-card">
+                <span>Monthly contributions</span>
+                <strong id="forecast-contribution">$0 / month</strong>
+              </div>
+              <div class="forecast-meta-card">
+                <span>Current invested</span>
+                <strong id="forecast-current-balance">$0</strong>
+              </div>
+            </div>
+            <p class="support-stat-copy" id="forecast-note">Growr will project the current investing path using the engine assumptions.</p>
+          </article>
 
           <article class="glass opportunity-card">
             <div class="section-heading compact">
@@ -544,7 +597,9 @@
               </div>
             </div>
           </article>
+        </section>
 
+        <section class="snapshot-supporting-grid">
           <article class="glass scenario-preview-card">
             <div class="section-heading compact">
               <p class="eyebrow">Scenario preview</p>
@@ -566,7 +621,18 @@
             </div>
             <p class="decision-support-copy" id="scenario-copy">Growr will compare your current setup with the move that improves your finances fastest.</p>
           </article>
+
+          <article class="glass support-insight-card">
+            <div class="section-heading compact">
+              <p class="eyebrow">Supporting insight</p>
+              <h2 id="support-recurring-title">Recurring drag worth reviewing</h2>
+            </div>
+            <strong class="support-insight-value" id="support-recurring-value">$0 / month</strong>
+            <p class="support-stat-copy" id="support-recurring-note">Growr will show recurring charges and bills that may be competing with better financial moves.</p>
+            <span class="support-stat-badge subtle" id="support-recurring-chip">Needs linked data</span>
+          </article>
         </section>
+
         <section id="planner" class="planner-grid">
           <div class="glass planner-panel">
           <div class="section-heading compact">

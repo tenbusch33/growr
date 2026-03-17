@@ -295,6 +295,22 @@
             annualReturnAssumption: 0.07,
             accountType: "hsa",
           },
+          {
+            id: "traditional-ira",
+            label: "Traditional IRA",
+            balance: shared.safeNumber(investmentInputs.traditionalIraBalance),
+            recurringContribution: shared.safeNumber(investmentInputs.traditionalIraContribution),
+            annualReturnAssumption: 0.065,
+            accountType: "traditionalIra",
+          },
+          {
+            id: "529",
+            label: "529",
+            balance: shared.safeNumber(investmentInputs.college529Balance),
+            recurringContribution: shared.safeNumber(investmentInputs.college529Contribution),
+            annualReturnAssumption: 0.065,
+            accountType: "college529",
+          },
         ].filter((account) => account.balance || account.recurringContribution)
       : [];
 
