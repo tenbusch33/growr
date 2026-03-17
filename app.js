@@ -2080,7 +2080,7 @@ function renderCategoryDonut(categorySpend) {
 
   rawEntries.forEach(([key, amount], index) => {
     const share = rawTotal ? amount / rawTotal : 0;
-    if (index < 5 && share >= 0.03) {
+    if (index < 4 && share >= 0.06) {
       condensedEntries.push([key, amount]);
     } else {
       otherAmount += amount;
@@ -2113,16 +2113,18 @@ function renderCategoryDonut(categorySpend) {
     return;
   }
 
-  let angle = 0;
-  const stops = entries.map(([key, amount]) => {
-    const nextAngle = angle + (amount / total) * 360;
+  let angle = -90;
+  const stops = entries.map(([key, amount], index) => {
+    const segmentSize = (amount / total) * 360;
+    const nextAngle = angle + segmentSize;
     const color = chartSolidPalette[key] || chartSolidPalette.other;
-    const stop = `${color} ${angle}deg ${nextAngle}deg`;
+    const gap = index === entries.length - 1 ? 0 : 1.4;
+    const stop = `${color} ${angle}deg ${Math.max(angle, nextAngle - gap)}deg`;
     angle = nextAngle;
     return stop;
   });
 
-  chart.style.background = `conic-gradient(${stops.join(", ")})`;
+  chart.style.background = `conic-gradient(${stops.join(", ")}, rgba(227, 234, 245, 0.9) ${angle}deg 270deg)`;
   center.innerHTML = `
     <span class="donut-kicker">Total spend</span>
     <span class="donut-period">in ${periodText}</span>

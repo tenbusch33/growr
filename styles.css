@@ -3197,30 +3197,31 @@ select {
   padding: 28px;
 }
 
-.spending-screen-intro,
 .spending-rocket-shell,
 .spending-top-card,
 .spending-breakdown-card {
   border-radius: 34px;
 }
 
-.spending-screen-intro {
-  padding: 20px 28px;
-}
-
-.spending-screen-intro-copy {
+.spending-screen-title {
   display: flex;
-  align-items: center;
   justify-content: center;
+  padding: 8px 0 18px;
 }
 
-.spending-screen-intro h2 {
+.spending-screen-title h2 {
   margin: 0;
+  color: #fff;
+  font-family: "Sora", sans-serif;
+  font-size: clamp(2rem, 3vw, 2.7rem);
 }
 
 .spending-top-card {
   padding: 26px;
   background: #fff;
+  max-width: 920px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .spending-top-card-row {
@@ -3342,6 +3343,8 @@ select {
 .spending-breakdown-card {
   padding: 0;
   overflow: hidden;
+  max-width: 920px;
+  margin: 0 auto;
 }
 
 .spending-breakdown-tabs {
@@ -3425,25 +3428,25 @@ select {
 }
 
 .spending-donut-wrap {
-  width: min(100%, 760px);
-  margin: 14px auto 10px;
+  width: min(100%, 520px);
+  margin: 18px auto 10px;
   display: grid;
   grid-template-columns: 1fr;
   justify-items: center;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .spending-donut-wrap .donut-chart {
-  width: min(520px, calc(100vw - 140px));
-  max-width: 520px;
+  width: min(360px, calc(100vw - 160px));
+  max-width: 360px;
   box-shadow:
-    inset 0 0 0 22px rgba(255, 255, 255, 0.94),
-    0 20px 40px rgba(32, 37, 58, 0.06);
+    inset 0 0 0 18px rgba(255, 255, 255, 0.96),
+    0 18px 32px rgba(32, 37, 58, 0.05);
 }
 
 .spending-donut-wrap .donut-center {
-  inset: 22%;
+  inset: 25%;
   box-shadow: none;
   border: none;
   background: rgba(255, 255, 255, 0.98);
@@ -3452,7 +3455,7 @@ select {
   align-content: center;
   justify-items: center;
   text-align: center;
-  padding: 22px;
+  padding: 16px;
 }
 
 .spending-donut-wrap .donut-center span {
@@ -3462,7 +3465,7 @@ select {
 }
 
 .spending-donut-wrap .donut-center .donut-kicker {
-  font-size: 1rem;
+  font-size: 0.92rem;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -3470,15 +3473,15 @@ select {
 }
 
 .spending-donut-wrap .donut-center .donut-period {
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   color: #656b79;
 }
 
 .spending-donut-wrap .donut-center strong {
   display: block;
   font-family: "Sora", sans-serif;
-  font-size: clamp(2.6rem, 5vw, 4.6rem);
-  line-height: 0.95;
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  line-height: 1;
   color: #111;
 }
 
@@ -3487,7 +3490,7 @@ select {
 }
 
 .spending-donut-legend {
-  width: min(100%, 760px);
+  width: min(100%, 620px);
   margin: 0 auto;
   padding: 0 18px 22px;
   display: grid;
@@ -5256,6 +5259,7 @@ select {
     display: none;
   }
 
+  .app-page[data-page="spending"] .page-intro,
   .app-page[data-page="spending"] .page-intro-callouts,
   .app-page[data-page="spending"] .section-bridge,
   .app-page[data-page="spending"] .budget-coach-grid,
@@ -5293,16 +5297,7 @@ select {
   }
 
   .app-page[data-page="spending"] .period-range-controls {
-    color: #fff;
-    justify-content: center;
-    margin: 18px 0 10px;
-  }
-
-  .app-page[data-page="spending"] .period-range-controls .ghost-btn {
-    border-color: rgba(255, 255, 255, 0.14);
-    color: rgba(255, 255, 255, 0.7);
-    background: transparent;
-    min-width: 92px;
+    display: none;
   }
 
   .app-page[data-page="spending"] .spending-mini-bars {
@@ -5451,18 +5446,18 @@ select {
   }
 
   .app-page[data-page="spending"] .spending-donut-wrap {
-    width: min(100%, 720px);
+    width: min(100%, 360px);
     margin-top: 10px;
     margin-bottom: 6px;
   }
 
   .app-page[data-page="spending"] .spending-donut-wrap .donut-chart {
-    width: min(84vw, 620px);
-    box-shadow: inset 0 0 0 16px rgba(255, 255, 255, 0.92);
+    width: min(78vw, 330px);
+    box-shadow: inset 0 0 0 14px rgba(255, 255, 255, 0.92);
   }
 
   .app-page[data-page="spending"] .spending-donut-wrap .donut-center {
-    inset: 22%;
+    inset: 25%;
   }
 
   .app-page[data-page="spending"] .spending-donut-wrap .donut-center span {
@@ -5470,7 +5465,12 @@ select {
   }
 
   .app-page[data-page="spending"] .spending-donut-wrap .donut-center strong {
-    font-size: clamp(2.8rem, 12vw, 4.2rem);
+    font-size: clamp(2.3rem, 11vw, 3.5rem);
+  }
+
+  .app-page[data-page="spending"] .spending-donut-legend {
+    width: min(100%, 100%);
+    padding: 0 14px 18px;
   }
 
   .app-page[data-page="transactions"] .budgeting-grid > .budget-workbench:first-child {
