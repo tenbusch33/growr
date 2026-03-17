@@ -1851,6 +1851,62 @@ function updateSpendingPeriodControls() {
   }
 }
 
+function buildSmoothPath(nodes) {
+  if (!nodes.length) {
+    return "";
+  }
+  if (nodes.length === 1) {
+    return `M ${nodes[0].x} ${nodes[0].y}`;
+  }
+  return nodes.reduce((path, node, index) => {
+    if (index === 0) {
+      return `M ${node.x} ${node.y}`;
+    }
+    const previous = nodes[index - 1];
+    const midX = (previous.x + node.x) / 2;
+    return `${path} C ${midX} ${previous.y}, ${midX} ${node.y}, ${node.x} ${node.y}`;
+  }, "");
+}
+
+function buildAreaPath(nodes, baselineY) {
+  if (!nodes.length) {
+    return "";
+  }
+  return [
+    `M ${nodes[0].x} ${baselineY}`,
+    ...nodes.map((node, index) => `${index === 0 ? "L" : "L"} ${node.x} ${node.y}`),
+    `L ${nodes[nodes.length - 1].x} ${baselineY}`,
+    "Z",
+  ].join(" ");
+}
+
+function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+  return {
+    x: centerX + radius * Math.cos(angleInRadians),
+    y: centerY + radius * Math.sin(angleInRadians),
+  };
+}
+
+function describeArcPath(centerX, centerY, radius, startAngle, endAngle) {
+  const start = polarToCartesian(centerX, centerY, radius, endAngle);
+  const end = polarToCartesian(centerX, centerY, radius, startAngle);
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+  return [
+    "M",
+    start.x,
+    start.y,
+    "A",
+    radius,
+    radius,
+    0,
+    largeArcFlag,
+    0,
+    end.x,
+    end.y,
+  ].join(" ");
+}
+
 function renderMonthlyTrendChart(series) {
   const chart = document.getElementById("monthly-trend-chart");
   const label = document.getElementById("monthly-trend-label");
@@ -1884,8 +1940,6 @@ function renderMonthlyTrendChart(series) {
     const y = height - padding - (value / maxValue) * (height - padding * 2);
     return `${x},${y}`;
   };
-  const spendPoints = series.map((point, index) => toPoint(point.spend, index)).join(" ");
-  const incomePoints = series.map((point, index) => toPoint(point.income, index)).join(" ");
   const spendNodes = series.map((point, index) => {
     const [x, y] = toPoint(point.spend, index).split(",").map(Number);
     return { x, y };
@@ -1894,32 +1948,16 @@ function renderMonthlyTrendChart(series) {
     const [x, y] = toPoint(point.income, index).split(",").map(Number);
     return { x, y };
   });
-  const smoothPath = (nodes) => {
-    if (nodes.length === 1) {
-      return `M ${nodes[0].x} ${nodes[0].y}`;
-    }
-    return nodes.reduce((path, node, index) => {
-      if (index === 0) {
-        return `M ${node.x} ${node.y}`;
-      }
-      const previous = nodes[index - 1];
-      const midX = (previous.x + node.x) / 2;
-      return `${path} C ${midX} ${previous.y}, ${midX} ${node.y}, ${node.x} ${node.y}`;
-    }, "");
-  };
-  const spendArea = [
-    `${padding},${height - padding}`,
-    ...series.map((point, index) => toPoint(point.spend, index)),
-    `${padding + stepX * (series.length - 1)},${height - padding}`,
-  ].join(" ");
-  const incomeArea = [
-    `${padding},${height - padding}`,
-    ...series.map((point, index) => toPoint(point.income, index)),
-    `${padding + stepX * (series.length - 1)},${height - padding}`,
-  ].join(" ");
+  const baselineY = height - padding;
+  const spendArea = buildAreaPath(spendNodes, baselineY);
+  const incomeArea = buildAreaPath(incomeNodes, baselineY);
   const latest = series[series.length - 1];
   const previous = series[series.length - 2];
   const trendDelta = previous ? latest.spend - previous.spend : 0;
+  const spendPath = buildSmoothPath(spendNodes);
+  const incomePath = buildSmoothPath(incomeNodes);
+  const latestSpend = spendNodes[spendNodes.length - 1];
+  const latestIncome = incomeNodes[incomeNodes.length - 1];
 
   chart.innerHTML = `
     <defs>
@@ -1939,6 +1977,9 @@ function renderMonthlyTrendChart(series) {
         <stop offset="0%" stop-color="#3867ff"></stop>
         <stop offset="100%" stop-color="#6c8cff"></stop>
       </linearGradient>
+      <filter id="growrTrendShadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(45,54,89,0.14)"></feDropShadow>
+      </filter>
     </defs>
     ${[0.25, 0.5, 0.75]
       .map((ratio) => {
@@ -1947,8 +1988,8 @@ function renderMonthlyTrendChart(series) {
       })
       .join("")}
     <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#d9e0ea" stroke-width="1.5"></line>
-    <polygon points="${incomeArea}" fill="url(#growrIncomeFill)"></polygon>
-    <polygon points="${spendArea}" fill="url(#growrSpendFill)"></polygon>
+    <path d="${incomeArea}" fill="url(#growrIncomeFill)"></path>
+    <path d="${spendArea}" fill="url(#growrSpendFill)"></path>
     ${series
       .map((point, index) => {
         const x = padding + stepX * index;
@@ -1957,8 +1998,8 @@ function renderMonthlyTrendChart(series) {
         `;
       })
       .join("")}
-    <path d="${smoothPath(incomeNodes)}" fill="none" stroke="url(#growrIncomeLine)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-    <path d="${smoothPath(spendNodes)}" fill="none" stroke="url(#growrSpendLine)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="${incomePath}" fill="none" stroke="url(#growrIncomeLine)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#growrTrendShadow)"></path>
+    <path d="${spendPath}" fill="none" stroke="url(#growrSpendLine)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#growrTrendShadow)"></path>
     ${series
       .map((point, index) => {
         const incomePoint = toPoint(point.income, index).split(",");
@@ -1969,8 +2010,10 @@ function renderMonthlyTrendChart(series) {
         `;
       })
       .join("")}
-    ${incomeNodes.length ? `<circle cx="${incomeNodes[incomeNodes.length - 1].x}" cy="${incomeNodes[incomeNodes.length - 1].y}" r="6" fill="#3867ff" stroke="#ffffff" stroke-width="3"></circle>` : ""}
-    ${spendNodes.length ? `<circle cx="${spendNodes[spendNodes.length - 1].x}" cy="${spendNodes[spendNodes.length - 1].y}" r="6" fill="#ff5a36" stroke="#ffffff" stroke-width="3"></circle>` : ""}
+    ${incomeNodes.length ? `<circle cx="${latestIncome.x}" cy="${latestIncome.y}" r="7" fill="#3867ff" stroke="#ffffff" stroke-width="3"></circle>` : ""}
+    ${spendNodes.length ? `<circle cx="${latestSpend.x}" cy="${latestSpend.y}" r="7" fill="#ff5a36" stroke="#ffffff" stroke-width="3"></circle>` : ""}
+    ${spendNodes.length ? `<rect x="${Math.max(latestSpend.x - 58, padding)}" y="${Math.max(latestSpend.y - 48, 10)}" rx="12" ry="12" width="92" height="30" fill="#111827"></rect>
+      <text x="${Math.max(latestSpend.x - 12, padding + 46)}" y="${Math.max(latestSpend.y - 28, 30)}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">${currency.format(latest.spend)}</text>` : ""}
   `;
 
   label.textContent = currency.format(latest.spend);
@@ -2020,20 +2063,10 @@ function renderProjectionLineChart({
     const y = height - paddingY - (point.value / maxValue) * (height - paddingY * 2);
     return { ...point, x, y };
   });
-  const polylinePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
-  const smoothPath = points.reduce((path, point, index) => {
-    if (index === 0) {
-      return `M ${point.x} ${point.y}`;
-    }
-    const previous = points[index - 1];
-    const midX = (previous.x + point.x) / 2;
-    return `${path} C ${midX} ${previous.y}, ${midX} ${point.y}, ${point.x} ${point.y}`;
-  }, "");
-  const areaPoints = [
-    `${points[0].x},${height - paddingY}`,
-    ...points.map((point) => `${point.x},${point.y}`),
-    `${points[points.length - 1].x},${height - paddingY}`,
-  ].join(" ");
+  const baselineY = height - paddingY;
+  const smoothPath = buildSmoothPath(points);
+  const areaPath = buildAreaPath(points, baselineY);
+  const latestPoint = points[points.length - 1];
 
   chart.innerHTML = `
     <defs>
@@ -2041,6 +2074,9 @@ function renderProjectionLineChart({
         <stop offset="0%" stop-color="${fillColor}" stop-opacity="0.36"></stop>
         <stop offset="100%" stop-color="${fillColor}" stop-opacity="0"></stop>
       </linearGradient>
+      <filter id="${chartId}-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(45,54,89,0.12)"></feDropShadow>
+      </filter>
     </defs>
     ${[0.25, 0.5, 0.75]
       .map((ratio) => {
@@ -2048,9 +2084,9 @@ function renderProjectionLineChart({
         return `<line x1="${paddingX}" y1="${y}" x2="${width - paddingX}" y2="${y}" stroke="#eef2f8" stroke-width="1"></line>`;
       })
       .join("")}
-    <polygon points="${areaPoints}" fill="url(#${chartId}-fill)"></polygon>
+    <path d="${areaPath}" fill="url(#${chartId}-fill)"></path>
     <line x1="${paddingX}" y1="${height - paddingY}" x2="${width - paddingX}" y2="${height - paddingY}" stroke="#d9e0ea" stroke-width="1.5"></line>
-    <path d="${smoothPath}" fill="none" stroke="${lineColor}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="${smoothPath}" fill="none" stroke="${lineColor}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#${chartId}-shadow)"></path>
     ${points
       .map(
         (point) => `
@@ -2059,6 +2095,7 @@ function renderProjectionLineChart({
         `
       )
       .join("")}
+    <circle cx="${latestPoint.x}" cy="${latestPoint.y}" r="7" fill="${lineColor}" stroke="#ffffff" stroke-width="3"></circle>
   `;
 
   label.textContent = labelFormatter(series[series.length - 1].value);
@@ -2116,18 +2153,27 @@ function renderCategoryDonut(categorySpend) {
     return;
   }
 
+  const radius = 92;
+  const centerPoint = 120;
   let angle = -90;
-  const stops = entries.map(([key, amount], index) => {
-    const segmentSize = (amount / total) * 360;
-    const nextAngle = angle + segmentSize;
-    const color = chartSolidPalette[key] || chartSolidPalette.other;
-    const gap = index === entries.length - 1 ? 0 : 1.4;
-    const stop = `${color} ${angle}deg ${Math.max(angle, nextAngle - gap)}deg`;
-    angle = nextAngle;
-    return stop;
-  });
+  const segmentMarkup = entries
+    .map(([key, amount], index) => {
+      const segmentSize = (amount / total) * 360;
+      const nextAngle = angle + segmentSize;
+      const color = chartSolidPalette[key] || chartSolidPalette.other;
+      const gap = index === entries.length - 1 ? 0 : 1.6;
+      const path = describeArcPath(centerPoint, centerPoint, radius, angle, Math.max(angle, nextAngle - gap));
+      angle = nextAngle;
+      return `<path d="${path}" stroke="${color}" stroke-width="28" stroke-linecap="round" fill="none"></path>`;
+    })
+    .join("");
 
-  chart.style.background = `conic-gradient(${stops.join(", ")}, rgba(227, 234, 245, 0.9) ${angle}deg 270deg)`;
+  chart.innerHTML = `
+    <svg viewBox="0 0 240 240" aria-hidden="true">
+      <circle cx="${centerPoint}" cy="${centerPoint}" r="${radius}" fill="none" stroke="rgba(227, 234, 245, 0.95)" stroke-width="28"></circle>
+      ${segmentMarkup}
+    </svg>
+  `;
   center.innerHTML = `
     <span class="donut-kicker">Total spend</span>
     <span class="donut-period">in ${periodText}</span>
@@ -3327,23 +3373,46 @@ function renderCharts(data) {
     1
   );
 
-  cashflowChart.innerHTML = cashSegments
-    .map((segment) => {
-      const height = Math.max(Math.min((segment.amount / cashChartScale) * 180, 180), 12);
-      const shareOfIncome = data.income > 0 ? segment.amount / data.income : 0;
-      const label = data.income > 0 && shareOfIncome <= 1.5
-        ? percent.format(shareOfIncome)
-        : currency.format(segment.amount);
+  const cashWidth = 420;
+  const cashHeight = 230;
+  const chartBottom = 184;
+  const barWidth = 54;
+  const cashGap = 22;
+  const startX = 34;
+  const barMarkup = cashSegments
+    .map((segment, index) => {
+      const height = Math.max(Math.min((segment.amount / cashChartScale) * 138, 138), 10);
+      const x = startX + index * (barWidth + cashGap);
+      const y = chartBottom - height;
       return `
-        <div class="stack-column">
-          <div class="stack-segment" style="height:${height}px;background:${chartPalette[segment.key]}">
-            <strong>${label}</strong>
-          </div>
-          <span class="stack-label">${segment.label}</span>
-        </div>
+        <g class="cashflow-bar-group">
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${height}" rx="16" ry="16" fill="${chartPalette[segment.key]}"></rect>
+          <text x="${x + barWidth / 2}" y="${Math.max(y - 10, 18)}" text-anchor="middle" fill="#111827" font-size="11" font-weight="700">${currency.format(segment.amount)}</text>
+          <text x="${x + barWidth / 2}" y="${chartBottom + 26}" text-anchor="middle" fill="#6b7280" font-size="11" font-weight="600">${segment.label}</text>
+        </g>
       `;
     })
     .join("");
+
+  cashflowChart.innerHTML = `
+    <svg viewBox="0 0 ${cashWidth} ${cashHeight}" aria-label="Monthly cash flow categories">
+      <defs>
+        <filter id="cashflowBarShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="rgba(30,41,59,0.10)"></feDropShadow>
+        </filter>
+      </defs>
+      ${[0.25, 0.5, 0.75, 1]
+        .map((ratio) => {
+          const y = chartBottom - ratio * 138;
+          return `<line x1="24" y1="${y}" x2="${cashWidth - 18}" y2="${y}" stroke="#edf2f7" stroke-width="1"></line>`;
+        })
+        .join("")}
+      <line x1="24" y1="${chartBottom}" x2="${cashWidth - 18}" y2="${chartBottom}" stroke="#d8e0ea" stroke-width="1.5"></line>
+      <g filter="url(#cashflowBarShadow)">
+        ${barMarkup}
+      </g>
+    </svg>
+  `;
 
   expenseLegend.innerHTML = cashSegments
     .filter((segment) => segment.key !== "leftover")
