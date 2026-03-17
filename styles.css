@@ -8491,3 +8491,80 @@ select {
     grid-template-columns: minmax(0, 1.58fr) minmax(380px, 0.72fr);
   }
 }
+
+.chart-card {
+  padding: 30px 32px 32px;
+}
+
+.chart-card-top {
+  margin-bottom: 18px;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.chart-card-top h3 {
+  font-size: 1.22rem;
+  letter-spacing: -0.035em;
+}
+
+.chart-card-top strong {
+  font-size: clamp(1.85rem, 2.2vw, 2.35rem);
+  letter-spacing: -0.05em;
+}
+
+.chart-note {
+  margin-top: 16px;
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: #6b7889;
+}
+
+.chart-card .insight-chip {
+  background: #f7faf9;
+  border-color: rgba(15, 23, 32, 0.05);
+  color: #617083;
+}
+
+.legend-item,
+.bar-item {
+  border-color: rgba(15, 23, 32, 0.05);
+  background: #fbfdfc;
+}
+
+.legend-item p,
+.bar-item p {
+  color: #5f6d80;
+}
+
+.legend-item strong,
+.bar-item strong {
+  color: #0f1720;
+}
+
+.legend-dot {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9);
+}
+
+.bar-track {
+  background: #edf2f5;
+}
+
+.bar-fill {
+  border-radius: 999px;
+}
+
+.snapshot-mini-trend,
+#monthly-trend-chart,
+#networth-trend-chart,
+#retirement-runway-chart,
+#cashflow-chart {
+  overflow: visible;
+}
+
+.spending-donut-wrap .donut-chart svg {
+  filter: none;
+}
+
+.spending-donut-wrap .donut-center {
+  background: rgba(255, 255, 255, 0.985);
+}

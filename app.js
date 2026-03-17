@@ -103,6 +103,19 @@ const chartSolidPalette = {
   other: "#94a3b8",
 };
 
+const chartSeriesStyles = {
+  primary: "#22c7b8",
+  secondary: "#0ea5e9",
+  neutral: "#cfd8e3",
+  grid: "rgba(15, 23, 32, 0.06)",
+  axis: "rgba(15, 23, 32, 0.12)",
+  label: "#738194",
+  tooltipBg: "#0f1720",
+  tooltipText: "#f8fafc",
+};
+
+const chartCategoryTones = ["#22c7b8", "#58d8ce", "#0ea5e9", "#82c9f2", "#cfd8e3", "#e5ebf2"];
+
 const categoryTargets = [
   { key: "housing", label: "Housing", target: 2100, color: chartPalette.housing },
   { key: "essentials", label: "Essentials", target: 850, color: chartPalette.essentials },
@@ -2082,58 +2095,58 @@ function renderMonthlyTrendChart(series) {
   chart.innerHTML = `
     <defs>
       <linearGradient id="growrSpendFill" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#ff5a36" stop-opacity="0.24"></stop>
-        <stop offset="100%" stop-color="#ff5a36" stop-opacity="0"></stop>
+        <stop offset="0%" stop-color="${chartSeriesStyles.primary}" stop-opacity="0.18"></stop>
+        <stop offset="100%" stop-color="${chartSeriesStyles.primary}" stop-opacity="0"></stop>
       </linearGradient>
       <linearGradient id="growrIncomeFill" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#3867ff" stop-opacity="0.22"></stop>
-        <stop offset="100%" stop-color="#3867ff" stop-opacity="0"></stop>
+        <stop offset="0%" stop-color="${chartSeriesStyles.secondary}" stop-opacity="0.12"></stop>
+        <stop offset="100%" stop-color="${chartSeriesStyles.secondary}" stop-opacity="0"></stop>
       </linearGradient>
       <linearGradient id="growrSpendLine" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#ff5a36"></stop>
-        <stop offset="100%" stop-color="#ff8b70"></stop>
+        <stop offset="0%" stop-color="${chartSeriesStyles.primary}"></stop>
+        <stop offset="100%" stop-color="${chartSeriesStyles.primary}"></stop>
       </linearGradient>
       <linearGradient id="growrIncomeLine" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#3867ff"></stop>
-        <stop offset="100%" stop-color="#6c8cff"></stop>
+        <stop offset="0%" stop-color="${chartSeriesStyles.secondary}"></stop>
+        <stop offset="100%" stop-color="${chartSeriesStyles.secondary}"></stop>
       </linearGradient>
       <filter id="growrTrendShadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(45,54,89,0.14)"></feDropShadow>
+        <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(15,23,32,0.08)"></feDropShadow>
       </filter>
     </defs>
-    ${[0.25, 0.5, 0.75]
+    ${[0.5]
       .map((ratio) => {
         const y = height - padding - ratio * (height - padding * 2);
-        return `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="#eef2f8" stroke-width="1"></line>`;
+        return `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="${chartSeriesStyles.grid}" stroke-width="1"></line>`;
       })
       .join("")}
-    <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#d9e0ea" stroke-width="1.5"></line>
+    <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="${chartSeriesStyles.axis}" stroke-width="1.25"></line>
     <path d="${incomeArea}" fill="url(#growrIncomeFill)"></path>
     <path d="${spendArea}" fill="url(#growrSpendFill)"></path>
     ${series
       .map((point, index) => {
         const x = padding + stepX * index;
         return `
-          <text x="${x}" y="${height - 2}" text-anchor="middle" fill="#7a8599" font-size="12">${point.label}</text>
+          <text x="${x}" y="${height - 2}" text-anchor="middle" fill="${chartSeriesStyles.label}" font-size="13" font-weight="600">${point.label}</text>
         `;
       })
       .join("")}
-    <path d="${incomePath}" fill="none" stroke="url(#growrIncomeLine)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#growrTrendShadow)"></path>
-    <path d="${spendPath}" fill="none" stroke="url(#growrSpendLine)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#growrTrendShadow)"></path>
+    <path d="${incomePath}" fill="none" stroke="url(#growrIncomeLine)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#growrTrendShadow)"></path>
+    <path d="${spendPath}" fill="none" stroke="url(#growrSpendLine)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#growrTrendShadow)"></path>
     ${series
       .map((point, index) => {
         const incomePoint = toPoint(point.income, index).split(",");
         const spendPoint = toPoint(point.spend, index).split(",");
         return `
-          <circle cx="${incomePoint[0]}" cy="${incomePoint[1]}" r="4.5" fill="#3867ff"></circle>
-          <circle cx="${spendPoint[0]}" cy="${spendPoint[1]}" r="4.5" fill="#ff5a36"></circle>
+          <circle cx="${incomePoint[0]}" cy="${incomePoint[1]}" r="4" fill="${chartSeriesStyles.secondary}" opacity="0.2"></circle>
+          <circle cx="${spendPoint[0]}" cy="${spendPoint[1]}" r="4" fill="${chartSeriesStyles.primary}" opacity="0.2"></circle>
         `;
       })
       .join("")}
-    ${incomeNodes.length ? `<circle cx="${latestIncome.x}" cy="${latestIncome.y}" r="7" fill="#3867ff" stroke="#ffffff" stroke-width="3"></circle>` : ""}
-    ${spendNodes.length ? `<circle cx="${latestSpend.x}" cy="${latestSpend.y}" r="7" fill="#ff5a36" stroke="#ffffff" stroke-width="3"></circle>` : ""}
-    ${spendNodes.length ? `<rect x="${Math.max(latestSpend.x - 58, padding)}" y="${Math.max(latestSpend.y - 48, 10)}" rx="12" ry="12" width="92" height="30" fill="#111827"></rect>
-      <text x="${Math.max(latestSpend.x - 12, padding + 46)}" y="${Math.max(latestSpend.y - 28, 30)}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">${currency.format(latest.spend)}</text>` : ""}
+    ${incomeNodes.length ? `<circle cx="${latestIncome.x}" cy="${latestIncome.y}" r="7" fill="${chartSeriesStyles.secondary}" stroke="#ffffff" stroke-width="3"></circle>` : ""}
+    ${spendNodes.length ? `<circle cx="${latestSpend.x}" cy="${latestSpend.y}" r="7" fill="${chartSeriesStyles.primary}" stroke="#ffffff" stroke-width="3"></circle>` : ""}
+    ${spendNodes.length ? `<rect x="${Math.max(latestSpend.x - 64, padding)}" y="${Math.max(latestSpend.y - 52, 10)}" rx="14" ry="14" width="104" height="34" fill="${chartSeriesStyles.tooltipBg}"></rect>
+      <text x="${Math.max(latestSpend.x - 12, padding + 52)}" y="${Math.max(latestSpend.y - 30, 32)}" text-anchor="middle" fill="${chartSeriesStyles.tooltipText}" font-size="13" font-weight="700">${currency.format(latest.spend)}</text>` : ""}
   `;
 
   label.textContent = currency.format(latest.spend);
@@ -2194,42 +2207,42 @@ function renderProjectionLineChart({
   chart.innerHTML = `
     <defs>
       <linearGradient id="${chartId}-fill" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="${fillColor}" stop-opacity="0.36"></stop>
+        <stop offset="0%" stop-color="${fillColor}" stop-opacity="0.2"></stop>
         <stop offset="100%" stop-color="${fillColor}" stop-opacity="0"></stop>
       </linearGradient>
       <linearGradient id="${chartId}-line" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="${lineColor}" stop-opacity="0.82"></stop>
+        <stop offset="0%" stop-color="${lineColor}" stop-opacity="0.88"></stop>
         <stop offset="100%" stop-color="${lineColor}" stop-opacity="1"></stop>
       </linearGradient>
       <filter id="${chartId}-shadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(45,54,89,0.12)"></feDropShadow>
+        <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(15,23,32,0.08)"></feDropShadow>
       </filter>
     </defs>
-    ${[0.25, 0.5, 0.75]
+    ${[0.5]
       .map((ratio) => {
         const y = height - paddingY - ratio * (height - paddingY * 2);
-        return `<line x1="${paddingX}" y1="${y}" x2="${width - paddingX}" y2="${y}" stroke="#eef2f8" stroke-width="1"></line>`;
+        return `<line x1="${paddingX}" y1="${y}" x2="${width - paddingX}" y2="${y}" stroke="${chartSeriesStyles.grid}" stroke-width="1"></line>`;
       })
       .join("")}
     <path d="${areaPath}" fill="url(#${chartId}-fill)"></path>
-    <line x1="${paddingX}" y1="${height - paddingY}" x2="${width - paddingX}" y2="${height - paddingY}" stroke="#d9e0ea" stroke-width="1.5"></line>
-    <line x1="${latestPoint.x}" y1="${paddingY}" x2="${latestPoint.x}" y2="${height - paddingY}" stroke="${lineColor}" stroke-opacity="0.14" stroke-width="2" stroke-dasharray="4 6"></line>
-    <path d="${smoothPath}" fill="none" stroke="url(#${chartId}-line)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#${chartId}-shadow)"></path>
+    <line x1="${paddingX}" y1="${height - paddingY}" x2="${width - paddingX}" y2="${height - paddingY}" stroke="${chartSeriesStyles.axis}" stroke-width="1.25"></line>
+    <line x1="${latestPoint.x}" y1="${paddingY}" x2="${latestPoint.x}" y2="${height - paddingY}" stroke="${lineColor}" stroke-opacity="0.08" stroke-width="2" stroke-dasharray="4 8"></line>
+    <path d="${smoothPath}" fill="none" stroke="url(#${chartId}-line)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#${chartId}-shadow)"></path>
     ${points
       .map(
         (point) => `
-          <circle cx="${point.x}" cy="${point.y}" r="${point === points[points.length - 1] ? 6 : 5}" fill="${lineColor}" ${point === points[points.length - 1] ? 'stroke="#ffffff" stroke-width="3"' : ""}></circle>
-          <text x="${point.x}" y="${height - 4}" text-anchor="middle" fill="#7a8599" font-size="12">${point.label}</text>
+          <circle cx="${point.x}" cy="${point.y}" r="${point === points[points.length - 1] ? 6 : 4}" fill="${lineColor}" opacity="${point === points[points.length - 1] ? "1" : "0.24"}" ${point === points[points.length - 1] ? 'stroke="#ffffff" stroke-width="3"' : ""}></circle>
+          <text x="${point.x}" y="${height - 2}" text-anchor="middle" fill="${chartSeriesStyles.label}" font-size="13" font-weight="600">${point.label}</text>
         `
       )
       .join("")}
     <circle cx="${latestPoint.x}" cy="${latestPoint.y}" r="7" fill="${lineColor}" stroke="#ffffff" stroke-width="3"></circle>
     <g>
-      <rect x="${Math.max(Math.min(latestPoint.x - 58, width - 118), 8)}" y="${Math.max(latestPoint.y - 48, 8)}" rx="12" ry="12" width="116" height="32" fill="#111827"></rect>
-      <text x="${Math.max(Math.min(latestPoint.x, width - 60), 66)}" y="${Math.max(latestPoint.y - 27, 29)}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">${valuePrefix}${labelFormatter(series[series.length - 1].value)}</text>
+      <rect x="${Math.max(Math.min(latestPoint.x - 64, width - 128), 8)}" y="${Math.max(latestPoint.y - 52, 8)}" rx="14" ry="14" width="128" height="34" fill="${chartSeriesStyles.tooltipBg}"></rect>
+      <text x="${Math.max(Math.min(latestPoint.x, width - 64), 72)}" y="${Math.max(latestPoint.y - 29, 31)}" text-anchor="middle" fill="${chartSeriesStyles.tooltipText}" font-size="13" font-weight="700">${valuePrefix}${labelFormatter(series[series.length - 1].value)}</text>
     </g>
-    <text x="${firstPoint.x}" y="${paddingY - 4}" text-anchor="start" fill="#9aa4b6" font-size="11">${valuePrefix}${labelFormatter(series[0].value)}</text>
-    <text x="${midPoint.x}" y="${paddingY - 4}" text-anchor="middle" fill="#9aa4b6" font-size="11">${valuePrefix}${labelFormatter(series[Math.floor(series.length / 2)].value)}</text>
+    <text x="${firstPoint.x}" y="${paddingY - 6}" text-anchor="start" fill="${chartSeriesStyles.label}" font-size="12" font-weight="600">${valuePrefix}${labelFormatter(series[0].value)}</text>
+    <text x="${midPoint.x}" y="${paddingY - 6}" text-anchor="middle" fill="${chartSeriesStyles.label}" font-size="12" font-weight="600">${valuePrefix}${labelFormatter(series[Math.floor(series.length / 2)].value)}</text>
   `;
 
   label.textContent = labelFormatter(series[series.length - 1].value);
@@ -2295,17 +2308,17 @@ function renderCategoryDonut(categorySpend) {
     .map(([key, amount], index) => {
       const segmentSize = (amount / total) * 360;
       const nextAngle = angle + segmentSize;
-      const color = chartSolidPalette[key] || chartSolidPalette.other;
+      const color = chartCategoryTones[index] || chartCategoryTones[chartCategoryTones.length - 1];
       const gap = index === entries.length - 1 ? 0 : 1.6;
       const path = describeArcPath(centerPoint, centerPoint, radius, angle, Math.max(angle, nextAngle - gap));
       angle = nextAngle;
-      return `<path d="${path}" stroke="${color}" stroke-width="28" stroke-linecap="round" fill="none"></path>`;
+      return `<path d="${path}" stroke="${color}" stroke-width="24" stroke-linecap="round" fill="none"></path>`;
     })
     .join("");
 
   chart.innerHTML = `
     <svg viewBox="0 0 240 240" aria-hidden="true">
-      <circle cx="${centerPoint}" cy="${centerPoint}" r="${radius}" fill="none" stroke="rgba(227, 234, 245, 0.95)" stroke-width="28"></circle>
+      <circle cx="${centerPoint}" cy="${centerPoint}" r="${radius}" fill="none" stroke="${chartSeriesStyles.neutral}" stroke-width="24"></circle>
       ${segmentMarkup}
     </svg>
   `;
@@ -2317,7 +2330,7 @@ function renderCategoryDonut(categorySpend) {
   label.textContent = topEntry ? `${toTitleCase(topEntry[0])} leads at ${currency.format(topEntry[1])}` : currency.format(total);
   legend.innerHTML = entries
     .map(([key, amount]) => {
-      const color = chartPalette[key] || chartPalette.other;
+      const color = chartCategoryTones[entries.findIndex(([entryKey]) => entryKey === key)] || chartCategoryTones[chartCategoryTones.length - 1];
       const share = total ? amount / total : 0;
       return `
         <div class="legend-item">
@@ -3516,11 +3529,17 @@ function renderCharts(data) {
       const height = Math.max(Math.min((segment.amount / cashChartScale) * 138, 138), 10);
       const x = startX + index * (barWidth + cashGap);
       const y = chartBottom - height;
+      const fill =
+        segment.key === "housing"
+          ? chartSeriesStyles.secondary
+          : segment.key === "leftover"
+            ? chartSeriesStyles.neutral
+            : chartSeriesStyles.primary;
       return `
         <g class="cashflow-bar-group">
-          <rect x="${x}" y="${y}" width="${barWidth}" height="${height}" rx="16" ry="16" fill="${chartPalette[segment.key]}"></rect>
-          <text x="${x + barWidth / 2}" y="${Math.max(y - 10, 18)}" text-anchor="middle" fill="#111827" font-size="11" font-weight="700">${currency.format(segment.amount)}</text>
-          <text x="${x + barWidth / 2}" y="${chartBottom + 26}" text-anchor="middle" fill="#6b7280" font-size="11" font-weight="600">${segment.label}</text>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${height}" rx="16" ry="16" fill="${fill}"></rect>
+          <text x="${x + barWidth / 2}" y="${Math.max(y - 12, 18)}" text-anchor="middle" fill="#111827" font-size="12" font-weight="700">${currency.format(segment.amount)}</text>
+          <text x="${x + barWidth / 2}" y="${chartBottom + 28}" text-anchor="middle" fill="${chartSeriesStyles.label}" font-size="12" font-weight="600">${segment.label}</text>
         </g>
       `;
     })
@@ -3530,16 +3549,16 @@ function renderCharts(data) {
     <svg viewBox="0 0 ${cashWidth} ${cashHeight}" aria-label="Monthly cash flow categories">
       <defs>
         <filter id="cashflowBarShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="rgba(30,41,59,0.10)"></feDropShadow>
+          <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="rgba(15,23,32,0.08)"></feDropShadow>
         </filter>
       </defs>
-      ${[0.25, 0.5, 0.75, 1]
+      ${[0.5]
         .map((ratio) => {
           const y = chartBottom - ratio * 138;
-          return `<line x1="24" y1="${y}" x2="${cashWidth - 18}" y2="${y}" stroke="#edf2f7" stroke-width="1"></line>`;
+          return `<line x1="24" y1="${y}" x2="${cashWidth - 18}" y2="${y}" stroke="${chartSeriesStyles.grid}" stroke-width="1"></line>`;
         })
         .join("")}
-      <line x1="24" y1="${chartBottom}" x2="${cashWidth - 18}" y2="${chartBottom}" stroke="#d8e0ea" stroke-width="1.5"></line>
+      <line x1="24" y1="${chartBottom}" x2="${cashWidth - 18}" y2="${chartBottom}" stroke="${chartSeriesStyles.axis}" stroke-width="1.25"></line>
       <g filter="url(#cashflowBarShadow)">
         ${barMarkup}
       </g>
@@ -3551,7 +3570,7 @@ function renderCharts(data) {
     .map(
       (segment) => `
         <div class="legend-item">
-          <span class="legend-dot" style="background:${chartPalette[segment.key]}"></span>
+          <span class="legend-dot" style="background:${segment.key === "housing" ? chartSeriesStyles.secondary : chartSeriesStyles.primary}"></span>
           <p>${segment.label}</p>
           <strong>${currency.format(segment.amount)}</strong>
         </div>
@@ -3570,7 +3589,7 @@ function renderCharts(data) {
         <div class="bar-item">
           <p>${row.label}</p>
           <div class="bar-track">
-            <div class="bar-fill" style="width:${width}%;background:${chartPalette[row.key]}"></div>
+            <div class="bar-fill" style="width:${width}%;background:${row.key === "brokerage" ? chartSeriesStyles.secondary : chartSeriesStyles.primary}"></div>
           </div>
           <strong>${currency.format(row.amount)}</strong>
         </div>
@@ -4263,30 +4282,30 @@ function renderSnapshotMiniTrend(series) {
   chart.innerHTML = `
     <defs>
       <linearGradient id="snapshot-mini-fill" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#8fa7ff" stop-opacity="0.34"></stop>
-        <stop offset="100%" stop-color="#8fa7ff" stop-opacity="0"></stop>
+        <stop offset="0%" stop-color="${chartSeriesStyles.secondary}" stop-opacity="0.18"></stop>
+        <stop offset="100%" stop-color="${chartSeriesStyles.secondary}" stop-opacity="0"></stop>
       </linearGradient>
       <linearGradient id="snapshot-mini-line" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#5f79ff"></stop>
-        <stop offset="100%" stop-color="#7a8fff"></stop>
+        <stop offset="0%" stop-color="${chartSeriesStyles.secondary}"></stop>
+        <stop offset="100%" stop-color="${chartSeriesStyles.secondary}"></stop>
       </linearGradient>
       <filter id="snapshot-mini-shadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(60,72,128,0.16)"></feDropShadow>
+        <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(15,23,32,0.08)"></feDropShadow>
       </filter>
     </defs>
-    ${[0.3, 0.6, 0.9]
+    ${[0.5]
       .map((ratio) => {
         const y = height - paddingBottom - ratio * (height - paddingTop - paddingBottom);
-        return `<line x1="${paddingX}" y1="${y}" x2="${width - paddingX}" y2="${y}" stroke="#eef2f8" stroke-width="1"></line>`;
+        return `<line x1="${paddingX}" y1="${y}" x2="${width - paddingX}" y2="${y}" stroke="${chartSeriesStyles.grid}" stroke-width="1"></line>`;
       })
       .join("")}
     <path d="${areaPath}" fill="url(#snapshot-mini-fill)"></path>
-    <path d="${linePath}" fill="none" stroke="url(#snapshot-mini-line)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#snapshot-mini-shadow)"></path>
-    <line x1="${lastPoint.x}" y1="${paddingTop}" x2="${lastPoint.x}" y2="${height - paddingBottom}" stroke="#6e86ff" stroke-opacity="0.14" stroke-width="2" stroke-dasharray="4 6"></line>
-    <circle cx="${lastPoint.x}" cy="${lastPoint.y}" r="10" fill="#ffffff" stroke="#6e86ff" stroke-width="6"></circle>
+    <path d="${linePath}" fill="none" stroke="url(#snapshot-mini-line)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" filter="url(#snapshot-mini-shadow)"></path>
+    <line x1="${lastPoint.x}" y1="${paddingTop}" x2="${lastPoint.x}" y2="${height - paddingBottom}" stroke="${chartSeriesStyles.secondary}" stroke-opacity="0.08" stroke-width="2" stroke-dasharray="4 8"></line>
+    <circle cx="${lastPoint.x}" cy="${lastPoint.y}" r="9" fill="#ffffff" stroke="${chartSeriesStyles.secondary}" stroke-width="5"></circle>
     <g>
-      <rect x="${Math.max(lastPoint.x - 64, 8)}" y="${Math.max(lastPoint.y - 46, 8)}" rx="12" ry="12" width="116" height="30" fill="#111827"></rect>
-      <text x="${Math.max(lastPoint.x - 6, 66)}" y="${Math.max(lastPoint.y - 26, 28)}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">${currency.format(latestSpend)}</text>
+      <rect x="${Math.max(lastPoint.x - 68, 8)}" y="${Math.max(lastPoint.y - 50, 8)}" rx="14" ry="14" width="124" height="34" fill="${chartSeriesStyles.tooltipBg}"></rect>
+      <text x="${Math.max(lastPoint.x - 6, 70)}" y="${Math.max(lastPoint.y - 28, 30)}" text-anchor="middle" fill="${chartSeriesStyles.tooltipText}" font-size="13" font-weight="700">${currency.format(latestSpend)}</text>
     </g>
   `;
 }
