@@ -459,119 +459,104 @@
             </div>
           </article>
         </section>
-        <section class="monarch-strip">
-          <article class="glass monarch-tile">
-            <span>Cash on hand</span>
-            <strong id="snapshot-household-cash">$0</strong>
-            <p>Cash and savings ready now</p>
-          </article>
-          <article class="glass monarch-tile">
-            <span>Net worth</span>
-            <strong id="snapshot-household-networth">$0</strong>
-            <p>Assets minus liabilities</p>
-          </article>
-          <article class="glass monarch-tile">
-            <span>Recurring load</span>
-            <strong id="snapshot-household-recurring">$0</strong>
-            <p>Bills and subscriptions each month</p>
-          </article>
-          <article class="glass monarch-tile">
-            <span>Investments</span>
-            <strong id="snapshot-household-investing">$0</strong>
-            <p>Long-term money in motion</p>
-          </article>
-        </section>
-        <section class="snapshot-command-center">
-          <article class="glass command-card command-card-primary">
-            <div class="command-card-top">
-              <div>
-                <p class="eyebrow">Command center</p>
-                <h2 id="snapshot-headline">You still have room to work with this month.</h2>
-              </div>
-              <span class="command-badge" id="snapshot-badge">Stable</span>
-            </div>
-            <div class="command-metric-grid">
-              <div class="command-metric">
-                <span>Left after fixed costs</span>
-                <strong id="snapshot-leftover">$0</strong>
-              </div>
-              <div class="command-metric">
-                <span>Monthly spending</span>
-                <strong id="snapshot-burn">$0</strong>
-              </div>
-              <div class="command-metric">
-                <span>How long your cash can last</span>
-                <strong id="snapshot-runway">0 months</strong>
-              </div>
-              <div class="command-metric">
-                <span>Retirement progress</span>
-                <strong id="snapshot-retirement-pace">Needs setup</strong>
-              </div>
-            </div>
-            <p class="command-copy" id="snapshot-summary-copy">Add your numbers so Growr can show what is costing the most right now and what to work on first.</p>
-          </article>
-          <article class="glass command-card">
+        <section class="snapshot-decision-grid">
+          <article class="glass grow-score-card">
             <div class="section-heading compact">
-              <p class="eyebrow">Next moves</p>
-              <h2>What deserves attention first</h2>
+              <p class="eyebrow">Grow Score</p>
+              <h2>Your money right now</h2>
             </div>
-            <div class="next-move-list">
-              <div class="next-move-item">
-                <span>1</span>
-                <div>
-                  <strong id="snapshot-next-title">Build your first clear plan</strong>
-                  <p id="snapshot-next-body">Start with income, bills, and debt so Growr can calculate what is actually left each month.</p>
-                </div>
+            <div class="score-wrap">
+              <div class="score-orb" id="score-orb">
+                <strong id="health-score">0</strong>
+                <span>/100</span>
               </div>
-              <div class="next-move-item">
-                <span>2</span>
-                <div>
-                  <strong id="snapshot-second-title">Connect accounts when you are ready</strong>
-                  <p id="snapshot-second-body">Link transactions later so Growr can organize categories, subscriptions, and recurring bills automatically.</p>
-                </div>
-              </div>
-              <div class="next-move-item">
-                <span>3</span>
-                <div>
-                  <strong id="snapshot-third-title">Set your future target</strong>
-                  <p id="snapshot-third-body">Use the investing tools to see how much monthly retirement income your current path may support.</p>
+              <div class="score-copy">
+                <h3 id="health-label">Getting started</h3>
+                <p id="health-summary">Enter your numbers to see a clearer picture of stability, debt load, and savings progress.</p>
+                <div class="score-insights" id="score-insights">
+                  <span class="insight-chip">Money left this month: $0</span>
+                  <span class="insight-chip">Debt load: Balanced</span>
+                  <span class="insight-chip">Emergency savings: Needs work</span>
                 </div>
               </div>
             </div>
-          </article>
-        </section>
-        <section class="snapshot-live-grid">
-          <article class="glass snapshot-story-card">
-            <div class="section-heading compact">
-              <p class="eyebrow">This month</p>
-              <h2 id="snapshot-change-title">Growr is watching what changed.</h2>
-              <p id="snapshot-change-body" class="page-intro-text">Connect accounts or add transactions to turn Snapshot into a running monthly story, not just a static set of totals.</p>
-            </div>
-            <div class="snapshot-highlight-grid">
-              <div class="command-metric">
-                <span>Spending pace</span>
-                <strong id="snapshot-spend-pace">Need history</strong>
+            <div class="signal-grid">
+              <div class="signal-card">
+                <span>Emergency savings</span>
+                <strong id="signal-savings">Needs work</strong>
               </div>
-              <div class="command-metric">
-                <span>Monthly subscriptions + bills</span>
-                <strong id="snapshot-recurring-drag">$0</strong>
+              <div class="signal-card">
+                <span>Debt load</span>
+                <strong id="signal-debt">Balanced</strong>
               </div>
-              <div class="command-metric">
-                <span>Next likely payday</span>
-                <strong id="snapshot-next-payday">Need deposits</strong>
-              </div>
-              <div class="command-metric">
-                <span>Biggest category</span>
-                <strong id="snapshot-top-category">Waiting on data</strong>
+              <div class="signal-card">
+                <span>Investment room</span>
+                <strong id="signal-investing">Cautious</strong>
               </div>
             </div>
           </article>
-          <article class="glass snapshot-feed-card">
+
+          <article class="glass next-best-move-card">
             <div class="section-heading compact">
-              <p class="eyebrow">Live feed</p>
-              <h2>What changed and what comes next</h2>
+              <p class="eyebrow">Next Best Move</p>
+              <h2 id="nbm-action">Build your first clear plan</h2>
             </div>
-            <div id="snapshot-feed-list" class="snapshot-feed-list"></div>
+            <div class="decision-meta-row">
+              <span class="decision-meta-pill" id="nbm-priority">Start here</span>
+              <span class="decision-meta-pill subtle" id="nbm-time-horizon">This month</span>
+            </div>
+            <div class="decision-detail-list">
+              <div class="decision-detail">
+                <span>Why</span>
+                <strong id="nbm-why">Growr needs your monthly income, bills, and debt to calculate the strongest next move.</strong>
+              </div>
+              <div class="decision-detail">
+                <span>Estimated impact</span>
+                <strong id="nbm-impact">$0 over 3 years</strong>
+              </div>
+            </div>
+            <p class="decision-support-copy" id="nbm-support">The best first step is always the one that improves flexibility the fastest.</p>
+          </article>
+
+          <article class="glass opportunity-card">
+            <div class="section-heading compact">
+              <p class="eyebrow">What this really costs</p>
+              <h2 id="opportunity-title">Your car is the biggest long-term drag right now.</h2>
+            </div>
+            <strong class="opportunity-amount" id="opportunity-amount">$0</strong>
+            <p class="opportunity-copy" id="opportunity-copy">Redirecting one recurring cost into investing can change the future value of your money more than most people expect.</p>
+            <div class="decision-detail-list compact">
+              <div class="decision-detail">
+                <span>Monthly amount</span>
+                <strong id="opportunity-monthly">$0</strong>
+              </div>
+              <div class="decision-detail">
+                <span>Time horizon</span>
+                <strong id="opportunity-horizon">15 years</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="glass scenario-preview-card">
+            <div class="section-heading compact">
+              <p class="eyebrow">Scenario preview</p>
+              <h2 id="scenario-title">Current path vs optimized path</h2>
+            </div>
+            <div class="scenario-values">
+              <div class="scenario-value-card">
+                <span>Current path</span>
+                <strong id="scenario-current">$0</strong>
+              </div>
+              <div class="scenario-value-card emphasis">
+                <span>Better path</span>
+                <strong id="scenario-optimized">$0</strong>
+              </div>
+            </div>
+            <div class="scenario-delta-row">
+              <span>Difference</span>
+              <strong id="scenario-delta">$0</strong>
+            </div>
+            <p class="decision-support-copy" id="scenario-copy">Growr will compare your current setup with the move that improves your finances fastest.</p>
           </article>
         </section>
         <section id="planner" class="planner-grid">
@@ -600,134 +585,6 @@
             </form>
           </div>
 
-        </section>
-
-        <section class="dashboard-strip">
-          <article class="glass score-panel">
-            <div class="section-heading compact">
-              <p class="eyebrow">Money health</p>
-              <h2>Your overall pulse</h2>
-            </div>
-            <div class="score-wrap">
-              <div class="score-orb" id="score-orb">
-                <strong id="health-score">0</strong>
-                <span>/100</span>
-              </div>
-              <div class="score-copy">
-                <h3 id="health-label">Getting started</h3>
-                <p id="health-summary">Enter your numbers to see a clearer picture of stability, debt load, and savings progress.</p>
-                <div class="score-insights" id="score-insights">
-                  <span class="insight-chip">Money left this month: $0</span>
-                  <span class="insight-chip">Debt load: Balanced</span>
-                  <span class="insight-chip">Emergency savings: Needs work</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <article class="glass score-panel">
-            <div class="section-heading compact">
-              <p class="eyebrow">Quick read</p>
-              <h2>What stands out</h2>
-            </div>
-            <div class="signal-grid">
-              <div class="signal-card">
-                <span>Emergency savings</span>
-                <strong id="signal-savings">Needs work</strong>
-              </div>
-              <div class="signal-card">
-                <span>Debt load</span>
-                <strong id="signal-debt">Balanced</strong>
-              </div>
-              <div class="signal-card">
-                <span>Investment room</span>
-                <strong id="signal-investing">Cautious</strong>
-              </div>
-            </div>
-          </article>
-        </section>
-
-        <section class="glass section-bridge snapshot-investing-bridge">
-          <div>
-            <p class="eyebrow">Future planning</p>
-            <h2>Want the retirement and investing side? It lives on its own page now.</h2>
-            <p class="page-intro-text">Snapshot stays focused on this month. Open Investing for retirement income planning, account forecasts, and age-based allocation guidance.</p>
-          </div>
-          <div class="bridge-actions">
-            <button type="button" class="primary-btn" data-page-target="investing">Open Investing</button>
-          </div>
-        </section>
-
-        <section class="results-grid">
-          <article class="glass results-panel">
-            <div class="section-heading compact">
-              <p class="eyebrow">This month</p>
-              <h2>Your budget summary</h2>
-            </div>
-            <div class="metric-grid">
-              <div class="metric-card">
-                <span>Money left this month</span>
-                <strong id="leftover">$0</strong>
-              </div>
-              <div class="metric-card">
-                <span>Income going to debt</span>
-                <strong id="debtRatio">0%</strong>
-              </div>
-              <div class="metric-card">
-                <span>Income going to your car</span>
-                <strong id="carRatio">0%</strong>
-              </div>
-              <div class="metric-card">
-                <span>Emergency months</span>
-                <strong id="emergencyMonths">0</strong>
-              </div>
-            </div>
-          </article>
-
-        </section>
-
-        <section class="glass charts-panel">
-          <div class="section-heading">
-            <p class="eyebrow">Visuals</p>
-            <h2>See the shape of your money</h2>
-          </div>
-          <div class="charts-grid">
-            <article class="chart-card">
-              <div class="chart-card-top">
-                <h3>Monthly cash flow</h3>
-                <strong id="cashflow-percent">0%</strong>
-              </div>
-              <div class="stack-chart" id="cashflow-chart"></div>
-              <div class="chart-insight-row" id="cashflow-insights">
-                <span class="insight-chip">Fixed costs: $0</span>
-                <span class="insight-chip">Biggest cost: Housing</span>
-                <span class="insight-chip">Money left: $0</span>
-              </div>
-              <p class="chart-note" id="cashflow-note">Shows how your paycheck gets divided each month.</p>
-            </article>
-            <article class="chart-card">
-              <div class="chart-card-top">
-                <h3>Expense mix</h3>
-                <strong id="expense-total">$0</strong>
-              </div>
-              <div class="legend-list" id="expense-legend"></div>
-              <div class="chart-insight-row" id="expense-insights">
-                <span class="insight-chip">Largest category: Waiting on data</span>
-                <span class="insight-chip">Second largest: Waiting on data</span>
-              </div>
-              <p class="chart-note" id="expense-note">Largest categories should feel intentional, not accidental.</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="guidance-grid">
-          <article class="glass recommendations-panel">
-            <div class="section-heading compact">
-              <p class="eyebrow">Recommendations</p>
-              <h2>Suggested next steps</h2>
-            </div>
-            <div id="recommendations" class="recommendation-list"></div>
-          </article>
         </section>
 
         </section>

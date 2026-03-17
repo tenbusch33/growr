@@ -240,6 +240,9 @@ function buildRecommendations(snapshot) {
 
 function renderRecommendations(items) {
   const container = document.getElementById("recommendations");
+  if (!container) {
+    return;
+  }
   container.innerHTML = items
     .map(
       (item) => `
@@ -3305,6 +3308,9 @@ function renderCharts(data) {
   const investmentInsights = document.getElementById("investment-insights");
   const networthInsights = document.getElementById("networth-trend-insights");
   const retirementInsights = document.getElementById("retirement-runway-insights");
+  if (!cashflowChart || !expenseLegend || !investmentBars) {
+    return;
+  }
 
   const incomeBase = Math.max(data.income, 1);
   const cashSegments = [
@@ -3486,6 +3492,172 @@ function renderCharts(data) {
   }
 }
 
+function buildNextBestMove(summary) {
+  const monthlyBuffer = Math.max(summary.leftover, 0);
+  const debtAttackAmount = Math.max(Math.round(monthlyBuffer * 0.75), 150);
+  const debtImpact = debtAttackAmount * 12 * 5 * 0.32;
+  const emergencyTargetMonths = Math.max(1, Math.min(3, summary.emergencyMonths < 1 ? 1 : 3));
+  const emergencyNeeded = Math.max(summary.essentialsBase * emergencyTargetMonths - summary.emergencyFund, 0);
+  const emergencyImpact = Math.min(emergencyNeeded, monthlyBuffer * 12 || emergencyNeeded);
+  const carMonthly = summary.carPayment + summary.carCosts;
+  const carImpact = futureValue(0, Math.max(carMonthly * 0.4, 100), returns.brokerage, 10);
+  const retirementBoost = Math.max(Math.round(monthlyBuffer * 0.6), 100);
+  const retirementImpact = futureValue(0, retirementBoost, returns.k401, 10);
+
+  if (summary.leftover < 0) {
+    return {
+      action: `Close the ${currency.format(Math.abs(summary.leftover))} monthly shortfall first`,
+      priority: "Urgent right now",
+      timeHorizon: "This month",
+      why: "You are spending more than the plan can support, so every other goal stays harder until the gap is closed.",
+      impactText: `Stabilizing the month protects about ${currency.format(Math.abs(summary.leftover) * 12)} per year from falling behind.`,
+      support: "Pause optional investing, trim flexible spending, and reduce repeating charges until money left this month turns positive.",
+      impactValue: Math.abs(summary.leftover) * 12,
+    };
+  }
+
+  if (summary.creditCardBalance > 0 && summary.debtRatio > 0.12) {
+    return {
+      action: `Send about ${currency.format(debtAttackAmount)} extra to credit card debt`,
+      priority: "Highest impact move",
+      timeHorizon: "Next 3-6 months",
+      why: "High-interest card debt usually grows faster than long-term investing, so paying it down improves flexibility and net worth faster.",
+      impactText: `This could improve your path by about ${currency.format(debtImpact)} over the next 5 years.`,
+      support: "Keep retirement contributions at least to any employer match, then use the rest of your extra monthly room to attack the highest-interest balance.",
+      impactValue: debtImpact,
+    };
+  }
+
+  if (summary.emergencyMonths < 1) {
+    return {
+      action: `Build your first month of emergency savings`,
+      priority: "Safety first",
+      timeHorizon: "Next 2-4 months",
+      why: "A cash buffer keeps normal surprises from turning into more debt and protects the progress you are already making.",
+      impactText: `Reaching one month of essentials means roughly ${currency.format(summary.essentialsBase)} is safely set aside.`,
+      support: `You need about ${currency.format(emergencyNeeded)} more to reach the first-month cushion.`,
+      impactValue: emergencyImpact,
+    };
+  }
+
+  if (summary.carRatio > 0.18) {
+    return {
+      action: "Reduce the drag from your car costs",
+      priority: "Biggest pressure point",
+      timeHorizon: "Next 6-12 months",
+      why: "Your car is taking a large share of income, which makes saving, investing, and debt payoff slower every month.",
+      impactText: `Redirecting part of that money could change long-term wealth by about ${currency.format(carImpact)} over 10 years.`,
+      support: "Compare keeping the car with refinancing, downgrading, or selling and investing the difference.",
+      impactValue: carImpact,
+    };
+  }
+
+  if (summary.hasInvestmentAccess && summary.retirementGap > 0 && monthlyBuffer > 0) {
+    return {
+      action: `Raise retirement investing by about ${currency.format(retirementBoost)} per month`,
+      priority: "Grow the future",
+      timeHorizon: "Next 10 years",
+      why: "Your current path still falls short of the retirement income target you entered, so increasing contributions now has time to compound.",
+      impactText: `That increase could grow to about ${currency.format(retirementImpact)} over 10 years.`,
+      support: "Start with 401(k) match money first, then grow Roth IRA or brokerage contributions once the month still feels comfortable.",
+      impactValue: retirementImpact,
+    };
+  }
+
+  const stableImpact = futureValue(0, Math.max(monthlyBuffer * 0.5, 100), returns.brokerage, 10);
+  return {
+    action: `Put about ${currency.format(Math.max(monthlyBuffer * 0.5, 100))} on autopilot each month`,
+    priority: "Keep momentum",
+    timeHorizon: "Next 12 months",
+    why: "You already have room in the plan, so the best move is turning that room into something automatic before lifestyle creep eats it.",
+    impactText: `Staying consistent at that pace could add about ${currency.format(stableImpact)} over 10 years.`,
+    support: "Split the money between emergency savings, retirement, and debt cleanup so progress keeps happening without extra effort.",
+    impactValue: stableImpact,
+  };
+}
+
+function buildOpportunityCost(summary) {
+  const candidates = [
+    {
+      key: "car",
+      title: "What your car costs long-term",
+      monthlyAmount: summary.carPayment + summary.carCosts,
+      horizonYears: 20,
+      copy: "This is money that could be redirected into investing if you ever reduce the payment, insurance, fuel, or maintenance load.",
+    },
+    {
+      key: "recurring",
+      title: "What recurring charges cost long-term",
+      monthlyAmount: summary.recurringTotal,
+      horizonYears: 15,
+      copy: "Recurring bills and subscriptions feel small month to month, but they add up quickly when you project them forward.",
+    },
+    {
+      key: "creditCard",
+      title: "What interest drag can cost you",
+      monthlyAmount: summary.creditCardPayment,
+      horizonYears: 10,
+      copy: "If high-interest debt is still around, every extra payment you keep making is money that cannot compound somewhere else.",
+    },
+  ].filter((candidate) => candidate.monthlyAmount > 0);
+
+  const winner = candidates.sort((left, right) => right.monthlyAmount - left.monthlyAmount)[0];
+  if (!winner) {
+    return {
+      title: "What this really costs",
+      amount: 0,
+      monthlyAmount: 0,
+      horizon: "15 years",
+      copy: "Connect more data or fill in more of the plan to see the strongest long-term tradeoff Growr can find.",
+    };
+  }
+
+  return {
+    title: winner.title,
+    amount: futureValue(0, winner.monthlyAmount, returns.brokerage, winner.horizonYears),
+    monthlyAmount: winner.monthlyAmount,
+    horizon: `${winner.horizonYears} years`,
+    copy: winner.copy,
+  };
+}
+
+function renderDecisionEngine(summary) {
+  const nextMoveAction = document.getElementById("nbm-action");
+  if (!nextMoveAction) {
+    return;
+  }
+
+  const nextMove = buildNextBestMove(summary);
+  const opportunity = buildOpportunityCost(summary);
+  const currentPath = summary.netWorthSeries?.[summary.netWorthSeries.length - 1]?.value || summary.netWorth || 0;
+  const optimizedPath = currentPath + Math.max(nextMove.impactValue || 0, 0);
+  const scenarioDelta = Math.max(optimizedPath - currentPath, 0);
+
+  setText("nbm-action", nextMove.action);
+  setText("nbm-priority", nextMove.priority);
+  setText("nbm-time-horizon", nextMove.timeHorizon);
+  setText("nbm-why", nextMove.why);
+  setText("nbm-impact", nextMove.impactText);
+  setText("nbm-support", nextMove.support);
+
+  setText("opportunity-title", opportunity.title);
+  setText("opportunity-amount", currency.format(opportunity.amount));
+  setText("opportunity-copy", opportunity.copy);
+  setText("opportunity-monthly", `${currency.format(opportunity.monthlyAmount)} / month`);
+  setText("opportunity-horizon", opportunity.horizon);
+
+  setText("scenario-title", "Current path vs smarter path");
+  setText("scenario-current", currency.format(currentPath));
+  setText("scenario-optimized", currency.format(optimizedPath));
+  setText("scenario-delta", `+${currency.format(scenarioDelta)}`);
+  setText(
+    "scenario-copy",
+    scenarioDelta > 0
+      ? `Following Growr's next move could improve your longer-term path by about ${currency.format(scenarioDelta)} if you stick with it.`
+      : "Growr will show a clearer scenario once it has enough data to compare your current path with a stronger alternative."
+  );
+}
+
 function renderHealth(snapshot) {
   const debtPenalty = Math.min(snapshot.debtRatio * 120, 38);
   const carPenalty = Math.min(snapshot.carRatio * 100, 22);
@@ -3500,6 +3672,9 @@ function renderHealth(snapshot) {
   const signalSavings = document.getElementById("signal-savings");
   const signalDebt = document.getElementById("signal-debt");
   const signalInvesting = document.getElementById("signal-investing");
+  if (!orb || !healthScore || !healthLabel || !healthSummary || !signalSavings || !signalDebt || !signalInvesting) {
+    return;
+  }
   const scoreColor = score >= 75 ? "#00b894" : score >= 50 ? "#ffd33d" : "#ff5a36";
 
   healthScore.textContent = String(score);
@@ -3543,18 +3718,26 @@ function renderSnapshotCommandCenter(summary) {
   const secondBody = document.getElementById("snapshot-second-body");
   const thirdTitle = document.getElementById("snapshot-third-title");
   const thirdBody = document.getElementById("snapshot-third-body");
+  if (!badge || !headline || !summaryCopy || !nextTitle || !nextBody || !secondTitle || !secondBody || !thirdTitle || !thirdBody) {
+    return;
+  }
 
-  document.getElementById("snapshot-leftover").textContent = currency.format(summary.leftover);
-  document.getElementById("snapshot-burn").textContent = currency.format(summary.totalExpenses);
-  document.getElementById("snapshot-runway").textContent =
+  setText("snapshot-leftover", currency.format(summary.leftover));
+  setText("snapshot-burn", currency.format(summary.totalExpenses));
+  setText(
+    "snapshot-runway",
     summary.totalExpenses > 0
       ? `${(summary.cashAssets / summary.totalExpenses).toFixed(1)} months`
-      : "0 months";
-  document.getElementById("snapshot-retirement-pace").textContent = summary.hasInvestmentAccess
+      : "0 months"
+  );
+  setText(
+    "snapshot-retirement-pace",
+    summary.hasInvestmentAccess
     ? summary.retirementGap > 0
       ? `${currency.format(summary.retirementGap)} short`
       : "On track"
-    : "Locked";
+    : "Locked"
+  );
 
   if (summary.leftover < 0) {
     badge.textContent = "Pressure";
@@ -3603,6 +3786,9 @@ function renderSnapshotFeed(summary) {
   const nextPayday = document.getElementById("snapshot-next-payday");
   const topCategory = document.getElementById("snapshot-top-category");
   const feedList = document.getElementById("snapshot-feed-list");
+  if (!changeTitle || !changeBody || !spendPace || !recurringDrag || !nextPayday || !topCategory || !feedList) {
+    return;
+  }
   const automation = buildMonthlyAutomationData();
   const latestMonth = automation.monthlySeries[automation.monthlySeries.length - 1];
   const priorMonth = automation.monthlySeries[automation.monthlySeries.length - 2];
@@ -3884,6 +4070,10 @@ function renderSnapshotDashboard(summary, automation) {
 }
 
 function renderHouseholdOverview(summary) {
+  const householdCash = document.getElementById("snapshot-household-cash");
+  if (!householdCash) {
+    return;
+  }
   const recurringTotal =
     state.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0) +
     state.recurringBills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0);
@@ -3892,12 +4082,10 @@ function renderHouseholdOverview(summary) {
     ? Math.max(state.linkedSummary.investmentsTotal || 0, summary.currentInvestmentAssets || 0)
     : 0;
 
-  document.getElementById("snapshot-household-cash").textContent = currency.format(cashTotal);
-  document.getElementById("snapshot-household-networth").textContent = currency.format(summary.netWorth || 0);
-  document.getElementById("snapshot-household-recurring").textContent = currency.format(recurringTotal);
-  document.getElementById("snapshot-household-investing").textContent = hasInvestmentAccess()
-    ? currency.format(investingTotal)
-    : "Locked";
+  householdCash.textContent = currency.format(cashTotal);
+  setText("snapshot-household-networth", currency.format(summary.netWorth || 0));
+  setText("snapshot-household-recurring", currency.format(recurringTotal));
+  setText("snapshot-household-investing", hasInvestmentAccess() ? currency.format(investingTotal) : "Locked");
 }
 
 function updateDashboard() {
@@ -4118,10 +4306,10 @@ function updateDashboard() {
     };
   });
 
-  document.getElementById("leftover").textContent = currency.format(leftover);
-  document.getElementById("debtRatio").textContent = percent.format(debtRatio);
-  document.getElementById("carRatio").textContent = percent.format(carRatio);
-  document.getElementById("emergencyMonths").textContent = emergencyMonths.toFixed(1);
+  setText("leftover", currency.format(leftover));
+  setText("debtRatio", percent.format(debtRatio));
+  setText("carRatio", percent.format(carRatio));
+  setText("emergencyMonths", emergencyMonths.toFixed(1));
 
   document.getElementById("k401Future").textContent = hasInvestmentAccess() ? currency.format(k401Future) : "Locked";
   document.getElementById("rothFuture").textContent = hasInvestmentAccess() ? currency.format(rothFuture) : "Locked";
@@ -4192,6 +4380,28 @@ function updateDashboard() {
       <p>Upgrade to unlock age-based allocation guidance for retirement investing.</p>
     `;
 
+  const decisionSummary = {
+    income,
+    leftover,
+    debtRatio,
+    carRatio,
+    emergencyMonths,
+    creditCardBalance,
+    creditCardPayment,
+    carPayment,
+    carCosts,
+    cashAssets,
+    emergencyFund,
+    essentialsBase,
+    recurringTotal:
+      state.subscriptions.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0) +
+      state.recurringBills.reduce((sum, item) => sum + Number(item.monthlyEstimate || 0), 0),
+    retirementGap,
+    hasInvestmentAccess: hasInvestmentAccess(),
+    netWorth,
+    netWorthSeries,
+  };
+
   renderRecommendations(
     buildRecommendations({
       leftover,
@@ -4210,6 +4420,7 @@ function updateDashboard() {
     emergencyMonths,
     creditCardBalance,
   });
+  renderDecisionEngine(decisionSummary);
   renderSnapshotCommandCenter({
     leftover,
     totalExpenses,
